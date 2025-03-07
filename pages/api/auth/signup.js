@@ -24,7 +24,15 @@ export default async function handler(req, res) {
 
     // ✅ Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, password: hashedPassword });
+    
+    // ✅ Automatically enroll user in the current season
+    const currentYear = new Date().getFullYear();
+    const newUser = new User({
+      username,
+      password: hashedPassword,
+      seasons: [currentYear],
+      picks: {},
+    });
 
     await newUser.save();
 
@@ -40,4 +48,4 @@ export default async function handler(req, res) {
     console.error("Signup error:", error);
     res.status(500).json({ message: "Server error" });
   }
-}
+} 

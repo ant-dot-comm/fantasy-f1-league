@@ -23,8 +23,8 @@ export default function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form onSubmit={handleLogin} className="bg-white p-6 rounded-lg shadow-lg">
+    <div className="flex justify-center items-center h-screen">
+      <form onSubmit={handleLogin} className="p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-bold mb-4">Login</h2>
         {error && <p className="text-red-500">{error}</p>}
         <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full p-2 border rounded mb-3" required />

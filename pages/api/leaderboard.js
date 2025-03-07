@@ -1,7 +1,8 @@
-// pages/api/leaderboard.js
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Race from "@/models/Race";
+
+const leaderboardCache = new Map(); // In-memory storage
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -11,12 +12,20 @@ export default async function handler(req, res) {
   await dbConnect();
   const { season } = req.query;
 
+  // ✅ Check cache before querying DB
+  if (leaderboardCache.has(season)) {
+    console.log(`⚡ Returning cached leaderboard for ${season}`);
+    return res.status(200).json({ leaderboard: leaderboardCache.get(season) });
+  }
+
   try {
     console.log(`📡 Fetching leaderboard scores for season: ${season}`);
     
-    // ✅ Fetch leaderboard data using bottomTenScoring logic
-    const leaderboard = await bottomTenScoring(season);
+    const leaderboard = await calculateLeaderboard(season);
     
+    // ✅ Store in cache
+    leaderboardCache.set(season, leaderboard);
+
     res.status(200).json({ leaderboard });
   } catch (error) {
     console.error("🚨 Error fetching leaderboard:", error);
@@ -24,10 +33,7 @@ export default async function handler(req, res) {
   }
 }
 
-/**
- * Moves bottomTenScoring logic inside the API route (server-side only).
- */
-async function bottomTenScoring(season) {
+async function calculateLeaderboard(season) {
   const users = await User.find({ [`picks.${season}`]: { $exists: true } });
   if (!users.length) return [];
 
@@ -44,16 +50,14 @@ async function bottomTenScoring(season) {
       const raceData = await Race.findOne({ meeting_key: meetingKey, year: season });
       if (!raceData) continue;
 
-      const { qualifying_results, race_results } = raceData;
-
       for (const driverNumber of pickedDrivers) {
-        const qualifyingPosition = qualifying_results.indexOf(driverNumber) + 1;
-        const racePosition = race_results.indexOf(driverNumber) + 1;
-        if (!qualifyingPosition || !racePosition) continue;
+        const raceResult = raceData.race_results.find(d => d.driverNumber === driverNumber);
+        if (!raceResult) continue;
 
-        let driverPoints = qualifyingPosition - racePosition;
-        if ((qualifyingPosition === 19 || qualifyingPosition === 20) && racePosition <= 10) driverPoints += 3;
-        if ((qualifyingPosition === 19 || qualifyingPosition === 20) && racePosition <= 5) driverPoints += 5;
+        let driverPoints = raceResult.startPosition - raceResult.finishPosition;
+
+        if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 10)) driverPoints += 3;
+        if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 5)) driverPoints += 5;
 
         totalPoints += driverPoints;
       }
@@ -62,5 +66,5 @@ async function bottomTenScoring(season) {
     leaderboard.push({ username: user.username, points: totalPoints });
   }
 
-  return leaderboard;
+  return leaderboard.sort((a, b) => b.points - a.points);
 }
