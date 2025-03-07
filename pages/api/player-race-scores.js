@@ -3,6 +3,7 @@ import User from "@/models/User";
 import Race from "@/models/Race";
 import Driver from "@/models/Driver";
 
+// Gets User season picks and calculates points
 const playerRaceCache = new Map(); // In-memory storage
 
 export default async function handler(req, res) {
