@@ -12,6 +12,7 @@ export default function Home() {
     const [username, setUsername] = useState(null);
     const [topRaceScoresData, setTopRaceScoresData] = useState([]);
     const [averageRaceScoresData, setAverageRaceScoresData] = useState([]);
+    const [driverSelectionData, setDriverSelectionData] = useState([]);
     const [loadingTopScores, setLoadingTopScores] = useState(true);
 
     // ✅ Get Logged-in Username from JWT Token
@@ -27,34 +28,48 @@ export default function Home() {
         }
     }, []);
 
-    // ✅ Fetch & Store Top Race Scores
     useEffect(() => {
-      async function fetchRaceStats() {
-          const cacheKey = `race-stats-${season}`;
+      async function fetchStats() {
+          const cacheKey = `stats-${season}`;
           const cachedData = sessionStorage.getItem(cacheKey);
   
           if (cachedData) {
               const parsedData = JSON.parse(cachedData);
-              setTopRaceScoresData(parsedData.topSingleRaceScores);
-              setAverageRaceScoresData(parsedData.averagePointsPerUser);
+              setTopRaceScoresData(parsedData.topSingleRaceScores || []);
+              setAverageRaceScoresData(parsedData.averagePointsPerUser || []);
+              setDriverSelectionData(parsedData.driverSelectionPercent || []);
+              setLoadingTopScores(false);
               return;
           }
   
           try {
-              const res = await fetch(`/api/top-race-scores?season=${season}`);
-              const data = await res.json();
+              const [raceStatsRes, driverSelectionRes] = await Promise.all([
+                  fetch(`/api/top-race-scores?season=${season}`),
+                  fetch(`/api/driver-selection-stats?season=${season}`)
+              ]);
   
-              setTopRaceScoresData(data.topSingleRaceScores);
-              setAverageRaceScoresData(data.averagePointsPerUser);
-              sessionStorage.setItem(cacheKey, JSON.stringify(data));
+              const raceStatsData = await raceStatsRes.json();
+              const driverSelectionData = await driverSelectionRes.json();
+  
+              setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
+              setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
+              setDriverSelectionData(driverSelectionData.driverSelectionPercent || []);
+  
+              sessionStorage.setItem(
+                  cacheKey,
+                  JSON.stringify({
+                      ...raceStatsData,
+                      driverSelectionPercent: driverSelectionData.driverSelectionPercent || [],
+                  })
+              );
           } catch (error) {
               console.error("❌ Error fetching race stats:", error);
           } finally {
               setLoadingTopScores(false);
-            }
+          }
       }
   
-      fetchRaceStats();
+      fetchStats();
   }, [season]);
           
     return (
@@ -135,6 +150,13 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+
+            <section>
+              <div className="mt-32">
+                <h2 className="text-xl font-bold mb-2">Most Picked Drivers</h2>
+                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} />}
+              </div>
+            </section>
         </div>
     );
 }
