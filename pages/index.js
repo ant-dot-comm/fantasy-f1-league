@@ -12,6 +12,7 @@ export default function Home() {
     const [username, setUsername] = useState(null);
     const [topRaceScoresData, setTopRaceScoresData] = useState([]);
     const [averageRaceScoresData, setAverageRaceScoresData] = useState([]);
+    const [topScoringDrivers, setTopScoringDrivers] = useState([]);
     const [driverSelectionData, setDriverSelectionData] = useState([]);
     const [loadingTopScores, setLoadingTopScores] = useState(true);
 
@@ -38,6 +39,7 @@ export default function Home() {
               setTopRaceScoresData(parsedData.topSingleRaceScores || []);
               setAverageRaceScoresData(parsedData.averagePointsPerUser || []);
               setDriverSelectionData(parsedData.driverSelectionPercent || []);
+              setTopScoringDrivers(parsedData.topScoringDrivers || []);
               setLoadingTopScores(false);
               return;
           }
@@ -53,6 +55,7 @@ export default function Home() {
   
               setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
               setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
+              setTopScoringDrivers(raceStatsData.topScoringDrivers || []);
               setDriverSelectionData(driverSelectionData.driverSelectionPercent || []);
   
               sessionStorage.setItem(
@@ -71,6 +74,19 @@ export default function Home() {
   
       fetchStats();
   }, [season]);
+
+    const leagueStats = (
+      <div className="sm:flex sm:flex-row gap-4 w-full">
+        <div className="w-full">
+          <h2 className="text-xl font-bold mb-2">Best Single Race Scores</h2>
+          <RankingsList scores={topRaceScoresData} loggedInUser={username} />
+        </div>
+        <div className="w-full">
+          <h2 className="text-xl font-bold mb-2">Best Average Scores</h2>
+          <RankingsList scores={averageRaceScoresData} loggedInUser={username} />
+        </div>
+      </div>
+    )
           
     return (
         <div>
@@ -103,7 +119,7 @@ export default function Home() {
                     <CurrentPick season={season} username={username} />
                 )}
 
-                <div className="flex flex-col sm:flex-row sm:justify-end mx-auto relative">
+                <div className="flex flex-col sm:flex-row mx-auto relative gap-4">
                     <div className="responsive-contianer relative sm:absolute sm:w-full sm:mt-10 max-sm:mb-4">
                         <div className="responsive-line" />
                         <div className="flex flex-col items-end w-1/2 sm:px-8">
@@ -113,8 +129,10 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
+                    <div className="max-sm:hidden w-1/2 flex items-start mt-[20%]">{leagueStats}</div>
                     <Leaderboard
                         season={season}
+                        loggedInUser={username}
                         className="sm:w-1/2 sm:mr-3 max-sm:mx-3 z-10"
                     />
                 </div>
@@ -127,16 +145,7 @@ export default function Home() {
                   {loadingTopScores ? (
                       <p>Loading...</p>
                   ) : (
-                      <div className="sm:flex sm:flex-row gap-4">
-                        <div>
-                          <h2 className="text-xl font-bold mb-2">Best Single Race Scores</h2>
-                          <RankingsList scores={topRaceScoresData} loggedInUser={username} />
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold mb-2">Best Average Scores</h2>
-                          <RankingsList scores={averageRaceScoresData} loggedInUser={username} />
-                        </div>
-                      </div>
+                      <div className="sm:hidden">{leagueStats}</div>
                   )}
               </div>
             </section>
@@ -151,10 +160,14 @@ export default function Home() {
                 </div>
             </div>
 
-            <section>
-              <div className="mt-32">
+            <section className="flex flex-col sm:flex-row gap-4 items-center max-w-2xl mx-auto mt-24">
+              <div className="w-full">
                 <h2 className="text-xl font-bold mb-2">Most Picked Drivers</h2>
                 {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} />}
+              </div>
+              <div className="w-full">
+                <h2 className="text-xl font-bold mb-2">Top Scoring Drivers</h2>
+                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={topScoringDrivers} />}
               </div>
             </section>
         </div>

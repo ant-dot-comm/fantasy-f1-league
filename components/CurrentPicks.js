@@ -113,7 +113,7 @@ export default function CurrentPick({ season, username }) {
                   <li key={driver.driverNumber}>
                     <button
                       className={`block text-xs w-full text-left p-2 border ${
-                        selectedDrivers.includes(driver.driverNumber) ? "bg-blue-300" : ""
+                        selectedDrivers.includes(driver.driverNumber) ? "bg-slate-600" : ""
                       }`}
                       onClick={() => toggleDriverSelection(driver.driverNumber)}
                     >

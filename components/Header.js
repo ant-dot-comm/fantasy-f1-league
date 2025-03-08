@@ -28,15 +28,18 @@ export default function Header() {
     };
 
     return (
-        <header className="border-b-8 border-neutral-700 uppercase">
-            <div className="container mx-auto mt-2 -mb-2 flex justify-between items-end">
+        <header className="border-b-8 border-neutral-700">
+            <div className="px-6 mx-auto mt-2 -mb-2 flex justify-between items-end">
                 <h1 className="font-display text-3xl leading-none">
                     <Link href="/">Fantasy F1 League</Link>
                 </h1>
-                <nav className="flex space-x-4">
+                <nav className="flex space-x-4 items-end">
                     {username ? (
                         <>
-                            <span>Welcome, {username}!</span>
+                            <span className="flex flex-col items-end">
+                                <p className="text-xs text-neutral-500 font-bold leading-none mb-[-4px]">Welcome</p>
+                                <p className="font-display text-lg mb-[-2px]">{username}</p>
+                            </span>
                             <button
                                 onClick={handleLogout}
                                 className="font-display"
@@ -46,10 +49,10 @@ export default function Header() {
                         </>
                     ) : (
                         <>
-                            <Link href="/signup" className="font-display">
+                            <Link href="/signup" className="font-display text-lg">
                                 Sign Up
                             </Link>
-                            <Link href="/login" className="font-display">
+                            <Link href="/login" className="font-display text-lg">
                                 Login
                             </Link>
                         </>

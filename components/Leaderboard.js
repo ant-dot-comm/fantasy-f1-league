@@ -48,23 +48,29 @@ export default function Leaderboard({ season, loggedInUser, className }) {
     }
 
     return (
-        <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200")}>
+        <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200 sm:min-h-[30rem]")}>
             <ul className="flex gap-2 flex-col">
                 {scores.length > 0 ? (
                     scores
                         .sort((a, b) => b.points - a.points)
                         .map((user, index) => (
-                            <li key={user.username} className={`${user.username === loggedInUser ? "bg-yellow-200 font-bold" : ""}`}>
+                            <li key={user.username}>
                                 <button
                                     onClick={() => {
                                         setSelectedPlayer(user.username);
                                         fetchPlayerRaceData(user.username);
                                     }}
-                                    className="w-full text-left font-bold bg-neutral-200 text-neutral-800 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 border-neutral-500"
+                                    className={classNames(
+                                        "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8",
+                                        user.username === loggedInUser ? "border-slate-600 text-slate-500" : "border-neutral-500 text-neutral-500"
+                                    )}
                                 >
-                                    <p className="font-display text-4xl text-neutral-500 -mb-2 -mt-1 leading-none shrink-0">P{index + 1}</p>
+                                    <p className={classNames(
+                                        "font-display text-4xl -mb-2 -mt-1 leading-none shrink-0",
+                                        user.username === loggedInUser ? " text-slate-500" : "text-neutral-500"
+                                    )}>P{index + 1}</p>
                                     <p className="grow leading-none">{user.username}</p>
-                                    <p className="shrink-0">{user.points}</p>
+                                    <p className="shrink-0 text-neutral-800 ">{user.points}</p>
                                 </button>
                             </li>
                         ))

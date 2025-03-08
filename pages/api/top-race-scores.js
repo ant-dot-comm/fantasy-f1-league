@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Race from "@/models/Race";
+import Driver from "@/models/Driver"; // ✅ Import driver model
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -16,6 +17,7 @@ export default async function handler(req, res) {
 
     let topSingleRaceScores = [];
     let userTotalPoints = {}; // Stores total points per user
+    let driverTotalPoints = {}; // ✅ Stores total points per driver
 
     // ✅ Count only completed races for the season
     let totalRacesCompleted = await Race.countDocuments({ year: season, "race_results.0": { $exists: true } });
@@ -40,9 +42,14 @@ export default async function handler(req, res) {
           if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 5)) driverPoints += 5;
 
           finalResult += driverPoints;
-        }
+          userTotalPoints[user.username] += driverPoints; // ✅ Store total season points per user
 
-        userTotalPoints[user.username] += finalResult; // ✅ Store total season points
+          // ✅ Add to driver point totals
+          if (!driverTotalPoints[driverNumber]) {
+            driverTotalPoints[driverNumber] = 0;
+          }
+          driverTotalPoints[driverNumber] += driverPoints;
+        }
 
         // ✅ Track highest single-race scores
         topSingleRaceScores.push({
@@ -69,9 +76,22 @@ export default async function handler(req, res) {
       .sort((a, b) => b.finalResult - a.finalResult)
       .slice(0, 10); // ✅ Top 10 users by avg points
 
+    // ✅ Convert driver numbers to full names
+    const driverNumbers = Object.keys(driverTotalPoints).map(Number);
+    const driverDetails = await Driver.find({ driver_number: { $in: driverNumbers }, year: season });
+
+    let topScoringDrivers = driverDetails
+      .map(driver => ({
+        username: driver.full_name, // ✅ Display full driver name
+        finalResult: driverTotalPoints[driver.driver_number] || 0, // ✅ Driver total points
+      }))
+      .sort((a, b) => b.finalResult - a.finalResult) // Sort highest to lowest
+      .slice(0, 10); // ✅ Get top 10 scoring drivers
+
     res.status(200).json({
       topSingleRaceScores: top10SingleRaceScores,
       averagePointsPerUser,
+      topScoringDrivers, // ✅ New driver points ranking
     });
   } catch (error) {
     console.error("🚨 Error fetching race stats:", error);
