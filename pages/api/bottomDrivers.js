@@ -35,7 +35,7 @@ export default async function handler(req, res) {
                 fullName: driverInfo ? driverInfo.full_name : `Driver ${driver.driverNumber}`, // ✅ Full name
                 team: driverInfo ? driverInfo.team_name : "Unknown", // ✅ Team name
                 teamColour: driverInfo ? driverInfo.team_colour : "#000000", // ✅ Default black if missing
-                headshot: driverInfo?.name_acronym 
+                headshot_url: driverInfo?.name_acronym 
                     ? `/drivers/${season}/${driverInfo.name_acronym}.png` 
                     : `/drivers/${season}/default.png`,
                 countryCode: driverInfo ? driverInfo.country_code : "N/A", // ✅ Country code

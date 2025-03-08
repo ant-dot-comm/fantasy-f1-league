@@ -76,32 +76,32 @@ export default function Home() {
   }, [season]);
 
     const leagueStats = (
-      <div className="sm:flex sm:flex-row gap-4 w-full">
+      <div className="flex flex-col sm:flex-row gap-4 w-full">
         <div className="w-full">
-          <h2 className="text-xl font-bold mb-2">Best Single Race Scores</h2>
-          <RankingsList scores={topRaceScoresData} loggedInUser={username} />
+          <h2 className="font-bold px-2">Best Single Race Scores</h2>
+          <RankingsList scores={topRaceScoresData} loggedInUser={username} title="Best Single Race Scores" />
         </div>
         <div className="w-full">
-          <h2 className="text-xl font-bold mb-2">Best Average Scores</h2>
-          <RankingsList scores={averageRaceScoresData} loggedInUser={username} />
+          <h2 className="font-bold px-2">Best Average Scores</h2>
+          <RankingsList scores={averageRaceScoresData} loggedInUser={username} title="Best Average Scores" />
         </div>
       </div>
     )
           
     return (
-        <div>
+        <div className="mb-32">
             <Header />
-            <div className="flex flex-col justify-center items-center mb-8 p-8">
+            <div className="flex flex-col justify-center items-center pt-10">
                 <h1 className="text-xl font-display leading-none">
                     Best of the Rest
                 </h1>
-                <label className="text-sm leading-none mb-2">
+                <label className="text-sm leading-none mb-10">
                     Redemption starts at the back
                 </label>
                 <select
                     value={season}
                     onChange={(e) => setSeason(parseInt(e.target.value))}
-                    className="p-2 border-4 rounded-lg"
+                    className="p-2 border-4 border-neutral-800 rounded-lg -mb-6 bg-neutral-100 z-10"
                 >
                     {[...Array(10)].map((_, i) => {
                         const year = new Date().getFullYear() - i;
@@ -130,18 +130,19 @@ export default function Home() {
                         </div>
                     </div>
                     <div className="max-sm:hidden w-1/2 flex items-start mt-[20%]">{leagueStats}</div>
-                    <Leaderboard
-                        season={season}
-                        loggedInUser={username}
-                        className="sm:w-1/2 sm:mr-3 max-sm:mx-3 z-10"
-                    />
+                    <div className="sm:w-1/2 sm:mr-3 max-sm:mx-3 z-10">
+                        <h2 className="font-display text-2xl px-4 -mb-2.5">Leaderboard</h2>
+                        <Leaderboard
+                            season={season}
+                            loggedInUser={username}
+                        />
+                    </div>
                 </div>
             </section>
 
             {/* ✅ Top Race Scores */}
             <section>
-              <div className="mt-32">
-                  
+              <div className="mt-8 px-3 sm:mt-32">
                   {loadingTopScores ? (
                       <p>Loading...</p>
                   ) : (
@@ -160,14 +161,14 @@ export default function Home() {
                 </div>
             </div>
 
-            <section className="flex flex-col sm:flex-row gap-4 items-center max-w-2xl mx-auto mt-24">
+            <section className="flex flex-col sm:flex-row gap-4 items-center max-w-2xl mx-auto mt-10 sm:mt-24 px-3">
               <div className="w-full">
-                <h2 className="text-xl font-bold mb-2">Most Picked Drivers</h2>
-                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} />}
+                <h2 className="font-bold px-2">Most Picked Drivers</h2>
+                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} title="Most Picked Drivers" />}
               </div>
               <div className="w-full">
-                <h2 className="text-xl font-bold mb-2">Top Scoring Drivers</h2>
-                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={topScoringDrivers} />}
+                <h2 className="font-bold px-2">Top Scoring Drivers</h2>
+                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={topScoringDrivers} title="Top Scoring Drivers" />}
               </div>
             </section>
         </div>

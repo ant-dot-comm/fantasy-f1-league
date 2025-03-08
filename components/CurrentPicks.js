@@ -87,25 +87,38 @@ export default function CurrentPick({ season, username }) {
       console.error("❌ Error submitting pick:", error);
     }
   }
+  const continaerClasses = "flex flex-col items-center bg-neutral-800 text-neutral-300 mb-20 pt-16 relative"
 
-  if (!currentRace && season === new Date().getFullYear()) return <p>{season} Season has not started</p>;
-  if (!currentRace) return <p>Loading {season} current race...</p>;
+  if (!currentRace && season === new Date().getFullYear()) return (
+    <div className={continaerClasses}>
+      <p className="absolute left-1/2 top-3/5 -translate-x-1/2 -translate-y-1/2">{season} Season has not started</p>
+    </div>
+);
+  if (!currentRace) return (
+    <div className={continaerClasses}>
+      <p className="absolute left-1/2 top-3/5 -translate-x-1/2 -translate-y-1/2">Loading {season} current race...</p>
+    </div>
+  );
 
   const hasRaceSessionStarted = false; // ✅ Placeholder for future logic
-
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold">{currentRace ? `${season} ${currentRace.meeting_name}` : "Season has not started"}</h2>
-      {userPicks.length > 0 && (
-        <p className="mt-2">
-          <strong>Your Picks:</strong> Driver {userPicks.join(", ")}
-        </p>
-      )}
+    <div className={continaerClasses}>
+      {currentRace && (<p className="leading-none text-sm">{userPicks ? "Your picks for": "Make your picks for"}</p>)}
+      <h2 className="text-xl font-display">{currentRace ? `${season} ${currentRace.meeting_name}` : "Season has not started"}</h2>
+      <div className="flex flex-row items-center">
+        {userPicks.map((driver, index) => (
+          <div key={driver.driverNumber} className={classNames("flex items-end mt-2", index === 0 ? "flex-row-reverse" : "")}>
+            <img src={driver.headshot_url} alt={driver.fullName} className="h-16" />
+            <p className="text-2xl font-display leading-none -mb-1">{driver.name_acronym}</p>
+          </div>
+        ))}
+      </div>
+      <div className="divider-glow-dark !w-1/2 mx-auto" />
 
       {!hasRaceSessionStarted && (
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          className="-mb-4 px-4 py-2 bg-cyan-800 text-white rounded-lg"
         >
           {userPicks.length > 0 ? "Update Picks" : "Make Picks"}
         </button>
@@ -113,7 +126,7 @@ export default function CurrentPick({ season, username }) {
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} user={username} title="Race Picks">
         <p className="font-bold leading-none">{season} {currentRace.meeting_name}</p>
-        <h3 className="mb-4 text-sm text-neutral-500">Select two drivers</h3>
+        <h3 className="mb-4 text-sm text-neutral-400">Select two drivers</h3>
         <ul className="flex flex-col gap-2">
           {bottomDrivers
             .sort((a, b) => a.qualifyingPosition - b.qualifyingPosition) // ✅ Sort by start position (11-20)
@@ -121,15 +134,15 @@ export default function CurrentPick({ season, username }) {
               <li key={driver.driverNumber}>
                 <button
                   className={`flex flex-row items-center text-xs w-full text-left rounded-lg shadow-2xl px-1 ${
-                    selectedDrivers.includes(driver.driverNumber) ? "bg-slate-600 text-neutral-200" : "bg-neutral-200 text-neutral-800"
+                    selectedDrivers.includes(driver.driverNumber) ? "bg-slate-600 text-neutral-200 shadow-lg" : "bg-neutral-200 text-neutral-700"
                   }`}
                   onClick={() => toggleDriverSelection(driver.driverNumber)}
                 >
                   <div className="rounded-l-md" style={{backgroundColor: `#${driver.teamColour}`}} >
-                    <img src={driver.headshot} alt={driver.fullName} className="h-10 -mt-4" />
+                    <img src={driver.headshot_url} alt={driver.fullName} className="h-10 -mt-4" />
                   </div>
                   <div className="mx-2 flex flex-row items-center font-display">
-                    <span className={classNames("mr-2", selectedDrivers.includes(driver.driverNumber) ? "text-neutral-300" : " text-neutral-800")}>P{driver.qualifyingPosition}</span>
+                    <span className={classNames("mr-2", selectedDrivers.includes(driver.driverNumber) ? "text-neutral-300" : " text-neutral-700")}>P{driver.qualifyingPosition}</span>
                     <span className="text-lg">{driver.fullName}</span>
                   </div>
                 </button>

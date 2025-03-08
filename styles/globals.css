@@ -33,6 +33,12 @@
   --foreground: #333333;
   --font-display: "Belanosima", sans-serif;
   --font-paragraph: "Geologica", sans-serif;
+  
+}
+
+@theme {
+  --shadow-lg: 0 0px 16px 0px rgba(0,0,0,.75);
+  --color-neutral-700: #333333;
 }
 
 body {
@@ -71,4 +77,10 @@ body {
   @media screen and (max-width: 768px) {
     height: .5rem;
   }
+}
+
+.divider-glow-dark {
+  background: radial-gradient(ellipse at top , theme('colors.neutral.950') 0%, transparent 75%);
+  height: 1.6rem;
+  width: 100%;
 }

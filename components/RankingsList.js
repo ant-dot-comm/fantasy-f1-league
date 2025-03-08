@@ -8,19 +8,18 @@ export default function RankingsList({ scores, loggedInUser, title, className })
   const hasMoreEntries = scores.length > 5; // Check if more than 5
 
   return (
-    <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200")}>
-      <h2 className="text-xl font-bold mb-2">{title}</h2>
+    <div className={classNames(className, "px-4 pt-6 pb-3 bg-neutral-500 rounded-2xl text-neutral-200", hasMoreEntries ? "pb-3" : "pb-6")}>
+      {/* {title && <h2 className="text-xl font-bold mb-2">{title}</h2>} */}
       <ul className="flex flex-col gap-2">
         {scores.length > 0 ? (
           topEntries.map((entry, index) => (
             <li key={`${entry.username}-${index}`}>
               <div className={classNames(
-                "w-full text-left font-bold bg-neutral-200 text-neutral-800 px-2 rounded-lg flex items-center justify-between gap-4",
-                entry.username === loggedInUser ? "border-b-8 border-slate-600" : "border-b-8 border-neutral-500"
+                "w-full text-left font-bold bg-neutral-200 px-2 py-1 rounded-lg flex items-center justify-between gap-4",
+                entry.username === loggedInUser ? "shadow-lg text-cyan-800" : "text-neutral-600"
             )}>
                 <p className={classNames(
                     "grow leading-none",
-                    entry.username === loggedInUser && "text-slate-600"
                 )}>{entry.username}</p>
                 <p className="shrink-0">{entry.finalResult}</p>
               </div>
@@ -34,25 +33,24 @@ export default function RankingsList({ scores, loggedInUser, title, className })
       {hasMoreEntries && (
         <button
           onClick={() => setIsModalOpen(true)}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded w-full"
+          className="mt-2 px-4 py-2 text-white font-bold rounded-xl w-full"
         >
           Full Rankings
         </button>
       )}
 
       {/* Modal for Full Rankings */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} user={title}>
+      <Modal title={title} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} user={loggedInUser}>
         <ul className="flex flex-col gap-2">
           {scores.map((entry, index) => (
             <li key={`${entry.username}-${index}`}>
               <div 
                 className={classNames(
-                    "w-full text-left font-bold bg-neutral-200 text-neutral-800 px-2 rounded-lg flex items-center justify-between gap-4",
-                    entry.username === loggedInUser ? "border-b-8 border-slate-600" : "border-b-8 border-neutral-500"
+                    "w-full text-left font-bold bg-neutral-200 px-2 py-1 rounded-lg flex items-center justify-between gap-4",
+                    entry.username === loggedInUser ? "shadow-lg text-cyan-800" : "text-neutral-600"
                 )}>
                 <p className={classNames(
                     "grow leading-none",
-                    entry.username === loggedInUser && "text-slate-600"
                 )}>{entry.username}</p>
                 <p className="shrink-0">{entry.finalResult}</p>
               </div>
