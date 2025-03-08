@@ -1,13 +1,13 @@
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Modal({ isOpen, onClose, user, children }) {
+export default function Modal({ isOpen, onClose, user, children, title }) {
     if (!isOpen) return null;
 
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 flex items-end sm:items-center justify-end sm:justify-center bg-neutral-200/50 backdrop-blur-xl z-[500]"
+                className="fixed inset-0 flex items-end sm:items-center justify-end sm:justify-center bg-neutral-200/50 backdrop-blur-xl z-[500] text-neutral-200"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -28,7 +28,7 @@ export default function Modal({ isOpen, onClose, user, children }) {
                             {user && (
                                 <h3 className="font-bold text-neutral-500 leading-none">{user}</h3>
                             )}
-                            <p className="font-display text-2xl text-neutral-800 leading-none -mb-1.5">Season Picks</p>
+                            <p className="font-display text-2xl text-neutral-800 leading-none -mb-1.5">{title}</p>
                         </div>
                         <button onClick={onClose} className="pl-4 text-neutral-700 font-bold">
                             <X size={32} strokeWidth={3} />

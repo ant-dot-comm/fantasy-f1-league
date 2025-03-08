@@ -86,6 +86,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                 isOpen={!!selectedPlayer}
                 onClose={() => setSelectedPlayer(null)}
                 user={selectedPlayer}
+                title="Season Picks"
             >
                 {playerRaceData[selectedPlayer] ? (
                     playerRaceData[selectedPlayer].map((race) => (

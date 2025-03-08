@@ -5,7 +5,7 @@ import Drivers from "../../models/Driver"; // ✅ Import driver model
 export default async function handler(req, res) {
     await dbConnect();
 
-    const { meeting_key } = req.query;
+    const { meeting_key, season } = req.query;
 
     try {
         const race = await Races.findOne({ meeting_key }).lean();
@@ -35,7 +35,9 @@ export default async function handler(req, res) {
                 fullName: driverInfo ? driverInfo.full_name : `Driver ${driver.driverNumber}`, // ✅ Full name
                 team: driverInfo ? driverInfo.team_name : "Unknown", // ✅ Team name
                 teamColour: driverInfo ? driverInfo.team_colour : "#000000", // ✅ Default black if missing
-                headshot: driverInfo ? driverInfo.headshot_url : null, // ✅ Headshot URL
+                headshot: driverInfo?.name_acronym 
+                    ? `/drivers/${season}/${driverInfo.name_acronym}.png` 
+                    : `/drivers/${season}/default.png`,
                 countryCode: driverInfo ? driverInfo.country_code : "N/A", // ✅ Country code
             };
         });
