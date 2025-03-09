@@ -13,6 +13,8 @@ export default function Leaderboard({ season, loggedInUser, className }) {
     useEffect(() => {
         async function fetchScores() {
             setLoading(true);
+            setSelectedPlayer(null);
+            setPlayerRaceData({});
             const storedScores = sessionStorage.getItem(`leaderboard-${season}`);
             if (storedScores) {
                 setScores(JSON.parse(storedScores));
@@ -90,16 +92,46 @@ export default function Leaderboard({ season, loggedInUser, className }) {
             >
                 {playerRaceData[selectedPlayer] ? (
                     playerRaceData[selectedPlayer].map((race) => (
-                        <div key={race.meeting_key} className="mb-3 p-2 bg-neutral-900 rounded-lg">
-                            <h4 className="font-bold">{race.race}</h4>
-                            <ul className="text-sm">
-                                {race.results.map((driver) => (
-                                    <li key={driver.driver_number}>
-                                        {driver.driver_name} ({driver.team}) - Q:{driver.qualifying_position}, R:
-                                        {driver.race_position}, Pts:{driver.points}
+                        <div key={race.meeting_key} className="mt-6 mb-10 relative">
+                            <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
+                                {race.results.length >= 2 && (
+                                    <div className="grid grid-cols-3 gap-2 absolute top-[-1.5rem] left-1/2 -translate-x-1/2 items-center ">
+                                        {/* ✅ Extract Driver Scores */}
+                                        <p className="text-lg font-display text-right">{race.results[0].points}</p>
+
+                                        {/* ✅ Display total score once in between */}
+                                        <div className="text-center font-display text-2xl bg-neutral-500 rounded w-10">
+                                            {race.results.reduce((acc, d) => acc + d.points, 0)}
+                                        </div>
+                                        <p className="text-lg font-display text-left">{race.results[1].points}</p>
+                                    </div>
+                                )}
+                                {race.results.map((driver, index) => (
+                                    <li 
+                                        key={driver.driver_number} 
+                                        className={classNames(
+                                            "flex flex-col relative -mt-4",
+                                            index === 1 ? "items-end -mr-2" : "items-start -ml-2",
+                                        )}
+                                    >
+                                        <img 
+                                            src={driver.headshot_url} 
+                                            alt={driver.driver_name} 
+                                            className="h-12 mr-2 shrink-0"
+                                        />
+                                        <div 
+                                            className={classNames(
+                                                "absolute top-0 flex flex-col w-max",
+                                                index === 1 ? "right-12 text-right" : "left-10 text-left",
+                                            )}
+                                        >
+                                            <p className="font-display text-lg leading-none">{driver.name_acronym}</p>
+                                            <p className="text-xs font-bold leading-none text-neutral-700">P{driver.qualifying_position} - P{driver.race_position}</p>
+                                        </div>
                                     </li>
                                 ))}
                             </ul>
+                            <h4 className="font-bold text-center text-sm text-neutral-800 absolute bottom-0 left-1/2 -translate-x-1/2 w-[75%]">{race.race}</h4>
                         </div>
                     ))
                 ) : (
