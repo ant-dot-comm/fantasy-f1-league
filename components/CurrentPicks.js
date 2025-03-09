@@ -3,6 +3,8 @@ import classNames from "classnames";
 import axios from "axios";
 import { useRouter } from "next/router";
 import Modal from "@/components/Modal";
+// import raceSchedule from "@/lib/raceSchedule";
+import {raceSchedule} from "@/data/raceSchedule";
 
 export default function CurrentPick({ season, username }) {
     const [currentRace, setCurrentRace] = useState(null);
@@ -10,7 +12,11 @@ export default function CurrentPick({ season, username }) {
     const [bottomDrivers, setBottomDrivers] = useState([]);
     const [selectedDrivers, setSelectedDrivers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [picksOpen, setPicksOpen] = useState(false);
+    const [pickStatusMessage, setPickStatusMessage] = useState("");
     const router = useRouter();
+
+    console.log({pickStatusMessage});
 
     // ✅ Fetch current race details
     useEffect(() => {
@@ -27,6 +33,44 @@ export default function CurrentPick({ season, username }) {
 
         fetchRace();
     }, [season]);
+
+    // ✅ Check if picks should be locked on load
+    useEffect(() => {
+      if (!currentRace) return;
+
+      const now = new Date();
+
+      if (season < 2025) {
+        // 🔴 Disable picks for past seasons
+        setPicksOpen(false);
+        if (userPicks.length > 0) {
+            setPickStatusMessage(`Your race picks for`);
+        } else {
+            setPickStatusMessage(`No picks made for`);
+        }
+        } else if (schedule) {
+            // 🔄 Use dynamic scheduling for 2025+
+            const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule
+            const picksOpen = new Date(schedule.picks_open);
+            const picksClose = new Date(schedule.picks_close);
+
+            if (now < picksClose) {
+                setPickStatusMessage(`Race picks open at ${picksOpen.toLocaleString()} and close at ${picksClose.toLocaleString()}.`);
+            } else {
+                if (userPicks.length > 0) {
+                    setPickStatusMessage(`Your race picks for`);
+                } else {
+                    setPickStatusMessage(`No picks made for`);
+                }
+            }
+            setPicksOpen(
+                now >= picksOpen && now <= picksClose
+            );
+        } else {
+        // 🚨 Default fallback if no schedule is found
+        setPicksOpen(false);
+    }
+  }, [currentRace, userPicks]);
 
     // ✅ Fetch user's picks for the current race
     useEffect(() => {
@@ -113,13 +157,11 @@ export default function CurrentPick({ season, username }) {
             </div>
         );
 
-    const hasRaceSessionStarted = false; // ✅ Placeholder for future logic
-
     return (
         <div className={continaerClasses}>
             {currentRace && (
                 <p className="leading-none text-sm">
-                    {userPicks ? "Your picks for" : "Make your picks for"}
+                    {pickStatusMessage}
                 </p>
             )}
             <h2 className="text-xl font-display">
@@ -149,16 +191,16 @@ export default function CurrentPick({ season, username }) {
             </div>
             <div className="divider-glow-dark !w-4/5 sm:!w-1/2 mx-auto" />
 
-              <button
-                  onClick={() => setIsModalOpen(true)}
-                  className={classNames(
-                    "-mb-4 px-4 py-2 rounded-lg text-neutral-100",
-                    hasRaceSessionStarted ? "bg-neutral-600" : "bg-cyan-800"
-                  )}
-                  disabled={hasRaceSessionStarted}
-              >
-                  {userPicks.length > 0 ? hasRaceSessionStarted? "Picks Locked" : "Update Picks" : "Make Picks"}
-              </button>
+            <button
+                onClick={() => setIsModalOpen(true)}
+                className={classNames(
+                "-mb-4 px-4 py-2 mt-6 rounded-lg text-neutral-100",
+                !picksOpen ? "bg-neutral-600" : "bg-cyan-800",
+                )}
+                disabled={!picksOpen}
+            >
+                {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Locked" : "Make Picks"}
+            </button>
 
             <Modal
                 isOpen={isModalOpen}
@@ -186,7 +228,7 @@ export default function CurrentPick({ season, username }) {
                                         selectedDrivers.includes(
                                             driver.driverNumber
                                         )
-                                            ? "bg-slate-600 text-neutral-200 shadow-lg"
+                                            ? "bg-neutral-600 text-neutral-200 shadow-lg"
                                             : "bg-neutral-200 text-neutral-700",
                                         driver.headshot_url ? "pr-2" : "px-1"
                                     )}

@@ -35,6 +35,7 @@ export default function Home() {
       async function fetchStats() {
           const cacheKey = `stats-${season}`;
           const cachedData = sessionStorage.getItem(cacheKey);
+          setLoadingTopScores(true);
   
           if (cachedData) {
               const parsedData = JSON.parse(cachedData);
@@ -77,15 +78,17 @@ export default function Home() {
       fetchStats();
   }, [season]);
 
-    const leagueStats = (
+    const leagueStats = loadingTopScores ? (
+        <p>Loading...</p>
+    ) : (
       <div className="flex flex-col sm:flex-row gap-4 w-full sm:ml-3">
         <div className="w-full">
-          <h2 className="font-bold px-2 leading-none mb-1">Best Single Race Scores</h2>
-          <RankingsList scores={topRaceScoresData} loggedInUser={username} title="Best Single Race Scores" />
+          <h2 className="font-bold px-2 leading-none mb-1">Single Race Scores</h2>
+          <RankingsList scores={topRaceScoresData} loggedInUser={username} title="Single Race Scores" />
         </div>
         <div className="w-full">
-          <h2 className="font-bold px-2 leading-none mb-1">Best Average Scores</h2>
-          <RankingsList scores={averageRaceScoresData} loggedInUser={username} title="Best Average Scores" />
+          <h2 className="font-bold px-2 leading-none mb-1">Average Scores</h2>
+          <RankingsList scores={averageRaceScoresData} loggedInUser={username} title="Average Scores" />
         </div>
       </div>
     )
@@ -108,8 +111,8 @@ export default function Home() {
                         username ? "-mb-6 mt-10" : "mb-16 mt-2"
                     )}
                 >
-                    {[...Array(10)].map((_, i) => {
-                        const year = new Date().getFullYear() - i;
+                    {[...Array(new Date().getFullYear() - 2022)].map((_, i) => {
+                        const year = 2023 + i; // ✅ Start at 2023
                         return (
                             <option key={year} value={year}>
                                 {year}
@@ -134,7 +137,9 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                    <div className="max-sm:hidden w-1/2 flex items-start mt-[20%]">{leagueStats}</div>
+                    <div className="max-sm:hidden w-1/2 flex items-start mt-[20%]">
+                        {leagueStats}
+                    </div>
                     <div className="sm:w-1/2 sm:mr-3 max-sm:mx-3 z-10">
                         <h2 className="font-display text-2xl px-4 -mb-2.5">Leaderboard</h2>
                         <Leaderboard
@@ -148,11 +153,7 @@ export default function Home() {
             {/* ✅ Top Race Scores */}
             <section>
               <div className="mt-8 px-3 sm:mt-32">
-                  {loadingTopScores ? (
-                      <p>Loading...</p>
-                  ) : (
-                      <div className="sm:hidden">{leagueStats}</div>
-                  )}
+                <div className="sm:hidden">{leagueStats}</div>
               </div>
             </section>
 

@@ -34,24 +34,19 @@ export default async function handler(req, res) {
       }
     }
 
-    // ✅ Fetch driver details from the database
-    const drivers = await Driver.find({ year: season });
-    let driverSelectionPercent = [];
+    // ✅ Fetch driver details from the database (Only include drivers that have been picked)
+    const selectedDriverNumbers = Object.keys(pickCounts).map(Number);
+    const drivers = await Driver.find({ year: season, driver_number: { $in: selectedDriverNumbers } });
 
-    for (const driver of drivers) {
-      const pickCount = pickCounts[driver.driver_number] || 0;
-      const selectionPercentage = totalSelections > 0 ? ((pickCount / totalSelections) * 100).toFixed(1) : "0.0";
-
-      driverSelectionPercent.push({
-        username: driver.full_name, // ✅ Driver name instead of username
-        finalResult: selectionPercentage, // ✅ Selection percentage
-        headshot_url: driver.name_acronym 
-          ? `/drivers/${season}/${driver.name_acronym}.png` 
-          : `/drivers/${season}/default.png`,
-        name_acronym: driver.name_acronym,
-        teamColour: driver.team_colour,
-      });
-    }
+    let driverSelectionPercent = drivers.map(driver => ({
+      username: driver.full_name, // ✅ Driver name instead of username
+      finalResult: ((pickCounts[driver.driver_number] / totalSelections) * 100).toFixed(1), // ✅ Selection percentage
+      headshot_url: driver.name_acronym 
+        ? `/drivers/${season}/${driver.name_acronym}.png` 
+        : `/drivers/${season}/default.png`,
+      name_acronym: driver.name_acronym,
+      teamColour: driver.team_colour,
+    }));
 
     // ✅ Sort by highest selection percentage
     driverSelectionPercent.sort((a, b) => b.finalResult - a.finalResult);
