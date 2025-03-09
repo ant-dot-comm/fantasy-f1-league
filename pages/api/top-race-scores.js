@@ -84,6 +84,11 @@ export default async function handler(req, res) {
       .map(driver => ({
         username: driver.full_name, // ✅ Display full driver name
         finalResult: driverTotalPoints[driver.driver_number] || 0, // ✅ Driver total points
+        headshot_url: driver.name_acronym 
+          ? `/drivers/${season}/${driver.name_acronym}.png` 
+          : `/drivers/${season}/default.png`,
+        name_acronym: driver.name_acronym,
+        teamColour: driver.team_colour,
       }))
       .sort((a, b) => b.finalResult - a.finalResult) // Sort highest to lowest
       .slice(0, 10); // ✅ Get top 10 scoring drivers

@@ -12,6 +12,8 @@ const RaceSchema = new mongoose.Schema(
     country_name: { type: String, required: true },
     meeting_name: { type: String, required: true },
     year: { type: Number, required: true },
+    date_start: { type: Number, required: true },
+    date_end: { type: Number, required: true },
     qualifying_results: { type: [DriverResultSchema], default: [] },
     race_results: { type: [DriverResultSchema], default: [] },
   },

@@ -84,3 +84,13 @@ body {
   height: 1.6rem;
   width: 100%;
 }
+
+.text-input {
+  background: var(--color-neutral-200);
+  color: var(--foreground);
+  font-family: var(--font-paragraph), sans-serif;
+  padding: .5rem;
+  border-radius: .5rem;
+  width: 100%;
+  display: block;
+}

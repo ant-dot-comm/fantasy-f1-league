@@ -15,9 +15,15 @@ export default function RankingsList({ scores, loggedInUser, title, className })
           topEntries.map((entry, index) => (
             <li key={`${entry.username}-${index}`}>
               <div className={classNames(
-                "w-full text-left font-bold bg-neutral-200 px-2 py-1 rounded-lg flex items-center justify-between gap-4",
-                entry.username === loggedInUser ? "shadow-lg text-cyan-800" : "text-neutral-600"
+                "w-full text-left font-bold bg-neutral-200 rounded-lg flex items-center justify-between gap-4",
+                entry.username === loggedInUser ? "shadow-lg text-cyan-800" : "text-neutral-600",
+                entry.headshot_url ? "pr-2" : "py-1 px-2"
             )}>
+                {entry.headshot_url && (
+                  <div className="rounded-l-md" style={{backgroundColor: `#${entry.teamColour}`}} >
+                    <img src={entry.headshot_url} alt={entry.username} className="h-10 -mt-4" />
+                  </div>
+                )}
                 <p className={classNames(
                     "grow leading-none",
                 )}>{entry.username}</p>

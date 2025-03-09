@@ -45,6 +45,11 @@ export default async function handler(req, res) {
       driverSelectionPercent.push({
         username: driver.full_name, // ✅ Driver name instead of username
         finalResult: selectionPercentage, // ✅ Selection percentage
+        headshot_url: driver.name_acronym 
+          ? `/drivers/${season}/${driver.name_acronym}.png` 
+          : `/drivers/${season}/default.png`,
+        name_acronym: driver.name_acronym,
+        teamColour: driver.team_colour,
       });
     }
 

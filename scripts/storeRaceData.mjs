@@ -20,14 +20,14 @@ async function storeRaceData(year) {
     console.log(`🏎️ Found ${raceResponse.length} races for ${year}.`);
 
     for (let race of raceResponse) {
-        const { meeting_key, country_name, meeting_name } = race;
+        const { meeting_key, country_name, meeting_name, date_start, date_end } = race;
 
         console.log(`📡 Processing: ${meeting_name} (${country_name})...`);
 
         // ✅ Find or create race entry
         let raceEntry = await Races.findOne({ meeting_key });
         if (!raceEntry) {
-            raceEntry = new Races({ meeting_key, country_name, meeting_name, year });
+            raceEntry = new Races({ meeting_key, country_name, meeting_name, year, date_start, date_end });
             console.log(`✅ Created new race entry: ${meeting_name} (${country_name})`);
         }
 

@@ -6,6 +6,8 @@ import Header from "../components/Header";
 import Leaderboard from "../components/Leaderboard";
 import CurrentPick from "../components/CurrentPicks";
 import RankingsList from "@/components/RankingsList";
+import classNames from "classnames";
+import RulesAndScoring from "@/components/RulesAndScoring";
 
 export default function Home() {
     const [season, setSeason] = useState(new Date().getFullYear());
@@ -76,13 +78,13 @@ export default function Home() {
   }, [season]);
 
     const leagueStats = (
-      <div className="flex flex-col sm:flex-row gap-4 w-full">
+      <div className="flex flex-col sm:flex-row gap-4 w-full sm:ml-3">
         <div className="w-full">
-          <h2 className="font-bold px-2">Best Single Race Scores</h2>
+          <h2 className="font-bold px-2 leading-none mb-1">Best Single Race Scores</h2>
           <RankingsList scores={topRaceScoresData} loggedInUser={username} title="Best Single Race Scores" />
         </div>
         <div className="w-full">
-          <h2 className="font-bold px-2">Best Average Scores</h2>
+          <h2 className="font-bold px-2 leading-none mb-1">Best Average Scores</h2>
           <RankingsList scores={averageRaceScoresData} loggedInUser={username} title="Best Average Scores" />
         </div>
       </div>
@@ -95,13 +97,16 @@ export default function Home() {
                 <h1 className="text-xl font-display leading-none">
                     Best of the Rest
                 </h1>
-                <label className="text-sm leading-none mb-10">
+                <label className="text-sm leading-none">
                     Redemption starts at the back
                 </label>
                 <select
                     value={season}
                     onChange={(e) => setSeason(parseInt(e.target.value))}
-                    className="p-2 border-4 border-neutral-800 rounded-lg -mb-6 bg-neutral-100 z-10"
+                    className={classNames(
+                        "p-2 border-4 border-neutral-700 rounded-lg -mb-6 bg-neutral-100 z-10",
+                        username ? "-mb-6 mt-10" : "mb-16 mt-2"
+                    )}
                 >
                     {[...Array(10)].map((_, i) => {
                         const year = new Date().getFullYear() - i;
@@ -153,7 +158,7 @@ export default function Home() {
 
             <div className="responsive-contianer flex justify-end relative w-full my-12 max-sm:mb-4">
                 <div className="responsive-line" />
-                <div className="flex flex-col items-end w-1/2 sm:px-8">
+                <div className="flex flex-col items-end w-1/2 sm:px-8 px-3">
                     <div className="responsive-xl">Driver</div>
                     <div className="responsive-lg text-neutral-500 z-[1]">
                         Stats
@@ -163,14 +168,26 @@ export default function Home() {
 
             <section className="flex flex-col sm:flex-row gap-4 items-center max-w-2xl mx-auto mt-10 sm:mt-24 px-3">
               <div className="w-full">
-                <h2 className="font-bold px-2">Most Picked Drivers</h2>
+                <h2 className="font-bold px-2 leading-none mb-1">Most Picked Drivers</h2>
                 {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} title="Most Picked Drivers" />}
               </div>
               <div className="w-full">
-                <h2 className="font-bold px-2">Top Scoring Drivers</h2>
+                <h2 className="font-bold px-2 leading-none mb-1">Top Scoring Drivers</h2>
                 {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={topScoringDrivers} title="Top Scoring Drivers" />}
               </div>
             </section>
+
+            <div className="responsive-contianer flex justify-start relative w-full my-12 sm:my-32 max-sm:mb-4">
+                <div className="responsive-line" />
+                <div className="flex flex-col items-start w-1/2 sm:px-8 px-3">
+                    <div className="responsive-xl">Rules</div>
+                    <div className="responsive-lg text-neutral-500 z-[1]">
+                        Scoring
+                    </div>
+                </div>
+            </div>
+
+            <RulesAndScoring />
         </div>
     );
 }
