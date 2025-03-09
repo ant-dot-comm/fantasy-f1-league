@@ -20,9 +20,10 @@ export default function RulesAndScoring() {
                     <h3 className="text-xl font-bold text-neutral-400">Scoring System</h3>
                     <ul className="list-disc pl-6 text-sm text-neutral-300">
                         <li>+1 point for each position gained from start to finish.</li>
+                        <li>-1 point for each position lost from start to finish.</li>
                         <li>+3 bonus points if starting 19th or 20th and finishing 10th or higher.</li>
                         <li>+5 bonus points if starting 19th or 20th and finishing 5th or higher.</li>
-                        <li>No points deducted for losing positions.</li>
+                        {/* <li>No points deducted for losing positions.</li> */}
                     </ul>
                 </div>
 

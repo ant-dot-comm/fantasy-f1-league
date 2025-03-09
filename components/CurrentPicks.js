@@ -3,8 +3,7 @@ import classNames from "classnames";
 import axios from "axios";
 import { useRouter } from "next/router";
 import Modal from "@/components/Modal";
-// import raceSchedule from "@/lib/raceSchedule";
-import {raceSchedule} from "@/data/raceSchedule";
+import raceSchedule from "../data/raceSchedule";
 
 export default function CurrentPick({ season, username }) {
     const [currentRace, setCurrentRace] = useState(null);
@@ -16,7 +15,7 @@ export default function CurrentPick({ season, username }) {
     const [pickStatusMessage, setPickStatusMessage] = useState("");
     const router = useRouter();
 
-    console.log({pickStatusMessage});
+    // console.log({pickStatusMessage});
 
     // ✅ Fetch current race details
     useEffect(() => {
@@ -100,7 +99,7 @@ export default function CurrentPick({ season, username }) {
                     `/api/bottomDrivers?meeting_key=${currentRace.meeting_key}&season=${season}`
                 );
                 setBottomDrivers(res.data);
-                console.log(res.data);
+                // console.log(res.data);
             } catch (error) {
                 console.error("❌ Error fetching bottom 10 drivers:", error);
             }
