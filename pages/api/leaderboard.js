@@ -34,37 +34,42 @@ export default async function handler(req, res) {
 }
 
 async function calculateLeaderboard(season) {
-  const users = await User.find({ [`picks.${season}`]: { $exists: true } });
+  // ✅ Fetch all users who participated in this season
+  const users = await User.find({ seasons: season }).select("username picks");
+
   if (!users.length) return [];
 
-  const leaderboard = [];
+  let leaderboard = [];
 
   for (const user of users) {
     let totalPoints = 0;
+    let hasPoints = false; // ✅ Track if user has any points
 
-    if (!user.picks?.[season]?.races) continue;
+    if (user.picks?.[season]?.races) {
+      const races = user.picks[season].races;
 
-    const races = user.picks[season].races;
+      for (const [meetingKey, pickedDrivers] of Object.entries(races)) {
+        const raceData = await Race.findOne({ meeting_key: meetingKey, year: season });
+        if (!raceData) continue;
 
-    for (const [meetingKey, pickedDrivers] of Object.entries(races)) {
-      const raceData = await Race.findOne({ meeting_key: meetingKey, year: season });
-      if (!raceData) continue;
+        for (const driverNumber of pickedDrivers) {
+          const raceResult = raceData.race_results.find(d => d.driverNumber === driverNumber);
+          if (!raceResult) continue;
 
-      for (const driverNumber of pickedDrivers) {
-        const raceResult = raceData.race_results.find(d => d.driverNumber === driverNumber);
-        if (!raceResult) continue;
+          let driverPoints = raceResult.startPosition - raceResult.finishPosition;
 
-        let driverPoints = raceResult.startPosition - raceResult.finishPosition;
+          if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 10)) driverPoints += 3;
+          if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 5)) driverPoints += 5;
 
-        if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 10)) driverPoints += 3;
-        if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 5)) driverPoints += 5;
-
-        totalPoints += driverPoints;
+          totalPoints += driverPoints;
+          hasPoints = true; // ✅ User has scored points
+        }
       }
     }
-    
-    leaderboard.push({ username: user.username, points: totalPoints });
+
+    // ✅ Push users into leaderboard, setting score to `null` if they haven't scored yet
+    leaderboard.push({ username: user.username, points: hasPoints ? totalPoints : null });
   }
 
-  return leaderboard.sort((a, b) => b.points - a.points);
+  return leaderboard.sort((a, b) => (b.points || 0) - (a.points || 0)); // Sort placing users with 0/null scores at the bottom
 }

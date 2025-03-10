@@ -15,6 +15,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
             setLoading(true);
             setSelectedPlayer(null);
             setPlayerRaceData({});
+            setScores([]);
             const storedScores = sessionStorage.getItem(`leaderboard-${season}`);
             if (storedScores) {
                 setScores(JSON.parse(storedScores));
@@ -66,13 +67,14 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8",
                                         user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-lg" : "border-neutral-500 text-neutral-500"
                                     )}
+                                    disabled={user.points === null}
                                 >
                                     <p className={classNames(
                                         "font-display text-4xl -mb-2 -mt-1 leading-none shrink-0",
                                         user.username === loggedInUser ? " text-cyan-800" : "text-neutral-500"
                                     )}>P{index + 1}</p>
                                     <p className="grow leading-none">{user.username}</p>
-                                    <p className="shrink-0 text-neutral-700 ">{user.points}</p>
+                                    <p className="shrink-0 text-neutral-700 ">{user.points !== null ? user.points : "--"}</p>
                                 </button>
                             </li>
                         ))
