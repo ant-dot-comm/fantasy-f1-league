@@ -173,7 +173,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center max-w-2xl mx-auto mt-10 sm:mt-24 px-3">
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center max-w-2xl lg:max-w-4xl mx-auto mt-10 sm:mt-24 px-3">
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Most Picked Drivers</h2>
                 {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} title="Most Picked Drivers" />}
