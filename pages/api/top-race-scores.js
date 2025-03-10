@@ -18,6 +18,8 @@ export default async function handler(req, res) {
     let topSingleRaceScores = [];
     let userTotalPoints = {}; // Stores total points per user
     let driverTotalPoints = {}; // ✅ Stores total points per driver
+    let driverPositionChanges = {}; // ✅ Stores total positions gained per driver
+    let driverPickCounts = {}; // ✅ Stores total picks per driver
 
     // ✅ Count only completed races for the season
     let totalRacesCompleted = await Race.countDocuments({ year: season, "race_results.0": { $exists: true } });
@@ -49,6 +51,19 @@ export default async function handler(req, res) {
             driverTotalPoints[driverNumber] = 0;
           }
           driverTotalPoints[driverNumber] += driverPoints;
+
+          // ✅ Track total positions gained across the season
+          const positionsGained = raceResult.startPosition - raceResult.finishPosition;
+          if (!driverPositionChanges[driverNumber]) {
+            driverPositionChanges[driverNumber] = 0;
+          }
+          driverPositionChanges[driverNumber] += positionsGained;
+
+          // ✅ Track how many times a driver was picked
+          if (!driverPickCounts[driverNumber]) {
+            driverPickCounts[driverNumber] = 0;
+          }
+          driverPickCounts[driverNumber] += 1;
         }
 
         // ✅ Track highest single-race scores
@@ -93,10 +108,44 @@ export default async function handler(req, res) {
       .sort((a, b) => b.finalResult - a.finalResult) // Sort highest to lowest
       .slice(0, 10); // ✅ Get top 10 scoring drivers
 
+    // ✅ Biggest Position Gainers (NEW)
+    let biggestPositionGainers = driverDetails
+      .map(driver => ({
+        username: driver.full_name, // ✅ Driver name
+        finalResult: driverPositionChanges[driver.driver_number] || 0, // ✅ Total positions gained
+        headshot_url: driver.name_acronym 
+          ? `/drivers/${season}/${driver.name_acronym}.png` 
+          : `/drivers/${season}/default.png`,
+        name_acronym: driver.name_acronym,
+        teamColour: driver.team_colour,
+      }))
+      .sort((a, b) => b.finalResult - a.finalResult) // Sort highest to lowest
+      .slice(0, 10); // ✅ Get top 10 biggest gainers
+
+      // ✅ Most Underrated Drivers (High Points, Low Picks)
+    let underratedDrivers = driverDetails
+    .map(driver => ({
+      username: driver.full_name,
+      points: driverTotalPoints[driver.driver_number] || 0,
+      // picks: driverPickCounts[driver.driver_number] || 1, // Avoid division by zero
+      finalResult: driverPickCounts[driver.driver_number] > 0 
+        ? ((driverTotalPoints[driver.driver_number] || 0) / driverPickCounts[driver.driver_number]).toFixed(1)
+        : "0.0",
+      headshot_url: driver.name_acronym 
+        ? `/drivers/${season}/${driver.name_acronym}.png` 
+        : `/drivers/${season}/default.png`,
+      name_acronym: driver.name_acronym,
+      teamColour: driver.team_colour,
+    }))
+    .sort((a, b) => b.finalResult - a.finalResult) // Sort by points per pick
+    // .slice(0, 10); // ✅ Get top 10 underrated drivers
+
     res.status(200).json({
       topSingleRaceScores: top10SingleRaceScores,
       averagePointsPerUser,
-      topScoringDrivers, // ✅ New driver points ranking
+      topScoringDrivers, // ✅ Driver total points ranking
+      biggestPositionGainers, // ✅ NEW Biggest Position Gainers
+      underratedDrivers, // ✅ NEW Most Underrated Drivers
     });
   } catch (error) {
     console.error("🚨 Error fetching race stats:", error);

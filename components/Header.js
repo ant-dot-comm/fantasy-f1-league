@@ -43,11 +43,12 @@ export default function Header() {
 
     const signupBeforeDate = raceSchedule["1254"].picks_close;
     const formattedTime = signupBeforeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+    const hideAtSeasonStart  = signupBeforeDate < new Date()
 
 
     return (
         <header className="border-b-8 border-neutral-700">
-            {signupBeforeDate < new Date() && (
+            {hideAtSeasonStart && (
                 <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
                     Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString()}</span> to be eligible for the 2025 season!
                 </div>
@@ -77,12 +78,14 @@ export default function Header() {
                         </>
                     ) : (
                         <>
-                            <button
-                                onClick={() => setIsSignupOpen(true)}
-                                className="font-display text-lg"
-                            >
-                                Sign Up
-                            </button>
+                            {hideAtSeasonStart && (
+                                <button
+                                    onClick={() => setIsSignupOpen(true)}
+                                    className="font-display text-lg"
+                                >
+                                    Sign Up
+                                </button>
+                            )}
                             <button
                                 onClick={() => setIsLoginOpen(true)}
                                 className="font-display text-lg"
@@ -118,12 +121,14 @@ export default function Header() {
                         </>
                     ) : (
                         <>
-                            <button
-                                onClick={() => { setIsSignupOpen(true); setIsMenuOpen(false); }}
-                                className="block text-lg font-display text-white hover:text-gray-400"
-                            >
-                                Sign Up
-                            </button>
+                            {hideAtSeasonStart && (
+                                <button
+                                    onClick={() => { setIsSignupOpen(true); setIsMenuOpen(false); }}
+                                    className="block text-lg font-display text-white hover:text-gray-400"
+                                >
+                                    Sign Up
+                                </button>
+                            )}
                             <button
                                 onClick={() => { setIsLoginOpen(true); setIsMenuOpen(false); }}
                                 className="block text-lg font-display text-white hover:text-gray-400"

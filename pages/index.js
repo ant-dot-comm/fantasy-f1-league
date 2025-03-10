@@ -15,6 +15,8 @@ export default function Home() {
     const [topRaceScoresData, setTopRaceScoresData] = useState([]);
     const [averageRaceScoresData, setAverageRaceScoresData] = useState([]);
     const [topScoringDrivers, setTopScoringDrivers] = useState([]);
+    const [underratedDrivers, setUnderratedDrivers] = useState([]);
+    const [biggestPositionGainers, setBiggestPositionGainers] = useState([]);
     const [driverSelectionData, setDriverSelectionData] = useState([]);
     const [loadingTopScores, setLoadingTopScores] = useState(true);
 
@@ -43,6 +45,8 @@ export default function Home() {
               setAverageRaceScoresData(parsedData.averagePointsPerUser || []);
               setDriverSelectionData(parsedData.driverSelectionPercent || []);
               setTopScoringDrivers(parsedData.topScoringDrivers || []);
+              setUnderratedDrivers(parsedData.underratedDrivers || []);
+              setBiggestPositionGainers(parsedData.biggestPositionGainers || []);
               setLoadingTopScores(false);
               return;
           }
@@ -59,6 +63,8 @@ export default function Home() {
               setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
               setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
               setTopScoringDrivers(raceStatsData.topScoringDrivers || []);
+              setUnderratedDrivers(raceStatsData.underratedDrivers || []);
+              setBiggestPositionGainers(raceStatsData.biggestPositionGainers || []);
               setDriverSelectionData(driverSelectionData.driverSelectionPercent || []);
   
               sessionStorage.setItem(
@@ -167,7 +173,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <section className="flex flex-col sm:flex-row gap-4 items-center max-w-2xl mx-auto mt-10 sm:mt-24 px-3">
+            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center max-w-2xl mx-auto mt-10 sm:mt-24 px-3">
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Most Picked Drivers</h2>
                 {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} title="Most Picked Drivers" />}
@@ -175,6 +181,10 @@ export default function Home() {
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Top Scoring Drivers</h2>
                 {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={topScoringDrivers} title="Top Scoring Drivers" />}
+              </div>
+              <div className="w-full">
+                <h2 className="font-bold px-2 leading-none mb-1">Points Per Selection</h2>
+                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={underratedDrivers} title="Top Scoring Drivers" />}
               </div>
             </section>
 

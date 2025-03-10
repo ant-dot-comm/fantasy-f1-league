@@ -20,7 +20,7 @@ export default function RankingsList({ scores, loggedInUser, title, className })
                 entry.headshot_url ? "pr-2" : "py-1 px-2"
               )}>
                 {entry.headshot_url && (
-                  <div className="rounded-l-md" style={{backgroundColor: `#${entry.teamColour}`}} >
+                  <div className="rounded-l-md shrink-0" style={{backgroundColor: `#${entry.teamColour}`}} >
                     <img src={entry.headshot_url} alt={entry.username} className="h-10 -mt-4" />
                   </div>
                 )}
@@ -56,7 +56,7 @@ export default function RankingsList({ scores, loggedInUser, title, className })
                 entry.headshot_url ? "pr-2" : "py-1 px-2"
               )}>
                 {entry.headshot_url && (
-                  <div className="rounded-l-md" style={{backgroundColor: `#${entry.teamColour}`}} >
+                  <div className="rounded-l-md shrink-0" style={{backgroundColor: `#${entry.teamColour}`}} >
                     <img src={entry.headshot_url} alt={entry.username} className="h-10 -mt-4" />
                   </div>
                 )}
