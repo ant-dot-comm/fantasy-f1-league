@@ -51,6 +51,12 @@ export default function Header() {
             {hideAtSeasonStart && (
                 <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
                     Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString()}</span> to be eligible for the 2025 season!
+                    <button
+                        onClick={() => setIsSignupOpen(true)}
+                        className="font-bold text-lg block mx-auto bg-neutral-100 text-cyan-800 rounded-md px-2 mt-2 shadow-2xl"
+                    >
+                        Sign Up
+                    </button>
                 </div>
             )}
             <div className="sm:mt-2 flex justify-between items-end sm:px-3">

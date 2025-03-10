@@ -19,11 +19,11 @@ export default function Modal({ isOpen, onClose, user, children, title }) {
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 flex items-end sm:items-center justify-end sm:justify-center bg-neutral-200/50 backdrop-blur-xl z-[500] text-neutral-200"
+                className="fixed top-[0] left-[0] w-full h-svh flex items-stretch pt-8 sm:items-center justify-end sm:justify-center bg-neutral-200/50 backdrop-blur-xl z-[500] text-neutral-200"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-            >
+            > 
                 <motion.div
                     className="w-[95%] max-w-md overflow-hidden flex flex-col relative"
                     initial={{ x: "100%" }}
@@ -47,7 +47,7 @@ export default function Modal({ isOpen, onClose, user, children, title }) {
                         </button>
                     </div>
 
-                    <div className="bg-neutral-700 p-6 pb-20 sm:rounded-2xl overflow-y-auto h-[90vh] max-sm:rounded-tl-2xl">
+                    <div className="bg-neutral-700 h-full p-6 pb-20 sm:rounded-2xl overflow-y-auto max-sm:rounded-tl-2xl">
                         {children}
                         <div className="content-fade w-full h-1/5 absolute left-0 sm:rounded-b-2xl bottom-0 bg-gradient-to-b transparent to-80% to-neutral-700 z-[2]" />
                     </div>
