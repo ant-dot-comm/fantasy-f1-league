@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { jwtDecode } from "jwt-decode";
 import { Menu } from "lucide-react";
+import raceSchedule from "../data/raceSchedule.js";
 import Modal from "@/components/Modal";
 import LoginForm from "@/components/LoginForm";
 import SignupForm from "@/components/SignupForm";
@@ -40,8 +41,17 @@ export default function Header() {
         router.push("/"); // ✅ Redirect to home
     };
 
+    const signupBeforeDate = raceSchedule["1254"].picks_close;
+    const formattedTime = signupBeforeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+
+
     return (
         <header className="border-b-8 border-neutral-700">
+            {signupBeforeDate < new Date() && (
+                <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
+                    Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString()}</span> to be eligible for the 2025 season!
+                </div>
+            )}
             <div className="sm:mt-2 flex justify-between items-end sm:px-3">
                 <h1 className="font-display -mb-1.5 sm:-mb-2 text-2xl sm:text-3xl leading-none max-sm:ml-3">
                     <Link href="/">Fantasy F1 League</Link>
@@ -55,8 +65,8 @@ export default function Header() {
                     {username ? (
                         <>
                             <span className="flex flex-col items-end">
-                                <p className="text-xs text-neutral-500 font-bold leading-none mb-[-4px]">Welcome</p>
-                                <p className="font-display text-lg mb-[-2px]">{username}</p>
+                                <p className="text-xs text-neutral-500 font-bold leading-none mb-[-6px]">Welcome</p>
+                                <p className="font-display text-lg mb-[-1.5px] text-cyan-800">{username}</p>
                             </span>
                             <button
                                 onClick={handleLogout}

@@ -133,7 +133,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                             </ul>
                             <h4 className="text-center absolute bottom-1 left-1/2 -translate-x-1/2 w-[75%]">
                                 <p className="leading-none text-[10px] font-bold text-neutral-500 uppercase">Round {index +1}</p>
-                                <p className="font-bold text-center text-sm text-neutral-800 leading-none">{race.race}</p>
+                                <p className="font-bold text-center text-sm text-neutral-700 leading-none">{race.race}</p>
                             </h4>
                         </div>
                     ))
