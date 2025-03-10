@@ -6,7 +6,6 @@ export default function Document() {
       <Head>
         {/* Favicon */}
         <link rel="icon" href="/fav.png" />
-        <title>Fantasy F1 League</title>
 
         {/* Meta tags for SEO */}
         <meta name="description" content="Fantasy F1 League - Make your picks and compete for the title!" />

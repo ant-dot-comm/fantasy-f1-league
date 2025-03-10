@@ -13,18 +13,21 @@ export default function CurrentPick({ season, username }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [picksOpen, setPicksOpen] = useState(false);
     const [pickStatusMessage, setPickStatusMessage] = useState("");
+    const [isCurrentRaceLoading, setIsCurrentRaceLoading] = useState(true);
     const router = useRouter();
-
-    // console.log({pickStatusMessage});
 
     // ✅ Fetch current race details
     useEffect(() => {
+        setIsCurrentRaceLoading(true);
         async function fetchRace() {
             try {
                 const res = await axios.get(
                     `/api/currentRace?season=${season}`
                 );
                 setCurrentRace(res.data);
+                setSelectedDrivers([]);
+                setUserPicks([]);
+                setIsCurrentRaceLoading(false);
             } catch (error) {
                 console.error("❌ Error fetching current race:", error);
             }
@@ -35,26 +38,27 @@ export default function CurrentPick({ season, username }) {
 
     // ✅ Check if picks should be locked on load
     useEffect(() => {
-      if (!currentRace) return;
+        if (!currentRace) return;
+        const now = new Date();
 
-      const now = new Date();
-
-      if (season < 2025) {
-        // 🔴 Disable picks for past seasons
-        setPicksOpen(false);
-        if (userPicks.length > 0) {
-            setPickStatusMessage(`Your race picks for`);
+        if (season < 2025) {
+            // 🔴 Disable picks for past seasons
+            setPicksOpen(false);
+            if (userPicks.length > 0) {
+                setPickStatusMessage(`Race picks for`);
+            } else {
+                setPickStatusMessage(`No picks for`);
+            }
         } else {
-            setPickStatusMessage(`No picks made for`);
-        }
-        } else if (schedule) {
-            // 🔄 Use dynamic scheduling for 2025+
-            const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule
-            const picksOpen = new Date(schedule.picks_open);
+            // const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
+            const schedule = raceSchedule['1254'];
+            const manualPickOpen = false; // because I dont know when openF1 has new data to pull from 
             const picksClose = new Date(schedule.picks_close);
 
-            if (now < picksClose) {
-                setPickStatusMessage(`Race picks open at ${picksOpen.toLocaleString()} and close at ${picksClose.toLocaleString()}.`);
+            if (manualPickOpen && now <= picksClose) {
+                setPickStatusMessage(
+                    "Processing race data. Check back soon to make your picks."
+                );
             } else {
                 if (userPicks.length > 0) {
                     setPickStatusMessage(`Your race picks for`);
@@ -62,14 +66,9 @@ export default function CurrentPick({ season, username }) {
                     setPickStatusMessage(`No picks made for`);
                 }
             }
-            setPicksOpen(
-                now >= picksOpen && now <= picksClose
-            );
-        } else {
-        // 🚨 Default fallback if no schedule is found
-        setPicksOpen(false);
-    }
-  }, [currentRace, userPicks]);
+            setPicksOpen(manualPickOpen && now <= picksClose);
+        }
+    }, [currentRace, userPicks, season]);
 
     // ✅ Fetch user's picks for the current race
     useEffect(() => {
@@ -139,15 +138,7 @@ export default function CurrentPick({ season, username }) {
     const continaerClasses =
         "flex flex-col items-center bg-neutral-700 text-neutral-300 mb-20 pt-16 relative";
 
-    if (!currentRace && season === new Date().getFullYear())
-        return (
-            <div className={continaerClasses}>
-                <p className="absolute left-1/2 top-3/5 -translate-x-1/2 -translate-y-1/2 w-full text-center">
-                    {season} Season has not started
-                </p>
-            </div>
-        );
-    if (!currentRace)
+    if (isCurrentRaceLoading)
         return (
             <div className={continaerClasses}>
                 <p className="absolute left-1/2 top-3/5 -translate-x-1/2 -translate-y-1/2w -full text-center ">
@@ -159,9 +150,7 @@ export default function CurrentPick({ season, username }) {
     return (
         <div className={continaerClasses}>
             {currentRace && (
-                <p className="leading-none text-sm">
-                    {pickStatusMessage}
-                </p>
+                <p className="leading-none text-sm">{pickStatusMessage}</p>
             )}
             <h2 className="text-xl font-display">
                 {currentRace
@@ -193,12 +182,16 @@ export default function CurrentPick({ season, username }) {
             <button
                 onClick={() => setIsModalOpen(true)}
                 className={classNames(
-                "-mb-4 px-4 py-2 mt-6 rounded-lg text-neutral-100",
-                !picksOpen ? "bg-neutral-600" : "bg-cyan-800",
+                    "-mb-4 px-4 py-2 mt-6 rounded-lg text-neutral-100",
+                    !picksOpen ? "bg-neutral-600" : "bg-cyan-800"
                 )}
                 disabled={!picksOpen}
             >
-                {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Locked" : "Make Picks"}
+                {!picksOpen
+                    ? "Picks Locked"
+                    : userPicks.length > 0
+                    ? "Update Locked"
+                    : "Make Picks"}
             </button>
 
             <Modal
@@ -208,7 +201,7 @@ export default function CurrentPick({ season, username }) {
                 title="Race Picks"
             >
                 <p className="font-bold leading-none">
-                    {season} {currentRace.meeting_name}
+                    {season} {currentRace?.meeting_name}
                 </p>
                 <h3 className="mb-6 text-sm text-neutral-400">
                     Select two drivers

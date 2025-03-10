@@ -41,9 +41,13 @@ export default function Header() {
         router.push("/"); // ✅ Redirect to home
     };
 
-    const signupBeforeDate = raceSchedule["1254"].picks_close;
-    const formattedTime = signupBeforeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
-    const hideAtSeasonStart  = signupBeforeDate < new Date()
+    const signupBeforeDate = new Date(raceSchedule["1254"].picks_close); // Convert to Date object
+    const formattedTime = signupBeforeDate.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    });
+    const hideAtSeasonStart  = signupBeforeDate > new Date() && !username
 
 
     return (

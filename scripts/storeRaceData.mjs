@@ -96,7 +96,7 @@ async function storeRaceData(year, meetingKey = null) {
         console.log(`✅ Successfully saved data for ${meeting_name}: Picks Open: ${qualifyingEndTime}, Picks Close: ${raceStartTime}`);
     }
 
-    console.log("✅ All race data stored successfully!");
+    console.log("✅ All race data stored successfully! MANUALLY SET PICKS TO ACTIVE, search - manualPickOpen");
     process.exit();
 }
 
