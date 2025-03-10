@@ -91,7 +91,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                 title="Season Picks"
             >
                 {playerRaceData[selectedPlayer] ? (
-                    playerRaceData[selectedPlayer].map((race) => (
+                    playerRaceData[selectedPlayer].map((race, index) => (
                         <div key={race.meeting_key} className="mt-6 mb-10 relative">
                             <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
                                 {race.results.length >= 2 && (
@@ -100,7 +100,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         <p className="text-lg font-display text-right">{race.results[0].points}</p>
 
                                         {/* ✅ Display total score once in between */}
-                                        <div className="text-center font-display text-2xl bg-neutral-500 rounded w-10">
+                                        <div className="text-center font-display text-2xl bg-cyan-800 rounded w-10">
                                             {race.results.reduce((acc, d) => acc + d.points, 0)}
                                         </div>
                                         <p className="text-lg font-display text-left">{race.results[1].points}</p>
@@ -110,14 +110,14 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     <li 
                                         key={driver.driver_number} 
                                         className={classNames(
-                                            "flex flex-col relative -mt-4",
+                                            "flex flex-col relative -mt-4 rounded-lg",
                                             index === 1 ? "items-end -mr-2" : "items-start -ml-2",
                                         )}
                                     >
                                         <img 
                                             src={driver.headshot_url} 
                                             alt={driver.driver_name} 
-                                            className="h-12 mr-2 shrink-0"
+                                            className="h-14 mr-2 shrink-0"
                                         />
                                         <div 
                                             className={classNames(
@@ -131,7 +131,10 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     </li>
                                 ))}
                             </ul>
-                            <h4 className="font-bold text-center text-sm text-neutral-800 absolute bottom-0 left-1/2 -translate-x-1/2 w-[75%]">{race.race}</h4>
+                            <h4 className="text-center absolute bottom-1 left-1/2 -translate-x-1/2 w-[75%]">
+                                <p className="leading-none text-[10px] font-bold text-neutral-500 uppercase">Round {index +1}</p>
+                                <p className="font-bold text-center text-sm text-neutral-800 leading-none">{race.race}</p>
+                            </h4>
                         </div>
                     ))
                 ) : (

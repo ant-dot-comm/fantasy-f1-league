@@ -37,7 +37,7 @@ export default function Modal({ isOpen, onClose, user, children, title }) {
 
                     <div className="bg-neutral-700 p-6 pb-20 sm:rounded-2xl overflow-y-auto h-[90vh] max-sm:rounded-tl-2xl">
                         {children}
-                        <div className="content-fade w-full h-1/5 absolute left-0 sm:rounded-b-2xl bottom-0 bg-gradient-to-b transparent to-neutral-700 z-[2]" />
+                        <div className="content-fade w-full h-1/5 absolute left-0 sm:rounded-b-2xl bottom-0 bg-gradient-to-b transparent to-80% to-neutral-700 z-[2]" />
                     </div>
                 </motion.div>
             </motion.div>

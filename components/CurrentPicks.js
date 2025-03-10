@@ -166,7 +166,7 @@ export default function CurrentPick({ season, username }) {
             <h2 className="text-xl font-display">
                 {currentRace
                     ? `${season} ${currentRace.meeting_name}`
-                    : "Season has not started"}
+                    : "Season has not started yet"}
             </h2>
             <div className="flex flex-row items-center">
                 {userPicks.map((driver, index) => (
