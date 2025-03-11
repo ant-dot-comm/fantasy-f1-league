@@ -73,7 +73,10 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         "font-display text-4xl -mb-2 -mt-1 leading-none shrink-0",
                                         user.username === loggedInUser ? " text-cyan-800" : "text-neutral-500"
                                     )}>P{index + 1}</p>
-                                    <p className="grow leading-none">{user.username}</p>
+                                    <div>
+                                        <p className="grow leading-none">{user.username}</p>
+                                        {/* <p className="text-xs text-neutral-500">{user.first_name}</p> */}
+                                    </div>
                                     <p className="shrink-0 text-neutral-700 ">{user.points !== null ? user.points : "--"}</p>
                                 </button>
                             </li>

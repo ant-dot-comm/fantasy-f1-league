@@ -9,17 +9,17 @@ export default async function handler(req, res) {
   }
 
   await dbConnect();
-  const { username, password } = req.body;
+  const { first_name, username, email, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ message: "Username and password are required" });
+  if (!first_name || !username || !email || !password) {
+    return res.status(400).json({ message: "First name, Username, Email, and password are required" });
   }
 
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ username }, { email });
 
     if (existingUser) {
-      return res.status(400).json({ message: "Username already exists" });
+      return res.status(400).json({ message: "Username or email already exists" });
     }
 
     // ✅ Hash password before storing
@@ -28,7 +28,9 @@ export default async function handler(req, res) {
     // ✅ Automatically enroll user in the current season
     const currentYear = new Date().getFullYear();
     const newUser = new User({
+      first_name,
       username,
+      email,
       password: hashedPassword,
       seasons: [currentYear],
       picks: {},
@@ -38,7 +40,7 @@ export default async function handler(req, res) {
 
     // ✅ Generate JWT token
     const token = sign(
-      { userId: newUser._id, username: newUser.username },
+      { userId: newUser._id, username: newUser.username, first_name: newUser.first_name },
       process.env.NEXTAUTH_SECRET,
       { expiresIn: "7d" }
     );
