@@ -53,7 +53,7 @@ export default function LoginForm({ onClose }) {
           <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} className="text-input" required />
           <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="text-input" required />
           <button type="submit" className="w-full bg-cyan-800 text-white p-2 rounded-lg">Login</button>
-          <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm text-cyan-500 mt-2">Forgot Password?</button>
+          <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm text-neutral-300 mt-2">Forgot Password?</button>
         </form>
       ) : (
         // ✅ Forgot Password Form
@@ -61,7 +61,7 @@ export default function LoginForm({ onClose }) {
           <p className="text-sm text-neutral-400">Enter your email, and we'll send you a password reset link.</p>
           <input type="email" placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)} className="text-input" required />
           <button type="submit" className="w-full bg-cyan-800 text-white p-2 rounded-lg">Send Reset Link</button>
-          <button type="button" onClick={() => setShowForgotPassword(false)} className="text-sm text-cyan-500 mt-2">Back to Login</button>
+          <button type="button" onClick={() => setShowForgotPassword(false)} className="text-sm text-neutral-300 mt-2">Back to Login</button>
         </form>
       )}
     </div>

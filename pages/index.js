@@ -102,12 +102,12 @@ export default function Home() {
     return (
         <div className="mb-32">
             <Header />
-            <div className="flex flex-col justify-center items-center pt-10">
+            <div className="flex flex-col justify-center items-center pt-10 max-w-screen-sm mx-auto">
                 <h1 className="text-xl font-display leading-none">
                     Best of the Rest
                 </h1>
-                <label className="text-sm leading-none">
-                    Redemption starts at the back
+                <label className="text-sm leading-none text-center">
+                    Redemption starts at the back! Pick your drivers wisely from the back half of the grid (P11-P20) and watch them climb to glory. The bigger the comeback, the bigger the rewards!
                 </label>
                 <select
                     value={season}

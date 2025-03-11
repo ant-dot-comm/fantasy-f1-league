@@ -25,7 +25,7 @@ export default function RankingsList({ scores, loggedInUser, title, className })
                   </div>
                 )}
                 <p className={classNames(
-                    "grow leading-none",
+                    "grow leading-none text-sm",
                 )}>{entry.username}</p>
                 <p className="shrink-0">{entry.finalResult}</p>
               </div>
@@ -61,7 +61,7 @@ export default function RankingsList({ scores, loggedInUser, title, className })
                   </div>
                 )}
                 <p className={classNames(
-                    "grow leading-none",
+                    "grow leading-none capitalize",
                 )}>{entry.username}</p>
                 <p className="shrink-0">{entry.finalResult}</p>
               </div>

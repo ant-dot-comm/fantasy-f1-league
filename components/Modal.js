@@ -36,7 +36,10 @@ export default function Modal({ isOpen, onClose, user, children, title }) {
                     }}
                 >
                     <div className="flex justify-between items-center px-6">
-                        <p className="font-display text-2xl text-neutral-700 leading-none -mb-1.5">{title}</p>
+                        <div className="">
+                            {user && (<p className="text-xs font-bold text-neutral-500">{user}</p>)}
+                            <p className="font-display text-2xl text-neutral-700 leading-none -mb-1.5">{title}</p>
+                        </div>
                         <button onClick={onClose} className="pl-4 text-neutral-700 font-bold">
                             <X size={32} strokeWidth={3} />
                         </button>
@@ -44,7 +47,7 @@ export default function Modal({ isOpen, onClose, user, children, title }) {
 
                     <div className="bg-neutral-700 p-6 pb-20 sm:rounded-2xl overflow-y-auto max-sm:rounded-tl-2xl">
                         {children}
-                        <div className="content-fade w-full h-1/5 absolute left-0 sm:rounded-b-2xl bottom-0 bg-gradient-to-b transparent to-80% to-neutral-700 z-[2]" />
+                        <div className="content-fade w-full h-20 absolute left-0 sm:rounded-b-2xl bottom-0 bg-gradient-to-b transparent to-80% to-neutral-700 z-[2] pointer-events-none" />
                     </div>
                 </motion.div>
             </motion.div>

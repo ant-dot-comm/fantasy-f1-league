@@ -91,6 +91,11 @@ body {
   height: 1rem;
   width: 100%;
 }
+.divider-glow-medium {
+  background: radial-gradient(ellipse at top , theme('colors.neutral.800') 0%, transparent 75%);
+  height: 1rem;
+  width: 100%;
+}
 
 .text-input {
   background: var(--color-neutral-200);

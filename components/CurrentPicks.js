@@ -135,8 +135,10 @@ export default function CurrentPick({ season, username }) {
             console.error("❌ Error submitting pick:", error);
         }
     }
-    const continaerClasses =
-        "flex flex-col items-center bg-neutral-700 text-neutral-300 mb-20 pt-16 relative";
+    const continaerClasses =classNames(
+        "flex flex-col items-center mb-20 pt-16 relative text-neutral-300",
+        userPicks.length > 0 ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-800" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700", 
+    );
 
     if (isCurrentRaceLoading)
         return (
@@ -177,7 +179,7 @@ export default function CurrentPick({ season, username }) {
                     </div>
                 ))}
             </div>
-            <div className="divider-glow-dark !w-4/5 sm:!w-1/2 mx-auto" />
+            <div className="divider-glow-medium !w-4/5 sm:!w-1/2 mx-auto" />
 
             <button
                 onClick={() => setIsModalOpen(true)}

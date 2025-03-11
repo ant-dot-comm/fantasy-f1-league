@@ -76,7 +76,7 @@ export default function Header() {
                     {username ? (
                         <>
                             <span className="flex flex-col items-end">
-                                <p className="text-xs text-neutral-500 font-bold leading-none mb-[-6px]">Welcome</p>
+                                <p className="text-xs font-light text-neutral-500 leading-none mb-[-6px]">Welcome</p>
                                 <p className="font-display text-lg mb-[-1.5px] text-cyan-800">{username}</p>
                             </span>
                             <button
@@ -120,7 +120,7 @@ export default function Header() {
                 <nav className="flex flex-col">
                     {username ? (
                         <>
-                            <p className="text-sm text-neutral-400 leading-none">Welcome</p>
+                            <p className="text-sm font-light text-neutral-400 leading-none">Welcome</p>
                             <p className="text-lg font-display text-white leading-none">{username}</p>
                             <button
                                 onClick={handleLogout}
