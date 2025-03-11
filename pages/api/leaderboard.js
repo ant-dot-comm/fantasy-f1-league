@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
 async function calculateLeaderboard(season) {
   // ✅ Fetch all users who participated in this season
-  const users = await User.find({ seasons: season }).select("username picks");
+  const users = await User.find({ seasons: season }).select("username first_name picks");
 
   if (!users.length) return [];
 
@@ -68,7 +68,7 @@ async function calculateLeaderboard(season) {
     }
 
     // ✅ Push users into leaderboard, setting score to `null` if they haven't scored yet
-    leaderboard.push({ username: user.username, points: hasPoints ? totalPoints : null });
+    leaderboard.push({ first_name: user.first_name, username: user.username, points: hasPoints ? totalPoints : null });
   }
 
   return leaderboard.sort((a, b) => (b.points || 0) - (a.points || 0)); // Sort placing users with 0/null scores at the bottom

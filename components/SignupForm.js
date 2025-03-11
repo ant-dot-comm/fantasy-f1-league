@@ -26,6 +26,7 @@ export default function SignupForm({ onClose }) {
 
       Cookies.set("token", res.data.token, { expires: 7 });
       sessionStorage.setItem("username", username);
+      sessionStorage.removeItem(`leaderboard-${new Date().getFullYear()}`);
       onClose(); // ✅ Close modal after signup
       router.reload(); // ✅ Refresh page to reflect login
     } catch (err) {

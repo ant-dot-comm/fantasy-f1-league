@@ -50,6 +50,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
         }
     }
 
+    // console.log({scores});
     return (
         <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200 sm:min-h-[30rem]")}>
             <ul className="flex gap-2 flex-col">
@@ -64,18 +65,26 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         fetchPlayerRaceData(user.username);
                                     }}
                                     className={classNames(
-                                        "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8",
+                                        "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group",
                                         user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-lg" : "border-neutral-500 text-neutral-500"
                                     )}
                                     disabled={user.points === null}
                                 >
                                     <p className={classNames(
-                                        "font-display text-4xl -mb-2 -mt-1 leading-none shrink-0",
-                                        user.username === loggedInUser ? " text-cyan-800" : "text-neutral-500"
-                                    )}>P{index + 1}</p>
-                                    <div>
-                                        <p className="grow leading-none">{user.username}</p>
-                                        {/* <p className="text-xs text-neutral-500">{user.first_name}</p> */}
+                                        "font-display text-4xl -mb-2 leading-none shrink-0",
+                                        user.username === loggedInUser ? "text-cyan-800" : "text-neutral-500"
+                                    )}>
+                                        P{index + 1}
+                                    </p>
+                                    <div className="flex flex-row items-end gap-1 flex-wrap grow">
+                                        <p className="leading-none">
+                                            {user.username}
+                                        </p>
+                                        <p 
+                                        className={classNames(
+                                            "text-xs font-light leading-none text-transparent",
+                                            { "group-hover:text-neutral-500 transition-colors duration-300": loggedInUser }
+                                        )}> - {user.first_name}</p>
                                     </div>
                                     <p className="shrink-0 text-neutral-700 ">{user.points !== null ? user.points : "--"}</p>
                                 </button>
