@@ -19,13 +19,13 @@ export default function Modal({ isOpen, onClose, user, children, title }) {
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed top-[0] left-[0] w-full h-svh flex items-stretch pt-8 sm:items-center justify-end sm:justify-center bg-neutral-200/50 backdrop-blur-xl z-[500] text-neutral-200"
+                className="fixed top-[0] bottom-[0] left-[0] right-[0] pt-8 w-full flex items-end sm:items-center justify-end sm:justify-center bg-neutral-200/50 backdrop-blur-xl z-[500] text-neutral-200"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
             > 
                 <motion.div
-                    className="w-[95%] max-w-md overflow-hidden flex flex-col relative"
+                    className="w-[95%] max-w-md max-h-[100%] sm:max-h-[80%] overflow-hidden flex flex-col relative"
                     initial={{ x: "100%" }}
                     animate={{ x: 0 }}
                     exit={{ x: "100%" }}
@@ -36,18 +36,13 @@ export default function Modal({ isOpen, onClose, user, children, title }) {
                     }}
                 >
                     <div className="flex justify-between items-center px-6">
-                        <div>
-                            {/* {user && (
-                                <h3 className="font-bold text-neutral-500 leading-none">{user}</h3>
-                            )} */}
-                            <p className="font-display text-2xl text-neutral-700 leading-none -mb-1.5">{title}</p>
-                        </div>
+                        <p className="font-display text-2xl text-neutral-700 leading-none -mb-1.5">{title}</p>
                         <button onClick={onClose} className="pl-4 text-neutral-700 font-bold">
                             <X size={32} strokeWidth={3} />
                         </button>
                     </div>
 
-                    <div className="bg-neutral-700 h-full p-6 pb-20 sm:rounded-2xl overflow-y-auto max-sm:rounded-tl-2xl">
+                    <div className="bg-neutral-700 p-6 pb-20 sm:rounded-2xl overflow-y-auto max-sm:rounded-tl-2xl">
                         {children}
                         <div className="content-fade w-full h-1/5 absolute left-0 sm:rounded-b-2xl bottom-0 bg-gradient-to-b transparent to-80% to-neutral-700 z-[2]" />
                     </div>
