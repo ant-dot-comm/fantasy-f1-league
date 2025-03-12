@@ -65,8 +65,9 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         fetchPlayerRaceData(user.username);
                                     }}
                                     className={classNames(
-                                        "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group",
-                                        user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-lg" : "border-neutral-500 text-neutral-500"
+                                        "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-colors duration-200",
+                                        user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-md" : "border-neutral-500 text-neutral-500",
+                                        { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer": user.points !== null }
                                     )}
                                     disabled={user.points === null}
                                 >
@@ -110,10 +111,8 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                             <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
                                 {race.results.length >= 2 && (
                                     <div className="grid grid-cols-3 gap-2 absolute top-[-1.5rem] left-1/2 -translate-x-1/2 items-center ">
-                                        {/* ✅ Extract Driver Scores */}
                                         <p className="text-lg font-display text-right">{race.results[0].points}</p>
 
-                                        {/* ✅ Display total score once in between */}
                                         <div className="text-center font-display text-2xl bg-cyan-800 rounded w-10">
                                             {race.results.reduce((acc, d) => acc + d.points, 0)}
                                         </div>

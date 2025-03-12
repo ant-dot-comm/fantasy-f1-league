@@ -137,7 +137,7 @@ export default function CurrentPick({ season, username }) {
     }
     const continaerClasses =classNames(
         "flex flex-col items-center mb-20 pt-16 relative text-neutral-300",
-        userPicks.length > 0 ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-800" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700", 
+        userPicks.length > 0 ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700", 
     );
 
     if (isCurrentRaceLoading)
@@ -184,15 +184,15 @@ export default function CurrentPick({ season, username }) {
             <button
                 onClick={() => setIsModalOpen(true)}
                 className={classNames(
-                    "-mb-4 px-4 py-2 mt-6 rounded-lg text-neutral-100",
-                    !picksOpen ? "bg-neutral-600" : "bg-cyan-800"
+                    "-mb-4 px-6 py-4 mt-6 rounded-lg text-neutral-100 shadow-md",
+                    !picksOpen ? "bg-neutral-500" : "bg-cyan-800"
                 )}
                 disabled={!picksOpen}
             >
                 {!picksOpen
                     ? "Picks Locked"
                     : userPicks.length > 0
-                    ? "Update Locked"
+                    ? "Update Picks"
                     : "Make Picks"}
             </button>
 
@@ -222,7 +222,7 @@ export default function CurrentPick({ season, username }) {
                                         selectedDrivers.includes(
                                             driver.driverNumber
                                         )
-                                            ? "bg-neutral-600 text-neutral-200 shadow-lg"
+                                            ? "bg-neutral-600 text-neutral-200 shadow-md"
                                             : "bg-neutral-200 text-neutral-700",
                                         driver.headshot_url ? "pr-2" : "px-1"
                                     )}
@@ -266,7 +266,7 @@ export default function CurrentPick({ season, username }) {
                         ))}
                 </ul>
                 <button
-                    className="px-4 py-2 mt-4 w-full bg-cyan-800 text-white rounded-lg font-bold"
+                    className="p-4 mt-2 w-full bg-cyan-800 text-white rounded-lg font-bold"
                     onClick={submitPick}
                     disabled={selectedDrivers.length !== 2}
                 >
