@@ -49,7 +49,7 @@ export default function CurrentPick({ season, username }) {
             if (userPicks.length > 0) {
                 setPickStatusMessage(`Race picks for`);
             } else {
-                setPickStatusMessage(`No picks for`);
+                setPickStatusMessage(username ? `No picks for` : '');
             }
         } else {
             // const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
@@ -163,13 +163,13 @@ export default function CurrentPick({ season, username }) {
                         "flex items-end mt-2",
                         index === 0 ? "flex-row-reverse" : ""
                     )}>
-                        <img src={driver.headshot_url} alt={driver.fullName} className="h-16"/>
+                        <img src={driver.headshot_url} alt={driver.fullName} className="h-16 sm:h-32"/>
                         <p className="text-2xl font-display leading-none -mb-1">{driver.name_acronym}</p>
                     </div>
                 ))}
             </div>
             <div className="divider-glow-medium !w-4/5 sm:!w-1/2 mx-auto" />
-            {autoPicked && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
+            {(autoPicked && userPicks.length > 0) && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
 
             {/* ✅ Pick Button */}
             <button

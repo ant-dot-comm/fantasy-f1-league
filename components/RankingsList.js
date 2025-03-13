@@ -2,7 +2,7 @@ import { useState } from "react";
 import Modal from "./Modal";
 import classNames from "classnames";
 
-export default function RankingsList({ scores, loggedInUser, title, className }) {
+export default function RankingsList({ scores, loggedInUser, title, className, loading }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const topEntries = scores.slice(0, 5); // First 5 entries
   const hasMoreEntries = scores.length > 5; // Check if more than 5
@@ -42,7 +42,20 @@ export default function RankingsList({ scores, loggedInUser, title, className })
             </li>
           ))
         ) : (
-          <li>No rankings available.</li>
+          <div>
+            {loading ? (
+              <div className="animate-pulse space-y-2">
+                  <div className="bg-neutral-600 h-6 w-full rounded-md" />
+                  <div className="bg-neutral-600 h-6 w-full rounded-md" />
+                  <div className="bg-neutral-600 h-6 w-full rounded-md" />
+                  <div className="bg-neutral-600 h-6 w-full rounded-md" />
+                  <div className="bg-neutral-600 h-6 w-full rounded-md" />
+                  <div className="bg-neutral-600 h-6 w-full rounded-md" />
+              </div>
+            ) : (
+              <li>No rankings available.</li>
+            )}
+          </div>
         )}
       </ul>
 

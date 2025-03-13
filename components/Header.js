@@ -39,6 +39,9 @@ export default function Header() {
         setUsername(null); // ✅ Clear user info
         setIsMenuOpen(false);
         router.push("/"); // ✅ Redirect to home
+        setTimeout(() => {
+            window.location.reload(); // ✅ Full page reload
+        }, 100);
     };
 
     const signupBeforeDate = new Date(raceSchedule["1254"].picks_close); // Convert to Date object

@@ -89,19 +89,17 @@ export default function Home() {
       fetchStats();
   }, [season]);
 
-    const leagueStats = loadingTopScores ? (
-        <p>Loading...</p>
-    ) : (
-      <div className="flex flex-col sm:flex-row gap-4 w-full sm:ml-3">
-        <div className="w-full">
-          <h2 className="font-bold px-2 leading-none mb-1">Single Race Scores</h2>
-          <RankingsList scores={topRaceScoresData} loggedInUser={username} title="Single Race Scores" />
+    const leagueStats = (
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:ml-3">
+            <div className="w-full">
+                <h2 className="font-bold px-2 leading-none mb-1">Single Race Scores</h2>
+                <RankingsList loading={loadingTopScores} scores={topRaceScoresData} loggedInUser={username} title="Single Race Scores" />
+            </div>
+            <div className="w-full">
+                <h2 className="font-bold px-2 leading-none mb-1">Average Scores</h2>
+                <RankingsList loading={loadingTopScores} scores={averageRaceScoresData} loggedInUser={username} title="Average Scores" />
+            </div>
         </div>
-        <div className="w-full">
-          <h2 className="font-bold px-2 leading-none mb-1">Average Scores</h2>
-          <RankingsList scores={averageRaceScoresData} loggedInUser={username} title="Average Scores" />
-        </div>
-      </div>
     )
           
     return (
@@ -138,7 +136,7 @@ export default function Home() {
                     <CurrentPick season={season} username={username} />
                 )}
 
-                <div className="flex flex-col sm:flex-row mx-auto relative gap-4">
+                <div className="flex flex-col sm:flex-row sm:justify-center mx-auto relative gap-4">
                     <div className="responsive-contianer relative sm:absolute sm:w-full sm:mt-10 max-sm:mb-4">
                         <div className="responsive-line" />
                         <div className="flex flex-col items-end w-1/2 sm:px-8">
@@ -148,10 +146,10 @@ export default function Home() {
                             </div>
                         </div>
                     </div>
-                    <div className="max-sm:hidden w-1/2 flex items-start mt-[20%]">
+                    <div className="max-sm:hidden w-1/2 max-w-[600px] flex items-start mt-[20%] xl:mt-[260px]">
                         {leagueStats}
                     </div>
-                    <div className="sm:w-1/2 sm:mr-3 max-sm:mx-3 z-10">
+                    <div className="sm:w-1/2 sm:max-w-[600px] sm:mr-3 max-sm:mx-3 z-10">
                         <h2 className="font-display text-2xl px-4 -mb-2.5">Leaderboard</h2>
                         <Leaderboard
                             season={season}
@@ -181,15 +179,15 @@ export default function Home() {
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center max-w-2xl lg:max-w-4xl mx-auto mt-10 sm:mt-24 px-3">
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Most Picked Drivers</h2>
-                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={driverSelectionData} title="Most Picked Drivers" />}
+                <RankingsList loading={loadingTopScores} scores={driverSelectionData} title="Most Picked Drivers" />
               </div>
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Top Scoring Drivers</h2>
-                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={topScoringDrivers} title="Top Scoring Drivers" />}
+                <RankingsList loading={loadingTopScores} scores={topScoringDrivers} title="Top Scoring Drivers" />
               </div>
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Points Per Selection</h2>
-                {loadingTopScores ? <p>Loading...</p> : <RankingsList scores={underratedDrivers} title="Top Scoring Drivers" />}
+                <RankingsList loading={loadingTopScores} scores={underratedDrivers} title="Top Scoring Drivers" />
               </div>
             </section>
 

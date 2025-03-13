@@ -94,7 +94,14 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                             </li>
                         ))
                 ) : loading ? (
-                    <li>Loading player scores...</li>
+                    <li className="animate-pulse space-y-2">
+                        <div className="bg-neutral-800 h-6 w-full rounded-md" />
+                        <div className="bg-neutral-800 h-6 w-full rounded-md" />
+                        <div className="bg-neutral-800 h-6 w-full rounded-md" />
+                        <div className="bg-neutral-800 h-6 w-full rounded-md" />
+                        <div className="bg-neutral-800 h-6 w-full rounded-md" />
+                        <div className="bg-neutral-800 h-6 w-full rounded-md" />
+                    </li>
                 ) : (
                     <li>No scores available</li>
                 )}

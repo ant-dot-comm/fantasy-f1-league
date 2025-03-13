@@ -12,6 +12,7 @@ export default function RulesAndGuide() {
                         <li>Only drivers starting 11th - 20th in qualifying are eligible.</li>
                         <li>Points are awarded based on how much your drivers improve their finishing position.</li>
                         <li>Picks lock at the start of the race.</li>
+                        <li>Picks are auto-generated to ensure every participant has a selection for the weekend. You can adjust your picks after qualifying and before the race starts.</li>
                     </ul>
                 </div>
 
