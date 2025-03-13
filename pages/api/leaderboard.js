@@ -39,11 +39,18 @@ export default async function handler(req, res) {
         leaderboard.push({
           first_name: user.first_name,
           username: user.username,
-          points: totalUserPoints, // ✅ Uses pre-calculated points
+          points: totalUserPoints !== null ? totalUserPoints : 0, // ✅ Uses pre-calculated points
           autoPicks: data.autoPicks,
         });
       } catch (error) {
         console.warn(`⚠️ No race data found for ${user.username}, setting score to null.`);
+        // ✅ Ensure user appears even without points
+        leaderboard.push({
+          first_name: user.first_name,
+          username: user.username,
+          points: 0, 
+          autoPicks: 0, 
+      });
       }
     }
 
