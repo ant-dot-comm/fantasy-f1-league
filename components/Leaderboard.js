@@ -69,25 +69,28 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     className={classNames(
                                         "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-colors duration-200",
                                         user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-md" : "border-neutral-500 text-neutral-500",
-                                        { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer": user.points !== null }
+                                        { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer": user.points !== null && loggedInUser }
                                     )}
                                     disabled={user.points === null}
                                 >
                                     <p className={classNames(
-                                        "font-display text-4xl -mb-2 leading-none shrink-0",
+                                        "font-display text-4xl -mb-2 leading-none shrink-0 w-16 text-center",
                                         user.username === loggedInUser ? "text-cyan-800" : "text-neutral-500"
                                     )}>
                                         P{index + 1}
                                     </p>
-                                    <div className="flex flex-row items-end gap-1 flex-wrap grow">
-                                        <p className="leading-none">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center sm:gap-1 flex-wrap grow">
+                                        <p className="leading-none max-sm:text-sm">
                                             {user.username}
                                         </p>
-                                        <p 
-                                        className={classNames(
-                                            "text-xs font-light leading-none text-transparent",
-                                            { "group-hover:text-neutral-500 transition-colors duration-300": loggedInUser }
-                                        )}> - {user.first_name}</p>
+                                        {loggedInUser && (
+                                            <p className={classNames(
+                                                "text-[8px] sm:text-xs sm:font-light leading-none sm:text-transparent",
+                                                { "group-hover:text-neutral-500 transition-colors duration-300": loggedInUser }
+                                            )}> 
+                                                <span className="max-sm:hidden">-</span> {user.first_name}
+                                            </p>
+                                        )}
                                     </div>
                                     <p className="shrink-0 text-neutral-700 ">{user.points !== null ? user.points : "--"}</p>
                                 </button>
