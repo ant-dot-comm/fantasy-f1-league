@@ -103,6 +103,7 @@ export default async function handler(req, res) {
                         race_position: raceResult.finishPosition, 
                         points: driverPoints,
                         name_acronym: driverInfo.name_acronym,
+                        autoPicks: raceData.autopick,
                         headshot_url: driverInfo.name_acronym
                             ? `/drivers/${season}/${driverInfo.name_acronym}.png`
                             : `/drivers/${season}/default.png`,

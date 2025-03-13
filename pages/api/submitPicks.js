@@ -15,32 +15,24 @@ export default async function handler(req, res) {
   }
 
   try {
-    let user = await User.findOne({ username });
-
+    let user = await User.findOne({ username }).lean();
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // ✅ Ensure season object exists
-    if (!user.picks[season]) {
-      user.picks[season] = {};
-    }
-
-    // ✅ Ensure race object exists inside the season
+    // ✅ Ensure picks object exists
+    if (!user.picks) user.picks = {};
+    if (!user.picks[season]) user.picks[season] = {};
     if (!user.picks[season][meeting_key]) {
       user.picks[season][meeting_key] = { picks: [], autopick: false };
     }
 
-    // ✅ Store or update picks for the specific meeting_key
+    // ✅ Update picks & remove autopick flag
     user.picks[season][meeting_key].picks = driverNumbers;
-
-    // ✅ Flip `autopick` to `false`
     user.picks[season][meeting_key].autopick = false;
 
-    // ✅ Mark the picks object as modified before saving
-    user.markModified(`picks.${season}.${meeting_key}`);
-
-    await user.save();
+    // ✅ Save changes
+    await User.updateOne({ username }, { $set: { picks: user.picks } });
 
     res.status(200).json({ 
       message: "Pick submitted successfully", 

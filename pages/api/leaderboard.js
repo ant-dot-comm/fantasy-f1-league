@@ -34,20 +34,16 @@ export default async function handler(req, res) {
         const { data } = await axios.get(`http://localhost:3000/api/selected-leaderboard-player-race-scores?username=${user.username}&season=${season}`);
         const totalUserPoints = data.raceBreakdown.reduce((acc, race) => {
           return acc + race.results.reduce((sum, driver) => sum + driver.points, 0);
-      }, 0);
+        }, 0);
 
         leaderboard.push({
           first_name: user.first_name,
           username: user.username,
           points: totalUserPoints, // ✅ Uses pre-calculated points
+          autoPicks: data.autoPicks,
         });
       } catch (error) {
         console.warn(`⚠️ No race data found for ${user.username}, setting score to null.`);
-        leaderboard.push({
-          first_name: user.first_name,
-          username: user.username,
-          points: null, // ✅ Set null if no race data
-        });
       }
     }
 

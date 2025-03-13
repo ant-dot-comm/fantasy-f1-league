@@ -108,7 +108,10 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                 title="Season Picks"
             >
                 {selectePlayerRaceData[selectedPlayer] ? (
-                    selectePlayerRaceData[selectedPlayer].map((race, index) => (
+                    selectePlayerRaceData[selectedPlayer].map((race, index) => {
+                        console.log({race})
+                        return ( 
+                        <>
                         <div key={race.meeting_key} className="mt-6 mb-10 relative">
                             <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
                                 {race.results.length >= 2 && (
@@ -123,7 +126,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                 )}
                                 {race.results.map((driver, index) => (
                                     <li 
-                                        key={driver.driver_number} 
+                                        key={driver.name_acronym} 
                                         className={classNames(
                                             "flex flex-col relative -mt-4 rounded-lg",
                                             index === 1 ? "items-end -mr-2" : "items-start -ml-2",
@@ -140,7 +143,10 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                                 index === 1 ? "right-12 text-right" : "left-10 text-left",
                                             )}
                                         >
-                                            <p className="font-display text-lg leading-none">{driver.name_acronym}</p>
+                                            <div className={classNames("flex items-end", index === 1 ? "flex-row-reverse" : "flex-row")}>
+                                                <p className="font-display text-lg leading-none">{driver.name_acronym}</p>
+                                                <span className={classNames("text-[8px] mb-[1px] text-neutral-400", index === 1 ? "mr-[2px]" : "ml-[2px]" )}>{driver.autoPicks && "Auto Picked"}</span>
+                                            </div>
                                             <p className="text-xs font-bold leading-none text-neutral-700">P{driver.qualifying_position} - P{driver.race_position}</p>
                                         </div>
                                     </li>
@@ -151,7 +157,9 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                 <p className="font-bold text-center text-sm text-neutral-700 leading-none">{race.race}</p>
                             </h4>
                         </div>
-                    ))
+                        </>
+                        )
+                    })
                 ) : (
                     <p>Loading race results...</p>
                 )}

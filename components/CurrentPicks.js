@@ -4,10 +4,12 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import Modal from "@/components/Modal";
 import raceSchedule from "../data/raceSchedule";
+import { set } from "mongoose";
 
 export default function CurrentPick({ season, username }) {
     const [currentRace, setCurrentRace] = useState(null);
     const [userPicks, setUserPicks] = useState([]);
+    const [autoPicked, setAutoPicked] = useState(false);
     const [bottomDrivers, setBottomDrivers] = useState([]);
     const [selectedDrivers, setSelectedDrivers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,20 +38,38 @@ export default function CurrentPick({ season, username }) {
         fetchRace();
     }, [season]);
 
-    // ✅ Check if picks should be locked
-    useEffect(() => {
+     // ✅ Check if picks should be locked on load
+     useEffect(() => {
         if (!currentRace) return;
         const now = new Date();
-        const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule
-        const picksClose = new Date(schedule?.picks_close || 0);
-        const manualPickOpen = false; // 🛠️ Ensure manual open for testing
 
-        setPicksOpen(manualPickOpen && now <= picksClose);
-        setPickStatusMessage(
-            manualPickOpen && now <= picksClose
-                ? "Picks open. Make your selections!"
-                : "Picks locked."
-        );
+        if (season < 2025) {
+            // 🔴 Disable picks for past seasons
+            setPicksOpen(false);
+            if (userPicks.length > 0) {
+                setPickStatusMessage(`Race picks for`);
+            } else {
+                setPickStatusMessage(`No picks for`);
+            }
+        } else {
+            // const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
+            const schedule = raceSchedule['1254'];
+            const manualPickOpen = false; // because I dont know when openF1 has new data to pull from 
+            const picksClose = new Date(schedule.picks_close);
+
+            if (manualPickOpen && now <= picksClose) {
+                setPickStatusMessage(
+                    "Processing race data. Check back soon to make your picks."
+                );
+            } else {
+                if (userPicks.length > 0) {
+                    setPickStatusMessage(`Your race picks for`);
+                } else {
+                    setPickStatusMessage(`No picks made for`);
+                }
+            }
+            setPicksOpen(manualPickOpen && now <= picksClose);
+        }
     }, [currentRace, userPicks, season]);
 
     // ✅ Fetch user's picks for the current race
@@ -64,6 +84,7 @@ export default function CurrentPick({ season, username }) {
                 // console.log('res', res.data, 'here');
                 // ✅ Store both picks and autopick flag
                 setUserPicks(res.data.picks || []);
+                setAutoPicked(res.data.autopick || true);
                 setSelectedDrivers(res.data.picks.map(p => p.driverNumber) || []);
             } catch (error) {
                 console.error("❌ Error fetching user pick:", error);
@@ -100,6 +121,7 @@ export default function CurrentPick({ season, username }) {
                 ? [...prevSelected, driverNumber]
                 : prevSelected
         );
+        setAutoPicked(false);
     }
 
     // ✅ Submit user picks and remove autopick flag
@@ -113,6 +135,7 @@ export default function CurrentPick({ season, username }) {
             });
 
             setUserPicks(selectedDrivers);
+            // setAutoPicked(false);
             setIsModalOpen(false);
             router.reload();
         } catch (error) {
@@ -142,11 +165,11 @@ export default function CurrentPick({ season, username }) {
                     )}>
                         <img src={driver.headshot_url} alt={driver.fullName} className="h-16"/>
                         <p className="text-2xl font-display leading-none -mb-1">{driver.name_acronym}</p>
-                        {driver.autopick && <span className="text-xs ml-1 text-yellow-400">(Auto-Picked)</span>}
                     </div>
                 ))}
             </div>
             <div className="divider-glow-medium !w-4/5 sm:!w-1/2 mx-auto" />
+            {autoPicked && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
 
             {/* ✅ Pick Button */}
             <button
@@ -163,7 +186,16 @@ export default function CurrentPick({ season, username }) {
             {/* ✅ Modal for selecting picks */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} user={username} title="Race Picks">
                 <p className="font-bold leading-none">{season} {currentRace?.meeting_name}</p>
-                <h3 className="mb-6 text-sm text-neutral-400">Select two drivers</h3>
+                <h3 className="mb-2 text-sm text-neutral-400">Select two drivers</h3>
+
+                {/* ✅ Submit Button */}
+                <button
+                    className="px-4 py-1 mb-4 w-full bg-cyan-800 text-white rounded-lg font-bold"
+                    onClick={submitPick}
+                    disabled={selectedDrivers.length !== 2}
+                >
+                    Confirm Picks
+                </button>
 
                 {/* ✅ Display Bottom 10 Drivers */}
                 <ul className="flex flex-col gap-2">
@@ -185,12 +217,15 @@ export default function CurrentPick({ season, username }) {
                                     </div>
                                     <div className="mx-2 flex flex-row items-center">
                                         <span className={classNames(
-                                            "mr-2 font-display",
+                                            "mr-2 font-display leading-none",
                                             selectedDrivers.includes(driver.driverNumber) ? "text-neutral-300" : "text-neutral-500"
                                         )}>
                                             P{driver.qualifyingPosition}
                                         </span>
-                                        <span className="text-[16px] font-bold">{driver.fullName}</span>
+                                        <div className="text-[16px] font-bold">
+                                            <div className="text-[16px] font-bold leading-none">{driver.fullName}</div>
+                                            {(autoPicked && selectedDrivers.includes(driver.driverNumber)) && (<div className="text-neutral-400 text-[10px] leading-none">Auto-picked</div>)}
+                                        </div>
                                     </div>
                                 </button>
                             </li>
@@ -199,7 +234,7 @@ export default function CurrentPick({ season, username }) {
 
                 {/* ✅ Submit Button */}
                 <button
-                    className="p-4 mt-2 w-full bg-cyan-800 text-white rounded-lg font-bold"
+                    className="p-2 mt-4 w-full bg-cyan-800 text-white rounded-lg font-bold"
                     onClick={submitPick}
                     disabled={selectedDrivers.length !== 2}
                 >
