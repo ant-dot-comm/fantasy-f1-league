@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
       try {
         // ✅ Pull scores from selected-leaderboard-player-race-scores API instead of recalculating
-        const { data } = await axios.get(`http://localhost:3000/api/selected-leaderboard-player-race-scores?username=${user.username}&season=${season}`);
+        const { data } = await axios.get(`/api/selected-leaderboard-player-race-scores?username=${user.username}&season=${season}`);
         const totalUserPoints = data.raceBreakdown.reduce((acc, race) => {
           return acc + race.results.reduce((sum, driver) => sum + driver.points, 0);
         }, 0);
