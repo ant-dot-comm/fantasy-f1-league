@@ -16,23 +16,29 @@ export default async function handler(req, res) {
     const user = await User.findOne({ username });
 
     if (!user) {
+      console.log("❌ User not found:", username);
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (!user.picks[season] || !user.picks[season].races) {
-      return res.status(200).json({ picks: [] });
+    // console.log(`🔍 Found User: ${username}`, user.picks);
+
+    // ✅ Convert MongoDB Map to a plain JS object
+    const userPicks = user.picks instanceof Map ? Object.fromEntries(user.picks) : user.picks;
+
+    // ✅ Check if user has picks for the season & meeting_key
+    const seasonPicks = userPicks[season] instanceof Map ? Object.fromEntries(userPicks[season]) : userPicks[season];
+    const racePicks = seasonPicks?.[meeting_key];
+
+    if (!racePicks || !racePicks.picks || racePicks.picks.length === 0) {
+      console.log(`⚠️ No picks found for ${username} in season ${season}, race ${meeting_key}`);
+      return res.status(200).json({ picks: [], autopick: false });
     }
 
-    // ✅ Get picked driver numbers for the given race
-    const pickedDriverNumbers = user.picks[season].races[meeting_key] || [];
-
-    if (pickedDriverNumbers.length === 0) {
-      return res.status(200).json({ picks: [] });
-    }
+    // console.log(`✅ Found picks for ${username}:`, racePicks);
 
     // ✅ Fetch driver details from DB
     const driverDetails = await Driver.find({
-      driver_number: { $in: pickedDriverNumbers },
+      driver_number: { $in: racePicks.picks },
       year: season,
     }).lean();
 
@@ -48,7 +54,8 @@ export default async function handler(req, res) {
       name_acronym: driver.name_acronym,
     }));
 
-    res.status(200).json({ picks: enrichedPicks });
+    // console.log("✅ Returning picks:", enrichedPicks);
+    res.status(200).json({ picks: enrichedPicks, autopick: racePicks.autopick || false });
   } catch (error) {
     console.error("❌ Error fetching user picks:", error);
     res.status(500).json({ error: "Internal Server Error" });

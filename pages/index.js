@@ -35,6 +35,7 @@ export default function Home() {
 
     useEffect(() => {
       async function fetchStats() {
+            console.log("Fetching stats for season rightchere:", season);
           const cacheKey = `stats-${season}`;
           const cachedData = sessionStorage.getItem(cacheKey);
           setLoadingTopScores(true);
@@ -50,14 +51,18 @@ export default function Home() {
               setLoadingTopScores(false);
               return;
           }
-  
+
+          
           try {
+              console.log("enter the dragon");
               const [raceStatsRes, driverSelectionRes] = await Promise.all([
                   fetch(`/api/top-race-scores?season=${season}`),
                   fetch(`/api/driver-selection-stats?season=${season}`)
               ]);
-  
+
+              
               const raceStatsData = await raceStatsRes.json();
+              console.log({raceStatsData});
               const driverSelectionData = await driverSelectionRes.json();
   
               setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);

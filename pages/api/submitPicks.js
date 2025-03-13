@@ -23,23 +23,30 @@ export default async function handler(req, res) {
 
     // ✅ Ensure season object exists
     if (!user.picks[season]) {
-      user.picks[season] = { races: {} };
+      user.picks[season] = {};
     }
 
-    // ✅ Ensure races object exists inside the season
-    if (!user.picks[season].races) {
-      user.picks[season].races = {};
+    // ✅ Ensure race object exists inside the season
+    if (!user.picks[season][meeting_key]) {
+      user.picks[season][meeting_key] = { picks: [], autopick: false };
     }
 
     // ✅ Store or update picks for the specific meeting_key
-    user.picks[season].races[meeting_key] = driverNumbers;
+    user.picks[season][meeting_key].picks = driverNumbers;
+
+    // ✅ Flip `autopick` to `false`
+    user.picks[season][meeting_key].autopick = false;
 
     // ✅ Mark the picks object as modified before saving
-    user.markModified("picks");
-    
+    user.markModified(`picks.${season}.${meeting_key}`);
+
     await user.save();
 
-    res.status(200).json({ message: "Pick submitted successfully", picks: user.picks[season].races[meeting_key] });
+    res.status(200).json({ 
+      message: "Pick submitted successfully", 
+      picks: user.picks[season][meeting_key].picks, 
+      autopick: user.picks[season][meeting_key].autopick 
+    });
   } catch (error) {
     console.error("❌ Error saving user picks:", error);
     res.status(500).json({ error: "Internal Server Error" });

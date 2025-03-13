@@ -1,8 +1,7 @@
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
-import Race from "@/models/Race";
-
-const leaderboardCache = new Map(); // In-memory storage
+import axios from "axios"; // ✅ Fetch selected-leaderboard-player-race-scores API instead of recalculating
+const leaderboardCache = new Map();
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -20,56 +19,43 @@ export default async function handler(req, res) {
 
   try {
     console.log(`📡 Fetching leaderboard scores for season: ${season}`);
-    
-    const leaderboard = await calculateLeaderboard(season);
-    
-    // ✅ Store in cache
-    leaderboardCache.set(season, leaderboard);
 
+    const users = await User.find({ seasons: season }).select("username first_name");
+
+    if (!users.length) return res.status(200).json({ leaderboard: [] });
+
+    let leaderboard = [];
+
+    for (const user of users) {
+      // console.log(`🔎 Fetching race scores for user: ${user.username}`);
+
+      try {
+        // ✅ Pull scores from selected-leaderboard-player-race-scores API instead of recalculating
+        const { data } = await axios.get(`http://localhost:3000/api/selected-leaderboard-player-race-scores?username=${user.username}&season=${season}`);
+        const totalUserPoints = data.raceBreakdown.reduce((acc, race) => {
+          return acc + race.results.reduce((sum, driver) => sum + driver.points, 0);
+      }, 0);
+
+        leaderboard.push({
+          first_name: user.first_name,
+          username: user.username,
+          points: totalUserPoints, // ✅ Uses pre-calculated points
+        });
+      } catch (error) {
+        console.warn(`⚠️ No race data found for ${user.username}, setting score to null.`);
+        leaderboard.push({
+          first_name: user.first_name,
+          username: user.username,
+          points: null, // ✅ Set null if no race data
+        });
+      }
+    }
+
+    leaderboard.sort((a, b) => (b.points || 0) - (a.points || 0)); // Sort by points
+    leaderboardCache.set(season, leaderboard);
     res.status(200).json({ leaderboard });
   } catch (error) {
     console.error("🚨 Error fetching leaderboard:", error);
     res.status(500).json({ message: "Internal server error" });
   }
-}
-
-async function calculateLeaderboard(season) {
-  // ✅ Fetch all users who participated in this season
-  const users = await User.find({ seasons: season }).select("username first_name picks");
-
-  if (!users.length) return [];
-
-  let leaderboard = [];
-
-  for (const user of users) {
-    let totalPoints = 0;
-    let hasPoints = false; // ✅ Track if user has any points
-
-    if (user.picks?.[season]?.races) {
-      const races = user.picks[season].races;
-
-      for (const [meetingKey, pickedDrivers] of Object.entries(races)) {
-        const raceData = await Race.findOne({ meeting_key: meetingKey, year: season });
-        if (!raceData) continue;
-
-        for (const driverNumber of pickedDrivers) {
-          const raceResult = raceData.race_results.find(d => d.driverNumber === driverNumber);
-          if (!raceResult) continue;
-
-          let driverPoints = raceResult.startPosition - raceResult.finishPosition;
-
-          if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 10)) driverPoints += 3;
-          if ((raceResult.startPosition >= 19) && (raceResult.finishPosition <= 5)) driverPoints += 5;
-
-          totalPoints += driverPoints;
-          hasPoints = true; // ✅ User has scored points
-        }
-      }
-    }
-
-    // ✅ Push users into leaderboard, setting score to `null` if they haven't scored yet
-    leaderboard.push({ first_name: user.first_name, username: user.username, points: hasPoints ? totalPoints : null });
-  }
-
-  return leaderboard.sort((a, b) => (b.points || 0) - (a.points || 0)); // Sort placing users with 0/null scores at the bottom
 }

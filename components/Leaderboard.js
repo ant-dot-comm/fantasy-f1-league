@@ -5,43 +5,45 @@ import { motion } from "framer-motion";
 import Modal from "./Modal"; // Import the reusable modal
 
 export default function Leaderboard({ season, loggedInUser, className }) {
-    const [scores, setScores] = useState([]);
+    const [leaderBoardScores, setLeaderBoardScores] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
-    const [playerRaceData, setPlayerRaceData] = useState({});
+    const [selectePlayerRaceData, setSelectedPlayerRaceData] = useState({});
 
     useEffect(() => {
         async function fetchScores() {
             setLoading(true);
             setSelectedPlayer(null);
-            setPlayerRaceData({});
-            setScores([]);
-            const storedScores = sessionStorage.getItem(`leaderboard-${season}`);
-            if (storedScores) {
-                setScores(JSON.parse(storedScores));
-                setLoading(false);
-                return;
-            }
-
+            setSelectedPlayerRaceData({});
+            setLeaderBoardScores([]);
+        
             try {
-                const res = await axios.get(`/api/leaderboard?season=${season}`);
-                setScores(res.data.leaderboard);
-                sessionStorage.setItem(`leaderboard-${season}`, JSON.stringify(res.data.leaderboard));
+                console.log(`📡 Fetching leaderboard for season: ${season}`);
+                const res = await axios.get(`/api/leaderboard?season=${season}`);        
+                // console.log("✅ Leaderboard API Response:", res.data);
+        
+                if (res.data.leaderboard && res.data.leaderboard.length > 0) {
+                    setLeaderBoardScores(res.data.leaderboard);
+                    sessionStorage.setItem(`leaderboard-${season}`, JSON.stringify(res.data.leaderboard));
+                    // console.log("✅ Leaderboard stored in session");
+                } else {
+                    console.warn("⚠️ No leaderboard data found.");
+                }
             } catch (error) {
                 console.error("❌ Error fetching leaderboard:", error);
             } finally {
                 setLoading(false);
             }
         }
-
+    
         fetchScores();
     }, [season]);
 
-    async function fetchPlayerRaceData(username) {
-        if (playerRaceData[username]) return;
+    async function fetchSelectedPlayerRaceData(username) {
+        if (selectePlayerRaceData[username]) return;
         try {
-            const res = await axios.get(`/api/player-race-scores?username=${username}&season=${season}`);
-            setPlayerRaceData((prev) => ({
+            const res = await axios.get(`/api/selected-leaderboard-player-race-scores?username=${username}&season=${season}`);
+            setSelectedPlayerRaceData((prev) => ({
                 ...prev,
                 [username]: res.data.raceBreakdown,
             }));
@@ -50,19 +52,19 @@ export default function Leaderboard({ season, loggedInUser, className }) {
         }
     }
 
-    // console.log({scores});
+    // console.log({leaderBoardScores});
     return (
         <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200 sm:min-h-[30rem]")}>
             <ul className="flex gap-2 flex-col">
-                {scores.length > 0 ? (
-                    scores
+                {leaderBoardScores.length > 0 ? (
+                    leaderBoardScores
                         .sort((a, b) => b.points - a.points)
                         .map((user, index) => (
                             <li key={user.username}>
                                 <button
                                     onClick={() => {
                                         setSelectedPlayer(user.username);
-                                        fetchPlayerRaceData(user.username);
+                                        fetchSelectedPlayerRaceData(user.username);
                                     }}
                                     className={classNames(
                                         "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-colors duration-200",
@@ -105,8 +107,8 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                 user={selectedPlayer}
                 title="Season Picks"
             >
-                {playerRaceData[selectedPlayer] ? (
-                    playerRaceData[selectedPlayer].map((race, index) => (
+                {selectePlayerRaceData[selectedPlayer] ? (
+                    selectePlayerRaceData[selectedPlayer].map((race, index) => (
                         <div key={race.meeting_key} className="mt-6 mb-10 relative">
                             <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
                                 {race.results.length >= 2 && (
