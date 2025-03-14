@@ -71,7 +71,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     className={classNames(
                                         "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-all duration-200 relative",
                                         user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-md" : "border-neutral-500 text-neutral-500",
-                                        { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12": user.points !== 0 && loggedInUser && user.points !== 0 }
+                                        { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12": user.points !== 0 }
                                     )}
                                     disabled={user.points === null || user.points === 0}
                                 >
