@@ -10,7 +10,7 @@ const DriverSchema = new mongoose.Schema({
   team_name: { type: String },
   team_colour: { type: String },
   headshot_url: { type: String },
-  year: { type: Number, required: true }, // Store by season
+  // year: { type: Number, required: true }, // Store by season
 }, { timestamps: true });
 
 const Driver = mongoose.models.Driver || mongoose.model("Driver", DriverSchema);

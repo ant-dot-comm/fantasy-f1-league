@@ -12,8 +12,8 @@ const RaceSchema = new mongoose.Schema(
     country_name: { type: String, required: true },
     meeting_name: { type: String, required: true },
     year: { type: Number, required: true },
-    picks_open: { type: Date, required: true }, // ✅ Updated field for Qualifying end
-    picks_closed: { type: Date, required: true }, // ✅ Updated field for Race start
+    picks_open: { type: Date }, // ✅ Updated field for Qualifying end
+    picks_closed: { type: Date }, // ✅ Updated field for Race start
     qualifying_results: { type: [DriverResultSchema], default: [] },
     race_results: { type: [DriverResultSchema], default: [] },
   },

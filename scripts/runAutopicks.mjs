@@ -5,7 +5,7 @@ import Race from "../models/Race.js";
 async function runAutoPicks() {
     await dbConnect();
 
-    const season = "2024"; // ✅ Set the season
+    const season = "2025"; // ✅ Set the season
 
     console.log(`🚀 Running auto-picks for season ${season}`);
 

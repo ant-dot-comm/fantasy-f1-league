@@ -54,7 +54,7 @@ export default function CurrentPick({ season, username }) {
         } else {
             // const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
             const schedule = raceSchedule['1254'];
-            const manualPickOpen = false; // because I dont know when openF1 has new data to pull from 
+            const manualPickOpen = true; // because I dont know when openF1 has new data to pull from 
             const picksClose = new Date(schedule.picks_close);
 
             if (manualPickOpen && now <= picksClose) {
