@@ -57,9 +57,11 @@ export default function CurrentPick({ season, username }) {
             const manualPickOpen = true; // because I dont know when openF1 has new data to pull from 
             const picksClose = new Date(schedule.picks_close);
 
-            if (manualPickOpen && now <= picksClose) {
+            const racePicksOpen = manualPickOpen && now <= picksClose;
+
+            if (!picksOpen) {
                 setPickStatusMessage(
-                    "Processing race data. Check back soon to make your picks."
+                    "Check back soon to make your picks."
                 );
             } else {
                 if (userPicks.length > 0) {
@@ -68,7 +70,7 @@ export default function CurrentPick({ season, username }) {
                     setPickStatusMessage(`No picks made for`);
                 }
             }
-            setPicksOpen(manualPickOpen && now <= picksClose);
+            setPicksOpen(racePicksOpen);
         }
     }, [currentRace, userPicks, season]);
 
@@ -84,7 +86,7 @@ export default function CurrentPick({ season, username }) {
                 // console.log('res', res.data, 'here');
                 // ✅ Store both picks and autopick flag
                 setUserPicks(res.data.picks || []);
-                setAutoPicked(res.data.autopick || true);
+                setAutoPicked(res.data.autopick);
                 setSelectedDrivers(res.data.picks.map(p => p.driverNumber) || []);
             } catch (error) {
                 console.error("❌ Error fetching user pick:", error);

@@ -39,7 +39,6 @@ export default async function handler(req, res) {
     // ✅ Fetch driver details from DB
     const driverDetails = await Driver.find({
       driver_number: { $in: racePicks.picks },
-      year: season,
     }).lean();
 
     // ✅ Format enriched driver picks
