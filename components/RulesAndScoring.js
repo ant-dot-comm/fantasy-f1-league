@@ -2,7 +2,7 @@ import Accordion from "./Accordion";
 
 export default function RulesAndGuide() {
     return (
-        <div className="px-6 mt-12 sm:mt-32 max-w-screen-md rounded-2xl mx-3 md:mx-auto">
+        <div className="px-6 mt-12 sm:mt-32 max-w-screen-md rounded-2xl mx-3 md:mx-auto" id="rules-and-guide">
             <Accordion title="Rules & Scoring" initialOpen={true}>
                 {/* How to Play */}
                 <div>
@@ -33,9 +33,9 @@ export default function RulesAndGuide() {
                     Here's a quick guide to making your picks and navigating the site.
                 </p>
                 <ul className="list-disc pl-6 text-sm mt-2">
-                    <li>You can select your drivers between the end of the qualifying session and the start of the race. Head to the **Current Picks** section to make your selections.</li>
+                    <li>You can select your drivers between the end of the qualifying session and the start of the race. Head to the <a href="#current-picks" className="font-bold text-sm hover:text-neutral-500 mt-4 underline">current picks</a> section to make your selections.</li>
                     <li>Once the race begins, picks are locked—choose wisely!</li>
-                    <li>After each race weekend, check the leaderboard to see the latest standings. Click on a leaderboard entry to view a detailed breakdown of points scored from each selected driver for each race weekend throughout the season.</li>
+                    <li>See how your competition is picking... After each race weekend, check the leaderboard to see the latest standings. Click on a player entry to view a detailed breakdown of points scored from their selected drivers for each race weekend throughout the season.</li>
                 </ul>
             </Accordion>
         </div>

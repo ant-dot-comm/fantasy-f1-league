@@ -76,7 +76,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     disabled={user.points === null || user.points === 0}
                                 >
                                     <p className={classNames(
-                                        "font-display text-4xl -mb-2 leading-none shrink-0 w-16 text-center",
+                                        "font-display text-2xl -mb-3 leading-none shrink-0 w-10 text-center",
                                         user.username === loggedInUser ? "text-cyan-800" : "text-neutral-500"
                                     )}>
                                         P{index + 1}

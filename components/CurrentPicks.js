@@ -147,7 +147,7 @@ export default function CurrentPick({ season, username }) {
 
     // ✅ Display current picks with autopick indicator
     return (
-        <div className={classNames(
+        <div id="current-picks" className={classNames(
             "flex flex-col items-center mb-20 pt-16 relative text-neutral-300",
             userPicks.length > 0 ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
         )}>
@@ -165,7 +165,7 @@ export default function CurrentPick({ season, username }) {
                         "flex items-end mt-2",
                         index === 0 ? "flex-row-reverse" : ""
                     )}>
-                        <img src={driver.headshot_url} alt={driver.fullName} className="h-16 sm:h-32"/>
+                        <img src={driver.headshot_url} alt={driver.fullName} className="h-24 sm:h-32"/>
                         <p className="text-2xl font-display leading-none -mb-1">{driver.name_acronym}</p>
                     </div>
                 ))}

@@ -123,8 +123,8 @@ async function storeRaceData(year, meetingKey = null) {
     process.exit();
 }
 
-// storeRaceData("2024"); // Call for a specific year & meeting if needed
-storeRaceData("2025", "1254"); // Call for a specific year & meeting if needed
+storeRaceData("2023"); // Call for a specific year & meeting if needed
+// storeRaceData("2025", "1254"); // Call for a specific year & meeting if needed
 
 // 🔥 Fetch ALL driver positions for a session at once **(Optimized)**
 async function fetchAllDriverPositions(sessionKey) {

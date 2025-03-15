@@ -39,7 +39,7 @@ export default async function handler(req, res) {
           return acc + race.results.reduce((sum, driver) => sum + driver.points, 0);
         }, 0);
 
-        console.log(`🏁 Calculated Points for ${user.username}: ${totalUserPoints}`);
+        // console.log(`🏁 Calculated Points for ${user.username}: ${totalUserPoints}`);
 
         leaderboard.push({
           first_name: user.first_name,
