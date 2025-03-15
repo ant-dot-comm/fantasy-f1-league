@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Modal from "@/components/Modal";
 import raceSchedule from "../data/raceSchedule";
 import { set } from "mongoose";
+import { Top3Players } from "./Top3Players";
 
 export default function CurrentPick({ season, username }) {
     const [currentRace, setCurrentRace] = useState(null);
@@ -16,6 +17,7 @@ export default function CurrentPick({ season, username }) {
     const [picksOpen, setPicksOpen] = useState(false);
     const [pickStatusMessage, setPickStatusMessage] = useState("");
     const [isCurrentRaceLoading, setIsCurrentRaceLoading] = useState(true);
+    const [showFinalResults, setShowFinalResults] = useState(false);
     const router = useRouter();
 
     // console.log('here', { currentRace, selectedDrivers, userPicks, bottomDrivers });
@@ -46,11 +48,7 @@ export default function CurrentPick({ season, username }) {
         if (season < 2025) {
             // 🔴 Disable picks for past seasons
             setPicksOpen(false);
-            if (userPicks.length > 0) {
-                setPickStatusMessage(`Race picks for`);
-            } else {
-                setPickStatusMessage(username ? `No picks for` : '');
-            }
+            setShowFinalResults(true);
         } else {
             // const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
             const schedule = raceSchedule['1254'];
@@ -71,6 +69,7 @@ export default function CurrentPick({ season, username }) {
                 }
             }
             setPicksOpen(racePicksOpen);
+            setShowFinalResults(false);
         }
     }, [currentRace, userPicks, season]);
 
@@ -149,41 +148,49 @@ export default function CurrentPick({ season, username }) {
     return (
         <div id="current-picks" className={classNames(
             "flex flex-col items-center mb-20 pt-16 relative text-neutral-300",
-            userPicks.length > 0 ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
+            userPicks.length > 0 || showFinalResults ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
         )}>
-            {currentRace && (
-                <p className="leading-none text-sm">{pickStatusMessage}</p>
-            )}
-            <h2 className="text-xl font-display">
-                {currentRace ? `${season} ${currentRace.meeting_name}` : "Season has not started yet"}
-            </h2>
+            
 
-            {/* ✅ Display selected picks */}
-            <div className="flex flex-row items-center">
-                {userPicks.map((driver, index) => (
-                    <div key={driver.driverNumber} className={classNames(
-                        "flex items-end mt-2",
-                        index === 0 ? "flex-row-reverse" : ""
-                    )}>
-                        <img src={driver.headshot_url} alt={driver.fullName} className="h-24 sm:h-32"/>
-                        <p className="text-2xl font-display leading-none -mb-1">{driver.name_acronym}</p>
+            {showFinalResults ? (
+                <Top3Players season={season} />
+            ) : (
+                <>
+                    {currentRace && (
+                        <p className="leading-none text-sm">{pickStatusMessage}</p>
+                    )}
+                    <h2 className="text-xl font-display">
+                        {currentRace ? `${season} ${currentRace.meeting_name}` : "Season has not started yet"}
+                    </h2>
+                    {/* ✅ Display selected picks */}
+                    <div className="flex flex-row items-center">
+                        {userPicks.map((driver, index) => (
+                            <div key={driver.driverNumber} className={classNames(
+                                "flex items-end mt-2",
+                                index === 0 ? "flex-row-reverse" : ""
+                            )}>
+                                <img src={driver.headshot_url} alt={driver.fullName} className="h-24 sm:h-32"/>
+                                <p className="text-2xl font-display leading-none -mb-1">{driver.name_acronym}</p>
+                            </div>
+                        ))}
                     </div>
-                ))}
-            </div>
-            <div className="divider-glow-medium !w-4/5 sm:!w-1/2 mx-auto" />
-            {(autoPicked && userPicks.length > 0) && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
+                    <div className="divider-glow-medium !w-4/5 sm:!w-1/2 mx-auto" />
+                    {(autoPicked && userPicks.length > 0) && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
 
-            {/* ✅ Pick Button */}
-            <button
-                onClick={() => setIsModalOpen(true)}
-                className={classNames(
-                    "-mb-4 px-6 py-4 mt-6 rounded-lg text-neutral-100 shadow-md",
-                    !picksOpen ? "bg-neutral-500" : "bg-cyan-800"
-                )}
-                disabled={!picksOpen}
-            >
-                {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
-            </button>
+                    {/* ✅ Pick Button */}
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className={classNames(
+                            "-mb-4 px-6 py-4 mt-6 rounded-lg text-neutral-100 shadow-md",
+                            !picksOpen ? "bg-neutral-500" : "bg-cyan-800"
+                        )}
+                        disabled={!picksOpen}
+                    >
+                        {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
+                    </button>
+                </>
+            )}
+            
 
             {/* ✅ Modal for selecting picks */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} user={username} title="Race Picks">

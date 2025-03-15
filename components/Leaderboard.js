@@ -69,7 +69,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         fetchSelectedPlayerRaceData(user.username);
                                     }}
                                     className={classNames(
-                                        "w-full text-left font-bold bg-neutral-200 px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-all duration-200 relative",
+                                        "w-full text-left font-bold bg-neutral-200 max-sm:pr-10 sm:px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-all duration-200 relative",
                                         user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-md" : "border-neutral-500 text-neutral-500",
                                         { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12": user.points !== 0 }
                                     )}
@@ -81,8 +81,9 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     )}>
                                         P{index + 1}
                                     </p>
-                                    <div className="flex flex-col sm:flex-row items-start sm:items-center sm:gap-1 flex-wrap grow">
-                                        <p className="leading-none max-sm:text-sm">
+
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center sm:gap-1 flex-wrap grow overflow-hidden">
+                                        <p className="leading-none max-sm:text-sm truncate">
                                             {user.username}
                                         </p>
                                         {loggedInUser && (
@@ -94,9 +95,11 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                             </p>
                                         )}
                                     </div>
+
                                     <p className="shrink-0 text-neutral-700 ">{user.points !== null ? user.points : "--"}</p>
+
                                     {user.points !== 0 && (
-                                        <div className="sm:w-0 opacity-0 group-hover:w-fit sm:group-hover:opacity-100 bg-neutral-300 rounded-tr-lg absolute right-0 top-0 bottom-0 flex items-center justify-center px-2 transition-all duration-200">
+                                        <div className="sm:w-0 sm:opacity-0 group-hover:w-fit sm:group-hover:opacity-100 bg-neutral-300 rounded-tr-lg absolute right-0 top-0 bottom-0 flex items-center justify-center px-2 transition-all duration-200">
                                             <LayoutList size={16} strokeWidth={2.5} />
                                         </div>
                                     )}

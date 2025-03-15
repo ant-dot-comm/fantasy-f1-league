@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
-import axios from "axios"; // ✅ Fetch selected-leaderboard-player-race-scores API instead of recalculating
+import axios from "axios";
 const leaderboardCache = new Map();
 
 export default async function handler(req, res) {
@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       try {
         // ✅ Pull scores from selected-leaderboard-player-race-scores API instead of recalculating
         const { data } = await axios.get(`${BASE_URL}/api/selected-leaderboard-player-race-scores?username=${user.username}&season=${season}`);
-        console.log(`🔎 API Response for ${user.username}:`, JSON.stringify(data, null, 2));
+        // console.log(`🔎 API Response for ${user.username}:`, JSON.stringify(data, null, 2));
 
         const totalUserPoints = data.raceBreakdown.reduce((acc, race) => {
           return acc + race.results.reduce((sum, driver) => sum + driver.points, 0);
