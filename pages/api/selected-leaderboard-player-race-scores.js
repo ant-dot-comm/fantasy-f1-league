@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
             const driverDetails = await Driver.find({
                 driver_number: { $in: raceData.picks },
-                year: season,
+                // year: season,
             });
 
             const results = raceData.picks

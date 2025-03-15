@@ -109,14 +109,14 @@ export default function Home() {
                 <h1 className="text-xl font-display leading-none">
                     Best of the Rest
                 </h1>
-                <label className="text-sm leading-none text-center">
+                <label className="text-sm leading-none text-center px-3">
                     Redemption starts at the back! Pick your drivers wisely from the back half of the grid (P11-P20) and watch them climb to glory. The bigger the comeback, the bigger the rewards!
                 </label>
                 <select
                     value={season}
                     onChange={(e) => setSeason(parseInt(e.target.value))}
                     className={classNames(
-                        "p-2 border-4 border-neutral-700 rounded-lg -mb-6 bg-neutral-100 z-10",
+                        "p-2 h-12 border-4 border-neutral-700 rounded-lg -mb-6 bg-neutral-100 z-10",
                         username ? "-mb-6 mt-10" : "mb-16 mt-2"
                     )}
                 >

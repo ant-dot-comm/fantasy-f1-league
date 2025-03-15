@@ -53,7 +53,10 @@ export default async function handler(req, res) {
 
     // ✅ Fetch driver details from the database (Only include drivers that have been picked)
     const selectedDriverNumbers = Object.keys(pickCounts).map(Number);
-    const drivers = await Driver.find({ year: season, driver_number: { $in: selectedDriverNumbers } });
+    const drivers = await Driver.find({ 
+      // year: season, 
+      driver_number: { $in: selectedDriverNumbers } 
+    });
 
     let driverSelectionPercent = drivers.map(driver => ({
       username: driver.full_name, // ✅ Driver name instead of username

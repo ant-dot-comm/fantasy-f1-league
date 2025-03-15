@@ -225,7 +225,7 @@ export default function CurrentPick({ season, username }) {
                                             P{driver.qualifyingPosition}
                                         </span>
                                         <div className="text-[16px] font-bold">
-                                            <div className="text-[16px] font-bold leading-none">{driver.fullName}</div>
+                                            <div className="text-[16px] font-bold leading-none">{driver.fullName} {selectedDrivers.includes(driver.driverNumber) && <span className="text-[8px] font-thin"> ( Unselect ) </span>}</div>
                                             {(autoPicked && selectedDrivers.includes(driver.driverNumber)) && (<div className="text-neutral-400 text-[10px] leading-none">Auto-picked</div>)}
                                         </div>
                                     </div>

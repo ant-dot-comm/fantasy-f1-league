@@ -134,7 +134,10 @@ export default async function handler(req, res) {
 
     console.log(`📊 Converting driver numbers to full names...`);
     const driverNumbers = Object.keys(driverTotalPoints).map(Number);
-    const driverDetails = await Driver.find({ driver_number: { $in: driverNumbers }, year: season });
+    const driverDetails = await Driver.find({ 
+      driver_number: { $in: driverNumbers }, 
+      // year: season 
+    });
 
     let topScoringDrivers = driverDetails
       .map(driver => ({
