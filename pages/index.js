@@ -45,9 +45,9 @@ export default function Home() {
               setTopRaceScoresData(parsedData.topSingleRaceScores || []);
               setAverageRaceScoresData(parsedData.averagePointsPerUser || []);
               setDriverSelectionData(parsedData.driverSelectionPercent || []);
-              setTopScoringDrivers(parsedData.topScoringDrivers || []);
-              setUnderratedDrivers(parsedData.underratedDrivers || []);
-              setBiggestPositionGainers(parsedData.biggestPositionGainers || []);
+            //   setTopScoringDrivers(parsedData.topScoringDrivers || []);
+            //   setUnderratedDrivers(parsedData.underratedDrivers || []);
+            //   setBiggestPositionGainers(parsedData.biggestPositionGainers || []);
               setLoadingTopScores(false);
               return;
           }
@@ -60,17 +60,15 @@ export default function Home() {
                   fetch(`/api/driver-selection-stats?season=${season}`)
               ]);
 
-              
               const raceStatsData = await raceStatsRes.json();
-              console.log({raceStatsData});
               const driverSelectionData = await driverSelectionRes.json();
   
               setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
               setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
-              setTopScoringDrivers(raceStatsData.topScoringDrivers || []);
-              setUnderratedDrivers(raceStatsData.underratedDrivers || []);
-              setBiggestPositionGainers(raceStatsData.biggestPositionGainers || []);
-              setDriverSelectionData(driverSelectionData.driverSelectionPercent || []);
+            //   setTopScoringDrivers(raceStatsData.topScoringDrivers || []);
+            //   setUnderratedDrivers(raceStatsData.underratedDrivers || []);
+            //   setBiggestPositionGainers(raceStatsData.biggestPositionGainers || []);
+            //   setDriverSelectionData(driverSelectionData.driverSelectionPercent || []);
   
               sessionStorage.setItem(
                   cacheKey,
@@ -167,7 +165,7 @@ export default function Home() {
               </div>
             </section>
 
-            <div className="responsive-contianer flex justify-end relative w-full my-12 max-sm:mb-4">
+            {/* <div className="responsive-contianer flex justify-end relative w-full my-12 max-sm:mb-4">
                 <div className="responsive-line" />
                 <div className="flex flex-col items-end w-1/2 sm:px-8 px-3">
                     <div className="responsive-xl">Driver</div>
@@ -182,15 +180,15 @@ export default function Home() {
                 <h2 className="font-bold px-2 leading-none mb-1">Most Picked Drivers</h2>
                 <RankingsList loading={loadingTopScores} scores={driverSelectionData} title="Most Picked Drivers" />
               </div>
-              {/* <div className="w-full">
+              <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Top Scoring Drivers</h2>
                 <RankingsList loading={loadingTopScores} scores={topScoringDrivers} title="Top Scoring Drivers" />
-              </div> */}
+              </div>
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Points Per Selection</h2>
                 <RankingsList loading={loadingTopScores} scores={underratedDrivers} title="Top Scoring Drivers" />
               </div>
-            </section>
+            </section> */}
 
             <div className="responsive-contianer flex justify-start relative w-full my-12 sm:my-32 max-sm:mb-4">
                 <div className="responsive-line" />

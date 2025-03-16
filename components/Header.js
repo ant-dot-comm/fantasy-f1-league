@@ -55,7 +55,7 @@ export default function Header() {
 
     return (
         <header className="border-b-8 border-neutral-700">
-            {hideAtSeasonStart && (
+            {/* {hideAtSeasonStart && (
                 <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
                     Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString()}</span> to be eligible for the 2025 season!
                     <button
@@ -65,10 +65,10 @@ export default function Header() {
                         Sign Up
                     </button>
                 </div>
-            )}
-            <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
+            )} */}
+            {/* <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
                 If your scores havent updated, try opening page in a new browser window. Few scoring bugs to fix ... will have all scoring based on your picks fixed ASAP. Thanks for your patience! 
-            </div>
+            </div> */}
             <div className="sm:mt-2 flex justify-between items-end sm:px-3">
                 <h1 className="font-display -mb-1.5 sm:-mb-2 text-2xl sm:text-3xl leading-none max-sm:ml-3">
                     <Link href="/">Fantasy F1 League</Link>

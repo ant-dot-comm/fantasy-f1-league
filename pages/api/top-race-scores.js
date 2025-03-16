@@ -41,16 +41,16 @@ export default async function handler(req, res) {
       const seasonPicks = userPicks[season] instanceof Map ? Object.fromEntries(userPicks[season]) : userPicks[season];
 
       if (!seasonPicks || Object.keys(seasonPicks).length === 0) {
-        console.warn(`⚠️ User ${user.username} has no picks for season ${season}.`);
-        console.warn(`👉 Full Picks Data After Conversion:`, JSON.stringify(userPicks, null, 2));
-        continue;
-    }
+          console.warn(`⚠️ User ${user.username} has no picks for season ${season}.`);
+          console.warn(`👉 Full Picks Data After Conversion:`, JSON.stringify(userPicks, null, 2));
+          continue;
+      }
 
-    if (!user.picks?.[season] || !Object.values(user.picks[season]).some(race => race.picks?.length)) {
-      console.warn(`⚠️ User ${user.username} has no picks for season ${season}. Skipping...`);
-      console.warn(`👉 Full Picks Data:`, JSON.stringify(user.picks, null, 2))
-      continue;
-    }
+      if (!user.picks?.[season] || !Object.values(user.picks[season]).some(race => race.picks?.length)) {
+        console.warn(`⚠️ User ${user.username} has no picks for season ${season}. Skipping...`);
+        console.warn(`👉 Full Picks Data:`, JSON.stringify(user.picks, null, 2))
+        continue;
+      }
 
       console.log(`✅ User ${user.username} has valid picks for ${season}`);
 
@@ -92,9 +92,7 @@ export default async function handler(req, res) {
           // console.log(`🏎 ${driverNumber} scored ${driverPoints} points`);
 
           finalResult += driverPoints;
-          // console.log(`📊 ${user.username} now has ${finalResult} points`);
           userTotalPoints[user.username] += driverPoints; // ✅ Store total season points per user
-          // console.log(`📊 ${user.username} now has ${userTotalPoints[user.username]} total points`);
 
           // ✅ Add to driver point totals
           driverTotalPoints[driverNumber] = (driverTotalPoints[driverNumber] || 0) + driverPoints;
