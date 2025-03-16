@@ -52,14 +52,13 @@ export default function CurrentPick({ season, username }) {
         } else {
             // const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
             const schedule = raceSchedule['1254'];
-            const manualPickOpen = true; // because I dont know when openF1 has new data to pull from 
             const picksClose = new Date(schedule.picks_close);
-
-            const racePicksOpen = manualPickOpen && now <= picksClose;
+            const manualPickOpen = false; // ✅ Enable manual picks
+            const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
 
             if (!picksOpen) {
                 setPickStatusMessage(
-                    "Check back soon to make your picks."
+                    "Your race picks for"
                 );
             } else {
                 if (userPicks.length > 0) {
