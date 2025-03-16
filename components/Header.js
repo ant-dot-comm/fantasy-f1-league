@@ -66,6 +66,9 @@ export default function Header() {
                     </button>
                 </div>
             )}
+            <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
+                    Few scoring bugs to fix ... will have correct scoring based on your picks ASAP.  Thanks for your patience!
+            </div>
             <div className="sm:mt-2 flex justify-between items-end sm:px-3">
                 <h1 className="font-display -mb-1.5 sm:-mb-2 text-2xl sm:text-3xl leading-none max-sm:ml-3">
                     <Link href="/">Fantasy F1 League</Link>
