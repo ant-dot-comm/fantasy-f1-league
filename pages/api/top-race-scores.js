@@ -92,13 +92,15 @@ export default async function handler(req, res) {
           // console.log(`🏎 ${driverNumber} scored ${driverPoints} points`);
 
           finalResult += driverPoints;
+          // console.log(`📊 ${user.username} now has ${finalResult} points`);
           userTotalPoints[user.username] += driverPoints; // ✅ Store total season points per user
+          // console.log(`📊 ${user.username} now has ${userTotalPoints[user.username]} total points`);
 
           // ✅ Add to driver point totals
           driverTotalPoints[driverNumber] = (driverTotalPoints[driverNumber] || 0) + driverPoints;
 
           // ✅ Track total positions gained across the season
-          const positionsGained = (raceResult.startPosition || 20) - raceResult.finishPosition;
+          const positionsGained = (raceResult.startPosition || 0) - raceResult.finishPosition; // 0 if they didt race
           driverPositionChanges[driverNumber] = (driverPositionChanges[driverNumber] || 0) + positionsGained;
 
           // ✅ Track how many times a driver was picked

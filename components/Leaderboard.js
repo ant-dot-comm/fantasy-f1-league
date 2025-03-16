@@ -70,10 +70,11 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     }}
                                     className={classNames(
                                         "w-full text-left font-bold bg-neutral-200 max-sm:pr-10 sm:px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-all duration-200 relative",
+                                        "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12",
                                         user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-md" : "border-neutral-500 text-neutral-500",
-                                        { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12": user.points !== 0 }
+                                        // { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12": user.points !== 0 }
                                     )}
-                                    disabled={user.points === null || user.points === 0}
+                                    // disabled={user.points === null || user.points === 0}
                                 >
                                     <p className={classNames(
                                         "font-display text-2xl -mb-3 leading-none shrink-0 w-10 text-center",
@@ -98,11 +99,11 @@ export default function Leaderboard({ season, loggedInUser, className }) {
 
                                     <p className="shrink-0 text-neutral-700 ">{user.points !== null ? user.points : "--"}</p>
 
-                                    {user.points !== 0 && (
+                                    {/* {user.points !== 0 && ( */}
                                         <div className="sm:w-0 sm:opacity-0 group-hover:w-fit sm:group-hover:opacity-100 bg-neutral-300 rounded-tr-lg absolute right-0 top-0 bottom-0 flex items-center justify-center px-2 transition-all duration-200">
                                             <LayoutList size={16} strokeWidth={2.5} />
                                         </div>
-                                    )}
+                                    {/* )} */}
                                 </button>
                             </li>
                         ))
@@ -167,7 +168,8 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                                 <p className="font-display text-lg leading-none">{driver.name_acronym}</p>
                                                 <span className={classNames("text-[8px] mb-[1px] text-neutral-400", index === 1 ? "mr-[2px]" : "ml-[2px]" )}>{driver.autoPicks && "Auto Picked"}</span>
                                             </div>
-                                            <p className="text-xs font-bold leading-none text-neutral-700">P{driver.qualifying_position} - P{driver.race_position}</p>
+                                            <p className="text-xs font-bold leading-none text-neutral-700">
+                                                P{driver.qualifying_position} - {driver.race_position === 0 ? "DNF" : `P${driver.race_position}`}</p>
                                         </div>
                                     </li>
                                 ))}

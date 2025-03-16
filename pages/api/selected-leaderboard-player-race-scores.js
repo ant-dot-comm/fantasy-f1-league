@@ -100,7 +100,7 @@ export default async function handler(req, res) {
                         driver_name: driverInfo.full_name,
                         team: driverInfo.team_name,
                         qualifying_position: qualiResult.finishPosition,  // ✅ Use the actual qualifying finish position
-                        race_position: raceResult.finishPosition, 
+                        race_position: raceResult.finishPosition,  // 0 if DNF
                         points: driverPoints,
                         name_acronym: driverInfo.name_acronym,
                         autoPicks: raceData.autopick,
