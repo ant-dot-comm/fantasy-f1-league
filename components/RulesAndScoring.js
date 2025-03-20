@@ -22,6 +22,7 @@ export default function RulesAndGuide() {
                     <ul className="list-disc pl-6 text-sm ">
                         <li>+1 point for each position gained from start to finish.</li>
                         <li>-1 point for each position lost from start to finish.</li>
+                        <li>0 points if driver did not finish race</li>
                         <li>+3 bonus points if starting 19th or 20th and finishing 10th or higher.</li>
                         <li>+5 bonus points if starting 19th or 20th and finishing 5th or higher.</li>
                     </ul>

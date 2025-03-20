@@ -14,9 +14,6 @@ export default function Home() {
     const [username, setUsername] = useState(null);
     const [topRaceScoresData, setTopRaceScoresData] = useState([]);
     const [averageRaceScoresData, setAverageRaceScoresData] = useState([]);
-    const [topScoringDrivers, setTopScoringDrivers] = useState([]);
-    const [underratedDrivers, setUnderratedDrivers] = useState([]);
-    const [biggestPositionGainers, setBiggestPositionGainers] = useState([]);
     const [driverSelectionData, setDriverSelectionData] = useState([]);
     const [loadingTopScores, setLoadingTopScores] = useState(true);
 
@@ -35,7 +32,7 @@ export default function Home() {
 
     useEffect(() => {
       async function fetchStats() {
-            console.log("Fetching stats for season rightchere:", season);
+            // console.log("Fetching stats for season rightchere:", season);
           const cacheKey = `stats-${season}`;
           const cachedData = sessionStorage.getItem(cacheKey);
           setLoadingTopScores(true);
@@ -44,37 +41,28 @@ export default function Home() {
               const parsedData = JSON.parse(cachedData);
               setTopRaceScoresData(parsedData.topSingleRaceScores || []);
               setAverageRaceScoresData(parsedData.averagePointsPerUser || []);
-              setDriverSelectionData(parsedData.driverSelectionPercent || []);
-            //   setTopScoringDrivers(parsedData.topScoringDrivers || []);
-            //   setUnderratedDrivers(parsedData.underratedDrivers || []);
-            //   setBiggestPositionGainers(parsedData.biggestPositionGainers || []);
+              setDriverSelectionData(parsedData.driverSelectionStats || []);
               setLoadingTopScores(false);
               return;
           }
-
           
           try {
-              console.log("enter the dragon");
               const [raceStatsRes, driverSelectionRes] = await Promise.all([
-                  fetch(`/api/top-race-scores?season=${season}`),
+                  fetch(`/api/top-race-scores?season=${season}`), // users rankings lists
                   fetch(`/api/driver-selection-stats?season=${season}`)
               ]);
 
               const raceStatsData = await raceStatsRes.json();
-              const driverSelectionData = await driverSelectionRes.json();
   
               setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
               setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
-            //   setTopScoringDrivers(raceStatsData.topScoringDrivers || []);
-            //   setUnderratedDrivers(raceStatsData.underratedDrivers || []);
-            //   setBiggestPositionGainers(raceStatsData.biggestPositionGainers || []);
-            //   setDriverSelectionData(driverSelectionData.driverSelectionPercent || []);
+              setDriverSelectionData(driverSelectionRes.driverSelectionStats || []);
   
               sessionStorage.setItem(
                   cacheKey,
                   JSON.stringify({
-                      ...raceStatsData,
-                      driverSelectionPercent: driverSelectionData.driverSelectionPercent || [],
+                        ...raceStatsData,
+                        driverSelectionStats: driverSelectionRes.driverSelectionStats
                   })
               );
           } catch (error) {
@@ -86,6 +74,8 @@ export default function Home() {
   
       fetchStats();
   }, [season]);
+
+  console.log({driverSelectionData});
 
     const leagueStats = (
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:ml-3">

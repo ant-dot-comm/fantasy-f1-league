@@ -4,11 +4,11 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import Modal from "@/components/Modal";
 import raceSchedule from "../data/raceSchedule";
-import { set } from "mongoose";
 import { Top3Players } from "./Top3Players";
 
 export default function CurrentPick({ season, username }) {
     const [currentRace, setCurrentRace] = useState(null);
+    const [nextRace, setNextRace] = useState({});
     const [userPicks, setUserPicks] = useState([]);
     const [autoPicked, setAutoPicked] = useState(false);
     const [bottomDrivers, setBottomDrivers] = useState([]);
@@ -40,6 +40,8 @@ export default function CurrentPick({ season, username }) {
         fetchRace();
     }, [season]);
 
+    // console.log('currentRace', currentRace);
+
      // ✅ Check if picks should be locked on load
      useEffect(() => {
         if (!currentRace) return;
@@ -50,15 +52,20 @@ export default function CurrentPick({ season, username }) {
             setPicksOpen(false);
             setShowFinalResults(true);
         } else {
-            // const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
-            const schedule = raceSchedule['1254'];
-            const picksClose = new Date(schedule.picks_close);
+            const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
+            // const schedule = raceSchedule['1254'];
+            const picksClose = schedule && new Date(schedule.picks_close);
             const manualPickOpen = false; // ✅ Enable manual picks
             const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
+            
+            const nextScheduleSessionId = Number(currentRace.meeting_key) + 1; // Fetch race schedule once season starts
+            const nextSchedule = raceSchedule[Number(nextScheduleSessionId).toString()]; // Fetch race schedule once season starts
+            nextSchedule && setNextRace(nextSchedule)
+
 
             if (!picksOpen) {
                 setPickStatusMessage(
-                    "Your race picks for"
+                    "Your race picks from"
                 );
             } else {
                 if (userPicks.length > 0) {
@@ -174,19 +181,32 @@ export default function CurrentPick({ season, username }) {
                         ))}
                     </div>
                     <div className="divider-glow-medium !w-4/5 sm:!w-1/2 mx-auto" />
+                    
                     {(autoPicked && userPicks.length > 0) && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
 
                     {/* ✅ Pick Button */}
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className={classNames(
-                            "-mb-4 px-6 py-4 mt-6 rounded-lg text-neutral-100 shadow-md",
+                            "-mb-4 px-6 py-4 mt-6 rounded-lg text-neutral-100 shadow-md z-10",
                             !picksOpen ? "bg-neutral-500" : "bg-cyan-800"
                         )}
                         disabled={!picksOpen}
                     >
                         {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
                     </button>
+
+                    {nextRace.picks_open && (
+                        <div className="text-center w-full p-8 bg-neutral-800">
+                            <p className="text-xs">Next Race</p>
+                            <p className="text-sm font-display">
+                                {nextRace.race_name}
+                            </p>
+                            <p className="text-xs">
+                            Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
+                            </p>
+                        </div>
+                    )}
                 </>
             )}
             

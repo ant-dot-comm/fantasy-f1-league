@@ -132,64 +132,9 @@ export default async function handler(req, res) {
       .sort((a, b) => b.finalResult - a.finalResult)
       .slice(0, 10); // ✅ Top 10 users by avg points
 
-    console.log(`📊 Converting driver numbers to full names...`);
-    const driverNumbers = Object.keys(driverTotalPoints).map(Number);
-    const driverDetails = await Driver.find({ 
-      driver_number: { $in: driverNumbers }, 
-      // year: season 
-    });
-
-    let topScoringDrivers = driverDetails
-      .map(driver => ({
-        username: driver.full_name,
-        finalResult: driverTotalPoints[driver.driver_number] || 0,
-        headshot_url: driver.name_acronym 
-          ? `/drivers/${season}/${driver.name_acronym}.png` 
-          : `/drivers/${season}/default.png`,
-        name_acronym: driver.name_acronym,
-        teamColour: driver.team_colour,
-      }))
-      .sort((a, b) => b.finalResult - a.finalResult)
-      .slice(0, 10);
-
-    console.log(`📊 Sorting biggest position gainers...`);
-    let biggestPositionGainers = driverDetails
-      .map(driver => ({
-        username: driver.full_name,
-        finalResult: driverPositionChanges[driver.driver_number] || 0,
-        headshot_url: driver.name_acronym 
-          ? `/drivers/${season}/${driver.name_acronym}.png` 
-          : `/drivers/${season}/default.png`,
-        name_acronym: driver.name_acronym,
-        teamColour: driver.team_colour,
-      }))
-      .sort((a, b) => b.finalResult - a.finalResult)
-      .slice(0, 10);
-
-    console.log(`📊 Sorting most underrated drivers...`);
-    let underratedDrivers = driverDetails
-      .map(driver => ({
-        username: driver.full_name,
-        points: driverTotalPoints[driver.driver_number] || 0,
-        finalResult: driverPickCounts[driver.driver_number] > 0 
-          ? ((driverTotalPoints[driver.driver_number] || 0) / driverPickCounts[driver.driver_number]).toFixed(1)
-          : "0.0",
-        headshot_url: driver.name_acronym 
-          ? `/drivers/${season}/${driver.name_acronym}.png` 
-          : `/drivers/${season}/default.png`,
-        name_acronym: driver.name_acronym,
-        teamColour: driver.team_colour,
-      }))
-      .sort((a, b) => b.finalResult - a.finalResult)
-      .slice(0, 10);
-
-    console.log(`✅ Sending API response...`);
     res.status(200).json({
       topSingleRaceScores: top10SingleRaceScores,
       averagePointsPerUser,
-      topScoringDrivers, 
-      biggestPositionGainers,
-      underratedDrivers,
     });
   } catch (error) {
     console.error("🚨 Error fetching race stats:", error);

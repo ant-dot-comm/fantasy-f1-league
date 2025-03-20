@@ -12,7 +12,7 @@ export const Top3Players = ({ drivers, season }) => {
             setTopPlayers([]);
 
             try {
-                console.log(`📡 Fetching top 3 players for season: ${season}`);
+                // console.log(`📡 Fetching top 3 players for season: ${season}`);
                 const res = await axios.get(`/api/leaderboard?season=${season}`);
                 // console.log("🔍 API Response:", res.data);
                 if (res.data.leaderboard && res.data.leaderboard.length > 0) {
@@ -23,7 +23,7 @@ export const Top3Players = ({ drivers, season }) => {
                     
                     setTopPlayers(sortedPlayers);
                     setLoading(false);
-                    console.log("✅ Top 3 Players:", sortedPlayers);
+                    // console.log("✅ Top 3 Players:", sortedPlayers);
                 } else {
                     console.warn("⚠️ No leaderboard data found.");
                 }
@@ -37,7 +37,7 @@ export const Top3Players = ({ drivers, season }) => {
         fetchTopPlayers();
     }, [season]);
 
-    console.log("🏁 Top 3 Players:", topPlayers);
+    // console.log("🏁 Top 3 Players:", topPlayers);
 
     const playerLockup = ( position, player, score ) => {
         return (
