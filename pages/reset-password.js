@@ -37,7 +37,7 @@ export default function ResetPassword() {
     }
 
     try {
-      const res = await axios.post("/api/auth/reset-password", { token, password: newPassword });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/reset-password`, { token, password: newPassword });
       setMessage(res.data.message);
       setTimeout(() => router.push("/login"), 3000); // ✅ Redirect to login after success
     } catch (err) {

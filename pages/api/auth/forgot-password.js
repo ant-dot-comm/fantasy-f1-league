@@ -38,7 +38,7 @@ export default async function handler(req, res) {
       },
     });
 
-    const resetLink = `${process.env.BASE_URL}/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password?token=${resetToken}`;
 
     await transporter.sendMail({
       from: `"Fantasy F1 League Support" <${process.env.EMAIL_USER}>`,
