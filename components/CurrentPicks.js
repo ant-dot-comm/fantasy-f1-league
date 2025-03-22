@@ -266,8 +266,9 @@ export default function CurrentPick({ season, username }) {
         </div>
 
         {!picksOpen && (
-            <div className="flex flex-col md:flex-row items-stretch px-2 gap-2 mx-auto mb-8">
-                <a 
+            <div className="flex flex-col md:flex-row items-stretch w-full px-2 gap-2 mx-auto mb-8 text-center text-cyan-800">
+                <p className="mx-auto">oops! things are are a little broke , check back later to make your picks</p>
+                {/* <a 
                     href={`https://f1nsight.com/#/race-results`} 
                     target="_blank" 
                     className="w-full flex flex-col items-center justify-center bg-neutral-300 relative text-center px-6 rounded-xl py-6 group overflow-hidden text-neutral-500 max-md:hidden"
@@ -289,7 +290,7 @@ export default function CurrentPick({ season, username }) {
                         Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
                         </p>
                     </div>
-                )}
+                )} */}
             </div>
         )}
         </>
