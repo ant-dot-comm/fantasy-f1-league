@@ -9,6 +9,7 @@ import { Top3Players } from "./Top3Players";
 export default function CurrentPick({ season, username }) {
     const [currentRace, setCurrentRace] = useState(null);
     const [nextRace, setNextRace] = useState({});
+    const [prevRace, setPrevRace] = useState({});
     const [userPicks, setUserPicks] = useState([]);
     const [autoPicked, setAutoPicked] = useState(false);
     const [bottomDrivers, setBottomDrivers] = useState([]);
@@ -59,16 +60,19 @@ export default function CurrentPick({ season, username }) {
             
             // const manualPickOpen = false; // ✅ Enable manual picks
             // const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
-            const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits
+            const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits, if works set up countdown timer
             
             const nextScheduleSessionId = Number(currentRace.meeting_key) + 1; // Fetch race schedule once season starts
+            const prevScheduleSessionId = Number(currentRace.meeting_key) - 1; 
             const nextSchedule = raceSchedule[Number(nextScheduleSessionId).toString()]; // Fetch race schedule once season starts
+            const prevSchedule = raceSchedule[Number(prevScheduleSessionId).toString()]; 
             nextSchedule && setNextRace(nextSchedule)
+            prevSchedule && setPrevRace(prevSchedule)
 
 
             if (!picksOpen) {
                 setPickStatusMessage(
-                    "Your race picks from"
+                    "Your race picks from"// need a message for picks open but processing data
                 );
             } else {
                 if (userPicks.length > 0) {
@@ -261,31 +265,33 @@ export default function CurrentPick({ season, username }) {
             </Modal>
         </div>
 
-        <div className="flex flex-col md:flex-row items-stretch px-2 gap-2 mx-auto mb-8">
-            <a 
-                href={`https://f1nsight.com/#/race/${currentRace?.meeting_key}`} 
-                target="_blank" 
-                className="w-full flex flex-col items-center justify-center bg-neutral-300 relative text-center px-6 rounded-xl py-6 group overflow-hidden text-neutral-500 max-md:hidden"
-            >
-                <p className="text-sm font-bold leading-none">
-                    {`Dive into F1nsight.com for all the in-depth details and stats from the ${season} ${currentRace?.meeting_name}`} 
-                </p>
-                <div className="absolute top-full w-full h-full group-hover:top-0 transition-all group-hover:bg-gradient-to-b group-hover:from-purple-950 group-hover:to-neutral-800 flex items-center justify-center">
-                    <div className="bg-purple-900 shadow-md rounded-xl px-4 py-2 w-fit text-white">F1nsight.com</div>
-                </div>
-            </a>
-            {nextRace.picks_open && (
-                <div className="text-center text-neutral-100 p-6 bg-neutral-800 rounded-xl">
-                    <p className="text-xs">Next Race</p>
-                    <p className="text-sm font-display">
-                        {nextRace.race_name}
+        {!picksOpen && (
+            <div className="flex flex-col md:flex-row items-stretch px-2 gap-2 mx-auto mb-8">
+                <a 
+                    href={`https://f1nsight.com/#/race-results`} 
+                    target="_blank" 
+                    className="w-full flex flex-col items-center justify-center bg-neutral-300 relative text-center px-6 rounded-xl py-6 group overflow-hidden text-neutral-500 max-md:hidden"
+                >
+                    <p className="text-sm font-bold leading-none">
+                        {`Dive into F1nsight.com for all the in-depth details and stats from the ${season} ${prevRace?.race_name}`} 
                     </p>
-                    <p className="text-xs">
-                    Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
-                    </p>
-                </div>
-            )}
-        </div>
+                    <div className="absolute top-full w-full h-full group-hover:top-0 transition-all group-hover:bg-gradient-to-b group-hover:from-purple-950 group-hover:to-neutral-800 flex items-center justify-center">
+                        <div className="bg-purple-900 shadow-md rounded-xl px-4 py-2 w-fit text-white">F1nsight.com</div>
+                    </div>
+                </a>
+                {nextRace.picks_open && (
+                    <div className="text-center text-neutral-100 p-6 bg-neutral-800 rounded-xl">
+                        <p className="text-xs">Next Race</p>
+                        <p className="text-sm font-display">
+                            {nextRace.race_name}
+                        </p>
+                        <p className="text-xs">
+                        Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
+                        </p>
+                    </div>
+                )}
+            </div>
+        )}
         </>
     );
 }
