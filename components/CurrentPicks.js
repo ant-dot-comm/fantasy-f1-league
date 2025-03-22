@@ -58,9 +58,9 @@ export default function CurrentPick({ season, username }) {
 
             const picksClose = schedule && new Date(schedule.picks_close);
             
-            // const manualPickOpen = false; // ✅ Enable manual picks
-            // const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
-            const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits, if works set up countdown timer
+            const manualPickOpen = false; // ✅ Enable manual picks
+            const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
+            // const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits, if works set up countdown timer
             
             const nextScheduleSessionId = Number(currentRace.meeting_key) + 1; // Fetch race schedule once season starts
             const prevScheduleSessionId = Number(currentRace.meeting_key) - 1; 
