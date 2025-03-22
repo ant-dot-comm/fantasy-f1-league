@@ -54,7 +54,7 @@ async function storeRaceData(year, meetingKey = null) {
             const qualifyingSession = sessions.find(
                 (s) => s.session_type === "Qualifying" && !s.session_name.includes("Sprint")
             );
-            const raceSession = sessions.find((s) => s.session_type === "Race");
+            const raceSession = sessions.find((s) => s.session_type === "Race" && !s.session_name.includes("Sprint"));
 
             if (qualifyingSession) {
                 sessionKeyQualifying = qualifyingSession.session_key;

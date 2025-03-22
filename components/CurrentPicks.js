@@ -58,9 +58,9 @@ export default function CurrentPick({ season, username }) {
 
             const picksClose = schedule && new Date(schedule.picks_close);
             
-            const manualPickOpen = false; // ✅ Enable manual picks
-            const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
-            // const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits, if works set up countdown timer
+            // const manualPickOpen = false; // ✅ Enable manual picks
+            // const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
+            const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits, if works set up countdown timer
             
             const nextScheduleSessionId = Number(currentRace.meeting_key) + 1; // Fetch race schedule once season starts
             const prevScheduleSessionId = Number(currentRace.meeting_key) - 1; 
@@ -265,9 +265,9 @@ export default function CurrentPick({ season, username }) {
             </Modal>
         </div>
 
-        {!picksOpen && (
+        {picksOpen && (
             <div className="flex flex-col md:flex-row items-stretch w-full px-2 gap-2 mx-auto mb-8 text-center text-cyan-800">
-                <p className="mx-auto">oops! things are are a little broke , check back later to make your picks</p>
+                <a className="bg-cyan-600 text-neutral-100 mx-auto p-2 rounded-lg" href="https://docs.google.com/forms/d/e/1FAIpQLSf5U06Vaz4K73KLOUkm7VUF8G_ImhaoFptLswQkO-oZRHvy0A/viewform?usp=dialog">Oops! messed up scores from first race, click here to submit your drivers or scores for the first race.</a>
                 {/* <a 
                     href={`https://f1nsight.com/#/race-results`} 
                     target="_blank" 
