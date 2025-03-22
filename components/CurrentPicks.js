@@ -267,7 +267,7 @@ export default function CurrentPick({ season, username }) {
 
         {picksOpen && (
             <div className="flex flex-col md:flex-row items-stretch w-full px-2 gap-2 mx-auto mb-8 text-center text-cyan-800">
-                <a className="bg-cyan-600 text-neutral-100 mx-auto p-2 rounded-lg" href="https://docs.google.com/forms/d/e/1FAIpQLSf5U06Vaz4K73KLOUkm7VUF8G_ImhaoFptLswQkO-oZRHvy0A/viewform?usp=dialog">Oops! messed up scores from first race, click here to submit your drivers or scores for the first race.</a>
+                <a className="bg-cyan-600 text-neutral-100 mx-auto p-2 rounded-lg" href="https://docs.google.com/forms/d/e/1FAIpQLSf5U06Vaz4K73KLOUkm7VUF8G_ImhaoFptLswQkO-oZRHvy0A/viewform?usp=dialog">Oops! messed up scores from first race 😇 This weeks picks are open and unaffected. If you haven't already, click here to submit your drivers or scores for the first race.</a>
                 {/* <a 
                     href={`https://f1nsight.com/#/race-results`} 
                     target="_blank" 

@@ -34,7 +34,7 @@ export default function LoginForm({ onClose }) {
     setMessage("");
 
     try {
-      const res = await axios.post("/api/auth/forgot-password", { email });
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/forgot-password`, { email });
       setMessage("If an account exists, you'll receive a reset email soon.");
       setEmail(""); // Clear input after submission
     } catch (err) {
