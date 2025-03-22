@@ -54,9 +54,12 @@ export default function CurrentPick({ season, username }) {
         } else {
             const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
             // const schedule = raceSchedule['1254'];
+
             const picksClose = schedule && new Date(schedule.picks_close);
-            const manualPickOpen = false; // ✅ Enable manual picks
-            const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
+            
+            // const manualPickOpen = false; // ✅ Enable manual picks
+            // const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
+            const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits
             
             const nextScheduleSessionId = Number(currentRace.meeting_key) + 1; // Fetch race schedule once season starts
             const nextSchedule = raceSchedule[Number(nextScheduleSessionId).toString()]; // Fetch race schedule once season starts
@@ -152,12 +155,11 @@ export default function CurrentPick({ season, username }) {
 
     // ✅ Display current picks with autopick indicator
     return (
+        <>
         <div id="current-picks" className={classNames(
-            "flex flex-col items-center mb-20 pt-16 relative text-neutral-300",
+            "flex flex-col items-center mb-12 pt-16 relative text-neutral-300",
             userPicks.length > 0 || showFinalResults ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
         )}>
-            
-
             {showFinalResults ? (
                 <Top3Players season={season} />
             ) : (
@@ -166,7 +168,7 @@ export default function CurrentPick({ season, username }) {
                         <p className="leading-none text-sm">{pickStatusMessage}</p>
                     )}
                     <h2 className="text-xl font-display">
-                        {currentRace ? `${season} ${currentRace.meeting_name}` : "Season has not started yet"}
+                        {currentRace ? `${season} ${currentRace?.meeting_name}` : "Season has not started yet"}
                     </h2>
                     {/* ✅ Display selected picks */}
                     <div className="flex flex-row items-center">
@@ -188,25 +190,13 @@ export default function CurrentPick({ season, username }) {
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className={classNames(
-                            "-mb-4 px-6 py-4 mt-6 rounded-lg text-neutral-100 shadow-md z-10",
+                            "-mb-6 px-6 py-4 mt-4 rounded-lg text-neutral-100 shadow-md z-10",
                             !picksOpen ? "bg-neutral-500" : "bg-cyan-800"
                         )}
                         disabled={!picksOpen}
                     >
                         {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
                     </button>
-
-                    {nextRace.picks_open && (
-                        <div className="text-center w-full p-8 bg-neutral-800">
-                            <p className="text-xs">Next Race</p>
-                            <p className="text-sm font-display">
-                                {nextRace.race_name}
-                            </p>
-                            <p className="text-xs">
-                            Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
-                            </p>
-                        </div>
-                    )}
                 </>
             )}
             
@@ -270,5 +260,32 @@ export default function CurrentPick({ season, username }) {
                 </button>
             </Modal>
         </div>
+
+        <div className="flex flex-col md:flex-row items-stretch px-2 gap-2 mx-auto mb-8">
+            <a 
+                href={`https://f1nsight.com/#/race/${currentRace?.meeting_key}`} 
+                target="_blank" 
+                className="w-full flex flex-col items-center justify-center bg-neutral-300 relative text-center px-6 rounded-xl py-6 group overflow-hidden text-neutral-500 max-md:hidden"
+            >
+                <p className="text-sm font-bold leading-none">
+                    {`Dive into F1nsight.com for all the in-depth details and stats from the ${season} ${currentRace?.meeting_name}`} 
+                </p>
+                <div className="absolute top-full w-full h-full group-hover:top-0 transition-all group-hover:bg-gradient-to-b group-hover:from-purple-950 group-hover:to-neutral-800 flex items-center justify-center">
+                    <div className="bg-purple-900 shadow-md rounded-xl px-4 py-2 w-fit text-white">F1nsight.com</div>
+                </div>
+            </a>
+            {nextRace.picks_open && (
+                <div className="text-center text-neutral-100 p-6 bg-neutral-800 rounded-xl">
+                    <p className="text-xs">Next Race</p>
+                    <p className="text-sm font-display">
+                        {nextRace.race_name}
+                    </p>
+                    <p className="text-xs">
+                    Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
+                    </p>
+                </div>
+            )}
+        </div>
+        </>
     );
 }
