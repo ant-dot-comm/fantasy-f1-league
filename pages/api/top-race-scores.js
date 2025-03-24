@@ -84,10 +84,10 @@ export default async function handler(req, res) {
             continue;
           }
 
-          let driverPoints = activeScoringModel(
-              qualiResult?.finishPosition || 20,  // ✅ Default to 20 if missing
-              raceResult.finishPosition 
-          );
+          const { points: driverPoints } = activeScoringModel(
+            qualiResult?.finishPosition || 20,
+            raceResult.finishPosition
+        );
 
           // console.log(`🏎 ${driverNumber} scored ${driverPoints} points`);
 

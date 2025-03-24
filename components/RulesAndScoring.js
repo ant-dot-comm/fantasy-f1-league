@@ -2,7 +2,7 @@ import Accordion from "./Accordion";
 
 export default function RulesAndGuide() {
     return (
-        <div className="px-6 mt-12 sm:mt-32 max-w-screen-md rounded-2xl mx-3 md:mx-auto" id="rules-and-guide">
+        <div className="px-3 mt-12 sm:mt-32 max-w-screen-md rounded-2xl md:mx-auto" id="rules-and-guide">
             <Accordion title="Rules & Scoring" initialOpen={true}>
                 {/* How to Play */}
                 <div>

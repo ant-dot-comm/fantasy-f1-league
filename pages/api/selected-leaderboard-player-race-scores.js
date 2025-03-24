@@ -87,9 +87,9 @@ export default async function handler(req, res) {
 
                     if (!raceResult || !qualiResult|| !driverInfo) return null; // ✅ Handles missing data
 
-                    let driverPoints = activeScoringModel(
-                        qualiResult.finishPosition,  // ✅ Qualifying finish position
-                        raceResult.finishPosition    // ✅ Race finish position
+                    const { points: driverPoints, bonusTitle, gpWinner } = activeScoringModel(
+                        qualiResult.finishPosition,
+                        raceResult.finishPosition
                     );
 
                     // console.log(
@@ -102,6 +102,8 @@ export default async function handler(req, res) {
                         qualifying_position: qualiResult.finishPosition,  // ✅ Use the actual qualifying finish position
                         race_position: raceResult.finishPosition,  // 0 if DNF
                         points: driverPoints,
+                        bonusTitle,
+                        gpWinner,
                         name_acronym: driverInfo.name_acronym,
                         autoPicks: raceData.autopick,
                         headshot_url: driverInfo.name_acronym

@@ -266,12 +266,12 @@ export default function CurrentPick({ season, username }) {
         </div>
 
         {!picksOpen && (
-            <div className="flex flex-col md:flex-row items-stretch w-full px-2 gap-2 mx-auto mb-8 text-center text-cyan-800">
+            <div className="flex flex-col sm:flex-row items-stretch max-w-screen-md px-2 gap-2 mx-auto mb-8 text-center text-cyan-800">
                 {/* <a className="bg-cyan-600 text-neutral-100 mx-auto p-2 rounded-lg" href="https://docs.google.com/forms/d/e/1FAIpQLSf5U06Vaz4K73KLOUkm7VUF8G_ImhaoFptLswQkO-oZRHvy0A/viewform?usp=dialog">Oops! messed up scores from first race 😇 This weeks picks are open and unaffected. If you haven't already, click here to submit your drivers or scores for the first race.</a> */}
                 <a 
                     href={`https://f1nsight.com/#/race-results`} 
                     target="_blank" 
-                    className="w-full flex flex-col items-center justify-center bg-neutral-300 relative text-center px-6 rounded-xl py-6 group overflow-hidden text-neutral-500 max-md:hidden"
+                    className="w-full sm:w-1/2 flex flex-col items-center justify-center bg-neutral-300 relative text-center p-6 rounded-xl group overflow-hidden text-neutral-500"
                 >
                     <p className="text-sm font-bold leading-none">
                         {`Dive into F1nsight.com for all the in-depth details and stats from the ${season} ${prevRace?.race_name}`} 
@@ -281,13 +281,13 @@ export default function CurrentPick({ season, username }) {
                     </div>
                 </a>
                 {nextRace.picks_open && (
-                    <div className="text-center text-neutral-100 p-6 bg-neutral-800 rounded-xl">
+                    <div className="text-center text-neutral-100 p-6 bg-neutral-800 rounded-xl w-full sm:w-1/2">
                         <p className="text-xs">Next Race</p>
                         <p className="text-sm font-display">
                             {nextRace.race_name}
                         </p>
                         <p className="text-xs">
-                        Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
+                            Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
                         </p>
                     </div>
                 )}

@@ -127,22 +127,32 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                 onClose={() => setSelectedPlayer(null)}
                 user={selectedPlayer}
                 title="Season Picks"
-                >
+            >
                 {selectePlayerRaceData[selectedPlayer] ? (
                     <>
                     {/* 1️⃣ Compute the total points for all races */}
-                    <div className="text-center mb-4">
-                        <p className="text-lg font-bold">
-                        Total Points:{" "}
-                        {
-                            // Reduce all race results to a single total
-                            selectePlayerRaceData[selectedPlayer].reduce((acc, race) => {
-                            return (
-                                acc + race.results.reduce((sum, driver) => sum + driver.points, 0)
-                            );
-                            }, 0)
+                    <div className="text-center mb-10">
+                        <p className="text-lg font-bold leading-none">
+                            Total Points:{" "}
+                            {
+                                // Reduce all race results to a single total
+                                selectePlayerRaceData[selectedPlayer].reduce((acc, race) => {
+                                    return (
+                                        acc + race.results.reduce((sum, driver) => sum + driver.points, 0)
+                                );
+                                }, 0)
                         }
                         </p>
+                        {(() => {
+                            const usedAutoPicks = selectePlayerRaceData[selectedPlayer].some(race =>
+                                race.results.some(driver => driver.autoPicks)
+                            );
+                            return usedAutoPicks ? (
+                                <p className="text-xs text-neutral-500 leading-none mb-2">
+                                * Auto picks were used
+                                </p>
+                            ) : null;
+                        })()}
                     </div>
 
                     {/* 2️⃣ Render each race’s details */}
@@ -150,64 +160,63 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                         <div key={race.meeting_key} className="mt-6 mb-10 relative">
                         <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
                             {race.results.length >= 2 && (
-                            <div className="grid grid-cols-3 gap-2 absolute top-[-1.5rem] left-1/2 -translate-x-1/2 items-center">
-                                <p className="text-lg font-display text-right">
-                                {race.results[0].points}
-                                </p>
-                                <div className="text-center font-display text-2xl bg-cyan-800 rounded w-10">
-                                {race.results.reduce((acc, d) => acc + d.points, 0)}
+                                <div className="grid grid-cols-3 gap-2 absolute top-[-1.5rem] left-1/2 -translate-x-1/2 items-center">
+                                    <p className="text-lg font-display text-right">
+                                        {race.results[0].points}
+                                    </p>
+                                    <div className="text-center bg-cyan-800 rounded w-10 relative">
+                                        <span className="font-display text-2xl">{race.results.reduce((acc, d) => acc + d.points, 0)}</span>
+                                        {race.results[0].autoPicks && <span className="absolute top-[2px] right-[2px] text-xs">*</span>}
+                                    </div>
+                                    <p className="text-lg font-display text-left">
+                                        {race.results[1].points}
+                                    </p>
                                 </div>
-                                <p className="text-lg font-display text-left">
-                                {race.results[1].points}
-                                </p>
-                            </div>
                             )}
 
                             {race.results.map((driver, idx) => (
-                            <li
-                                key={driver.name_acronym}
-                                className={classNames(
-                                "flex flex-col relative -mt-4 rounded-lg",
-                                idx === 1 ? "items-end -mr-2" : "items-start -ml-2"
-                                )}
-                            >
-                                <img
-                                src={driver.headshot_url}
-                                alt={driver.driver_name}
-                                className="h-14 mr-2 shrink-0"
-                                />
-                                <div
-                                className={classNames(
-                                    "absolute top-0 flex flex-col w-max",
-                                    idx === 1 ? "right-12 text-right" : "left-10 text-left"
-                                )}
-                                >
-                                <div
+                                <li
+                                    key={driver.name_acronym}
                                     className={classNames(
-                                    "flex items-end",
-                                    idx === 1 ? "flex-row-reverse" : "flex-row"
+                                    "flex flex-col relative -mt-4 rounded-lg",
+                                    idx === 1 ? "items-end -mr-2" : "items-start -ml-2"
                                     )}
                                 >
-                                    <p className="font-display text-lg leading-none">
-                                    {driver.name_acronym}
-                                    </p>
-                                    <span
+                                    <img
+                                        src={driver.headshot_url}
+                                        alt={driver.driver_name}
+                                        className="h-14 mr-2 shrink-0"
+                                    />
+                                        {driver.bonusTitle &&(
+                                            <div className="text-cyan-700 absolute top-full w-full">{driver.bonusTitle}</div>
+                                        )}
+                                        {driver.gpWinner && (
+                                            <p className="text-xs text-neutral-500 absolute top-0 right-0">🏆</p>
+                                        )}
+                                    <div
                                     className={classNames(
-                                        "text-[8px] mb-[1px] text-neutral-400",
-                                        idx === 1 ? "mr-[2px]" : "ml-[2px]"
+                                        "absolute top-0 flex flex-col w-max",
+                                        idx === 1 ? "right-12 text-right" : "left-10 text-left"
                                     )}
                                     >
-                                    {driver.autoPicks && "Auto Picked"}
-                                    </span>
-                                </div>
-                                <p className="text-xs font-bold leading-none text-neutral-700">
-                                    P{driver.qualifying_position} -{" "}
-                                    {driver.race_position === 0
-                                    ? "DNF"
-                                    : `P${driver.race_position}`}
-                                </p>
-                                </div>
-                            </li>
+                                    <div
+                                        className={classNames(
+                                        "flex items-end",
+                                        idx === 1 ? "flex-row-reverse" : "flex-row"
+                                        )}
+                                    >
+                                        <p className="font-display text-lg leading-none">
+                                            {driver.name_acronym}
+                                        </p>
+                                    </div>
+                                    <p className="text-xs font-bold leading-none text-neutral-700">
+                                        P{driver.qualifying_position} -{" "}
+                                        {driver.race_position === 0
+                                        ? "DNF"
+                                        : `P${driver.race_position}`}
+                                    </p>
+                                    </div>
+                                </li>
                             ))}
                         </ul>
                         <h4 className="text-center absolute bottom-1 left-1/2 -translate-x-1/2 w-[75%]">
