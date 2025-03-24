@@ -188,7 +188,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         className="h-14 mr-2 shrink-0"
                                     />
                                         {driver.bonusTitle &&(
-                                            <div className="text-cyan-700 absolute top-full w-full">{driver.bonusTitle}</div>
+                                            <div className="bg-cyan-700 text-neutral-100 text-[8px] px-1 mx-4 rounded-b-sm absolute top-full w-[120px]">{driver.bonusTitle}</div>
                                         )}
                                         {driver.gpWinner && (
                                             <p className="text-xs text-neutral-500 absolute top-0 right-0">🏆</p>

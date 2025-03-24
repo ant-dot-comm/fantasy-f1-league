@@ -6,7 +6,7 @@ export default function RulesAndGuide() {
             <Accordion title="Rules & Scoring" initialOpen={true}>
                 {/* How to Play */}
                 <div>
-                    <h3 className="font-bold">How to Play</h3>
+                    <h3 className="font-bold mb-4">How to Play</h3>
                     <ul className="list-disc pl-6 text-sm">
                         <li>Each race weekend, you must select 2 drivers.</li>
                         <li>Only drivers starting 11th - 20th in qualifying are eligible.</li>
@@ -18,13 +18,22 @@ export default function RulesAndGuide() {
 
                 {/* Scoring System */}
                 <div className="mt-4">
-                    <h3 className="font-bold ">Scoring System</h3>
-                    <ul className="list-disc pl-6 text-sm ">
-                        <li>+1 point for each position gained from start to finish.</li>
-                        <li>-1 point for each position lost from start to finish.</li>
+                    <h3 className="font-bold mb-4">Scoring System</h3>
+                    Base Scoring
+                    <ul className="list-disc pl-6 text-sm mb-4">
+                        <li>+1 point for each position gained from start to finish</li>
+                        <li>-1 point for each position lost from start to finish</li>
                         <li>0 points if driver did not finish race</li>
-                        <li>+3 bonus points if starting 19th or 20th and finishing 10th or higher.</li>
-                        <li>+5 bonus points if starting 19th or 20th and finishing 5th or higher.</li>
+                    </ul>
+                    Position Gained Bonus
+                    <ul className="list-disc pl-6 text-sm mb-4">
+                        <li>Overtake Artist: <span className="font-bold">+2 bonus points</span> if 10-13 positions gained</li>
+                        <li>Track Titan: <span className="font-bold">+3 bonus points</span> if 14-17 positions gained</li>
+                        <li>Zero to Hero: <span className="font-bold">+4 bonus points</span> if 18-19 positions gained</li>
+                    </ul>
+                    Race Winner Bonus
+                    <ul className="list-disc pl-6 text-sm mb-4">
+                        <li>In addition to position gained bonuses, <span className="font-bold">+3 bonus points</span> if you select the race winner</li>
                     </ul>
                 </div>
             </Accordion>
