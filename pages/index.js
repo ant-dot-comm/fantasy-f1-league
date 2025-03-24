@@ -75,7 +75,7 @@ export default function Home() {
       fetchStats();
   }, [season]);
 
-  console.log({driverSelectionData});
+//   console.log({driverSelectionData});
 
     const leagueStats = (
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:ml-3">

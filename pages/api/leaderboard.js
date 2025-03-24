@@ -10,7 +10,6 @@ export default async function handler(req, res) {
 
   await dbConnect();
   const { season } = req.query;
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
   // ✅ Check cache before querying DB
   if (leaderboardCache.has(season)) {
@@ -32,8 +31,8 @@ export default async function handler(req, res) {
 
       try {
         // ✅ Pull scores from selected-leaderboard-player-race-scores API instead of recalculating
-        const { data } = await axios.get(`${BASE_URL}/api/selected-leaderboard-player-race-scores?username=${user.username}&season=${season}`);
-        // console.log(`🔎 API Response for ${user.username}:`, JSON.stringify(data, null, 2));
+        const { data } = await axios.get(`${ process.env.NEXT_PUBLIC_BASE_URL}/api/selected-leaderboard-player-race-scores?username=${user.username}&season=${season}`);
+        // console.log(`🔎 API Response for ${user.username}:`, JSON.stringify(data, null, 2)); uhu
 
         const totalUserPoints = data.raceBreakdown.reduce((acc, race) => {
           return acc + race.results.reduce((sum, driver) => sum + driver.points, 0);
