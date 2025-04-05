@@ -12,7 +12,7 @@ const raceSchedule = {
     "1256": { // Japan
       race_name: "Japanese Grand Prix",
       picks_open: new Date("2025-04-04T00:00:00"),  
-      picks_close: new Date("2025-03-05T22:00:00"), 
+      picks_close: new Date("2025-04-05T22:00:00"), 
     },
     "1257": { // Bahrain
       race_name: "Bahrain Grand Prix",
