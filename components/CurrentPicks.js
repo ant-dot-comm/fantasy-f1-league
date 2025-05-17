@@ -287,7 +287,7 @@ export default function CurrentPick({ season, username }) {
                             {nextRace.race_name}
                         </p>
                         <p className="text-xs">
-                            Picks Open {nextRace.picks_open.toLocaleDateString()} at {nextRace.picks_open.toLocaleTimeString()}
+                            Picks open as soon ASAP after qualifying. Keep checking back or message Antoni to hurry up and run the data script 😅
                         </p>
                     </div>
                 )}

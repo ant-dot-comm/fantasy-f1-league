@@ -39,24 +39,23 @@ export default function Home() {
   
           if (cachedData) {
               const parsedData = JSON.parse(cachedData);
-              setTopRaceScoresData(parsedData.topSingleRaceScores || []);
-              setAverageRaceScoresData(parsedData.averagePointsPerUser || []);
-              setDriverSelectionData(parsedData.driverSelectionStats || []);
+              setTopRaceScoresData(parsedData.topSingleRaceScores || []); // good
+              setAverageRaceScoresData(parsedData.averagePointsPerUser || []); // good
               setLoadingTopScores(false);
               return;
           }
           
           try {
               const [raceStatsRes, driverSelectionRes] = await Promise.all([
-                  fetch(`/api/top-race-scores?season=${season}`), // users rankings lists
-                  fetch(`/api/driver-selection-stats?season=${season}`)
+                  fetch(`/api/top-race-scores?season=${season}`), // good
+                //   fetch(`/api/driver-selection-stats?season=${season}`) // rework
               ]);
 
               const raceStatsData = await raceStatsRes.json();
   
               setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
               setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
-              setDriverSelectionData(driverSelectionRes.driverSelectionStats || []);
+            //   setDriverSelectionData(driverSelectionRes.driverSelectionStats || []);
   
               sessionStorage.setItem(
                   cacheKey,

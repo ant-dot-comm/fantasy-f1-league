@@ -39,7 +39,7 @@ export default function ResetPassword() {
     try {
       const res = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL}/api/auth/reset-password`, { token, password: newPassword });
       setMessage(res.data.message);
-      setTimeout(() => router.push("/login"), 3000); // ✅ Redirect to login after success
+      setTimeout(() => router.push("/login"), 1500); // ✅ Redirect to login after success
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong.");
     }
