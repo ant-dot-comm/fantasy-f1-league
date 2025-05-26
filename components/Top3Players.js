@@ -44,17 +44,17 @@ export const Top3Players = ({ drivers, season }) => {
             <div 
                 className={classNames(
                     "flex flex-col items-center shrink-0 leading-none", 
-                    {"-mx-20 z-10 items-center": position === "1", "items-start": position === "2", "items-end": position === "3"},
+                    {"-mx-15 z-10 items-center": position === "1", "items-start": position === "2", "items-end": position === "3"},
                 )}>
-                <p className="text-neutral-400 text-xs">P{position}</p>
-                <p className="font-bold mb-1">{player}</p>
-                <p className="font-bold text-neutral-400 ">
+                <p className="font-bold text-neutral-400 text-xs">P{position}</p>
+                <p className="font-bold mb-[2px] text-xs">{player}</p>
+                <p className="font-bold text-neutral-400">
                     {score}
                 </p>
                 <img 
                     src={position === "1" ? "/drivers/default1.png" : position === "2" ? "/drivers/default2.png" : "/drivers/default3.png"} 
                     alt={player}
-                    className={classNames("shrink-0", position === "1" ? "h-40" : "h-32")}
+                    className={classNames("shrink-0", position === "1" ? "h-40" : "h-32", {"-scale-x-100": position === "3"})}
                 />
             </div>
         )

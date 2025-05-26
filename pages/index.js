@@ -61,7 +61,7 @@ export default function Home() {
                   cacheKey,
                   JSON.stringify({
                         ...raceStatsData,
-                        driverSelectionStats: driverSelectionRes.driverSelectionStats
+                        // driverSelectionStats: driverSelectionRes.driverSelectionStats
                   })
               );
           } catch (error) {

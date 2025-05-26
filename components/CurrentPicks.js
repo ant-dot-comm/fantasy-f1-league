@@ -71,10 +71,12 @@ export default function CurrentPick({ season, username }) {
 
 
             if (!picksOpen) {
-                setPickStatusMessage(
-                    "Your race picks from"// need a message for picks open but processing data
-                );
+                setShowFinalResults(true);
+                // setPickStatusMessage(
+                //     "Your race picks from"// need a message for picks open but processing data
+                // );
             } else {
+                setShowFinalResults(false);
                 if (userPicks.length > 0) {
                     setPickStatusMessage(`Your race picks for`);
                 } else {
@@ -82,7 +84,6 @@ export default function CurrentPick({ season, username }) {
                 }
             }
             setPicksOpen(racePicksOpen);
-            setShowFinalResults(false);
         }
     }, [currentRace, userPicks, season]);
 

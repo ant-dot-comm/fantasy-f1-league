@@ -210,7 +210,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                         </p>
                                     </div>
                                     <p className="text-xs font-bold leading-none text-neutral-700">
-                                        P{driver.qualifying_position} -{" "}
+                                        P{driver.race_startPosition} -{" "}
                                         {driver.race_position === 0
                                         ? "DNF"
                                         : `P${driver.race_position}`}
