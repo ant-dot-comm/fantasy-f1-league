@@ -54,7 +54,7 @@ const raceSchedule = {
       picks_open: new Date("2025-06-28T08:00:00"),  
       picks_close: new Date("2025-06-29T06:00:00"), 
     },
-    "1265": { // Great Britain  
+    "1277": { // Great Britain  
       race_name: "British Grand Prix",
       picks_open: new Date("2025-07-05T08:00:00"),  
       picks_close: new Date("2025-07-06T07:00:00"), 
