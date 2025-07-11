@@ -114,7 +114,7 @@ const raceSchedule = {
       picks_open: new Date("2025-11-29T11:00:00"),  
       picks_close: new Date("2025-11-30T08:00:00"), 
     },
-    "1277": { // Abu Dhabi
+    "1265": { // Abu Dhabi
       race_name: "Abu Dhabi Grand Prix",
       picks_open: new Date("2025-12-06T07:00:00"),  
       picks_close: new Date("2025-12-07T05:00:00"),
