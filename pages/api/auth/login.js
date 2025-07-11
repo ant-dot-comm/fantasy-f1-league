@@ -25,5 +25,21 @@ export default async function handler(req, res) {
     process.env.NEXTAUTH_SECRET,
     { expiresIn: "7d" }
   );
+
+  // Set JWT token as HTTP cookie
+  const cookieOptions = [
+    `token=${token}`,
+    'HttpOnly',
+    'Path=/',
+    'Max-Age=604800', // 7 days in seconds
+    'SameSite=Lax'
+  ];
+
+  // Add Secure flag for production (HTTPS)
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.push('Secure');
+  }
+
+  res.setHeader('Set-Cookie', cookieOptions.join('; '));
   res.status(200).json({ token, message: "Login successful" });
 }

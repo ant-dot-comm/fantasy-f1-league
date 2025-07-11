@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import classNames from "classnames";
 import axios from "axios";
 import { useRouter } from "next/router";
+import Cookies from "js-cookie";
 import Modal from "@/components/Modal";
 import raceSchedule from "../data/raceSchedule";
 import { Top3Players } from "./Top3Players";
@@ -94,8 +95,14 @@ export default function CurrentPick({ season, username }) {
     
         async function fetchPicks() {
             try {
+                const token = Cookies.get("token");
                 const res = await axios.get(
-                    `/api/userPicks?username=${username}&meeting_key=${currentRace.meeting_key}&season=${season}`
+                    `/api/userPicks?username=${username}&meeting_key=${currentRace.meeting_key}&season=${season}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
                 );
                 // console.log('res', res.data, 'here');
                 // ✅ Store both picks and autopick flag
@@ -104,6 +111,10 @@ export default function CurrentPick({ season, username }) {
                 setSelectedDrivers(res.data.picks.map(p => p.driverNumber) || []);
             } catch (error) {
                 console.error("❌ Error fetching user pick:", error);
+                if (error.response?.status === 401) {
+                    console.error("Authentication failed. Please log in again.");
+                    // Optionally redirect to login or show a message
+                }
             }
         }
     
@@ -143,11 +154,16 @@ export default function CurrentPick({ season, username }) {
     // ✅ Submit user picks and remove autopick flag
     async function submitPick() {
         try {
+            const token = Cookies.get("token");
             await axios.post("/api/submitPicks", {
                 username,
                 season,
                 meeting_key: currentRace.meeting_key,
                 driverNumbers: selectedDrivers, // ✅ Send both selected drivers
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             setUserPicks(selectedDrivers);
@@ -156,6 +172,10 @@ export default function CurrentPick({ season, username }) {
             router.reload();
         } catch (error) {
             console.error("❌ Error submitting pick:", error);
+            if (error.response?.status === 401) {
+                console.error("Authentication failed. Please log in again.");
+                // Optionally redirect to login or show a message
+            }
         }
     }
 

@@ -1,7 +1,9 @@
 import dbConnect from "../../lib/mongodb";
 import User from "../../models/User";
+import { authenticateAndAuthorizeUser } from "../../lib/middleware";
+import raceSchedule from "../../data/raceSchedule";
 
-export default async function handler(req, res) {
+async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
@@ -12,6 +14,27 @@ export default async function handler(req, res) {
 
   if (!username || !season || !meeting_key || !driverNumbers || driverNumbers.length !== 2) {
     return res.status(400).json({ error: "Invalid request data" });
+  }
+
+  // ✅ Time-based validation: Check if picks submission is still allowed
+  const raceInfo = raceSchedule[meeting_key];
+  if (!raceInfo) {
+    return res.status(400).json({ 
+      error: "Invalid race", 
+      message: `No race found for meeting key: ${meeting_key}` 
+    });
+  }
+
+  const now = new Date();
+  const picksCloseTime = new Date(raceInfo.picks_close);
+  
+  if (now > picksCloseTime) {
+    return res.status(403).json({ 
+      error: "Picks deadline exceeded", 
+      message: `Picks for ${raceInfo.race_name} closed at ${picksCloseTime.toLocaleString()}. Current time: ${now.toLocaleString()}`,
+      picks_close: picksCloseTime.toISOString(),
+      current_time: now.toISOString()
+    });
   }
 
   try {
@@ -37,10 +60,18 @@ export default async function handler(req, res) {
     res.status(200).json({ 
       message: "Pick submitted successfully", 
       picks: user.picks[season][meeting_key].picks, 
-      autopick: user.picks[season][meeting_key].autopick 
+      autopick: user.picks[season][meeting_key].autopick,
+      race_info: {
+        race_name: raceInfo.race_name,
+        picks_close: picksCloseTime.toISOString(),
+        time_remaining: Math.max(0, Math.floor((picksCloseTime - now) / 1000 / 60)) // minutes remaining
+      }
     });
   } catch (error) {
     console.error("❌ Error saving user picks:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
+
+// Export with JWT authentication and user authorization middleware
+export default authenticateAndAuthorizeUser(handler);
