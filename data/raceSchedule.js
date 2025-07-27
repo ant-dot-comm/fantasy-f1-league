@@ -59,7 +59,7 @@ const raceSchedule = {
       picks_open: new Date("2025-07-05T08:00:00"),  
       picks_close: new Date("2025-07-06T07:00:00"), 
     },
-    "1266": { // Belgium
+    "1265": { // Belgium
       race_name: "Belgian Grand Prix",
       picks_open: new Date("2025-07-26T08:00:00"),  
       picks_close: new Date("2025-07-27T06:00:00"), 
