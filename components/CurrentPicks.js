@@ -47,45 +47,45 @@ export default function CurrentPick({ season, username }) {
      // ✅ Check if picks should be locked on load
      useEffect(() => {
         if (!currentRace) return;
-        const now = new Date();
 
         if (season < 2025) {
             // 🔴 Disable picks for past seasons
             setPicksOpen(false);
             setShowFinalResults(true);
         } else {
-            const schedule = raceSchedule[currentRace.meeting_key]; // Fetch race schedule once season starts
-            // const schedule = raceSchedule['1254'];
+            // Use the API to get picks status instead of manual calculation
+            async function fetchPicksStatus() {
+                try {
+                    const res = await axios.get(`/api/picksStatus?meeting_key=${currentRace.meeting_key}`);
+                    const { is_open } = res.data;
+                    
+                    const nextScheduleSessionId = Number(currentRace.meeting_key) + 1;
+                    const prevScheduleSessionId = is_open ? Number(currentRace.meeting_key) - 1 : Number(currentRace.meeting_key);
+                    const nextSchedule = raceSchedule[Number(nextScheduleSessionId).toString()];
+                    const prevSchedule = raceSchedule[Number(prevScheduleSessionId).toString()]; 
+                    nextSchedule && setNextRace(nextSchedule)
+                    prevSchedule && setPrevRace(prevSchedule)
 
-            const picksClose = schedule && new Date(schedule.picks_close);
-            
-            // const manualPickOpen = false; // ✅ Enable manual picks
-            // const racePicksOpen = manualPickOpen && now <= picksClose; // referesh page at time to see if this hits
-            const racePicksOpen = now <= picksClose; // referesh page at time to see if this hits, if works set up countdown timer
-            // const racePicksOpen = false; // referesh page at time to see if this hits, if works set up countdown timer
-            
-            const nextScheduleSessionId = Number(currentRace.meeting_key) + 1; // Fetch race schedule once season starts
-            const prevScheduleSessionId =  now <= picksClose ? Number(currentRace.meeting_key) - 1 : Number(currentRace.meeting_key);
-            const nextSchedule = raceSchedule[Number(nextScheduleSessionId).toString()]; // Fetch race schedule once season starts
-            const prevSchedule = raceSchedule[Number(prevScheduleSessionId).toString()]; 
-            nextSchedule && setNextRace(nextSchedule)
-            prevSchedule && setPrevRace(prevSchedule)
-
-
-            if (!picksOpen) {
-                setShowFinalResults(true);
-                // setPickStatusMessage(
-                //     "Your race picks from"// need a message for picks open but processing data
-                // );
-            } else {
-                setShowFinalResults(false);
-                if (userPicks.length > 0) {
-                    setPickStatusMessage(`Your race picks for`);
-                } else {
-                    setPickStatusMessage(`No picks made for`);
+                    if (!is_open) {
+                        setShowFinalResults(true);
+                    } else {
+                        setShowFinalResults(false);
+                        if (userPicks.length > 0) {
+                            setPickStatusMessage(`Your race picks for`);
+                        } else {
+                            setPickStatusMessage(`No picks made for`);
+                        }
+                    }
+                    setPicksOpen(is_open);
+                } catch (error) {
+                    console.error("❌ Error fetching picks status:", error);
+                    // Fallback to closed state on error
+                    setPicksOpen(false);
+                    setShowFinalResults(true);
                 }
             }
-            setPicksOpen(racePicksOpen);
+
+            fetchPicksStatus();
         }
     }, [currentRace, userPicks, season]);
 
