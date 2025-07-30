@@ -287,9 +287,8 @@ export default function CurrentPick({ season, username }) {
             </Modal>
         </div>
 
-        {!picksOpen && (
+        {/* {!picksOpen && (
             <div className="flex flex-col sm:flex-row items-stretch max-w-screen-md px-2 gap-2 mx-auto mb-8 text-center text-cyan-800">
-                {/* <a className="bg-cyan-600 text-neutral-100 mx-auto p-2 rounded-lg" href="https://docs.google.com/forms/d/e/1FAIpQLSf5U06Vaz4K73KLOUkm7VUF8G_ImhaoFptLswQkO-oZRHvy0A/viewform?usp=dialog">Oops! messed up scores from first race 😇 This weeks picks are open and unaffected. If you haven't already, click here to submit your drivers or scores for the first race.</a> */}
                 <a 
                     href={`https://f1nsight.com/#/race-results`} 
                     target="_blank" 
@@ -302,7 +301,7 @@ export default function CurrentPick({ season, username }) {
                         <div className="bg-purple-900 shadow-md rounded-xl px-4 py-2 w-fit text-white">F1nsight.com</div>
                     </div>
                 </a>
-                {nextRace.picks_open && (
+                {nextRace && (
                     <div className="text-center text-neutral-100 p-6 bg-neutral-800 rounded-xl w-full sm:w-1/2">
                         <p className="text-xs">Next Race</p>
                         <p className="text-sm font-display">
@@ -314,7 +313,7 @@ export default function CurrentPick({ season, username }) {
                     </div>
                 )}
             </div>
-        )}
+        )} */}
         </>
     );
 }

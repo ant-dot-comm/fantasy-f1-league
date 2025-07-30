@@ -64,57 +64,57 @@ const raceSchedule = {
       picks_open: new Date("2025-07-26T08:00:00"),  
       picks_close: new Date("2025-07-27T06:00:00"), 
     },
-    "1267": { // Hungary
+    "1266": { // Hungary
       race_name: "Hungarian Grand Prix",
       picks_open: new Date("2025-08-02T08:00:00"),  
       picks_close: new Date("2025-08-03T06:00:00"), 
     },
-    "1268": { // Netherlands
+    "1267": { // Netherlands
       race_name: "Dutch Grand Prix",
       picks_open: new Date("2025-08-31T07:00:00"),  
       picks_close: new Date("2025-08-30T06:00:00"), 
     },
-    "1269": { // Italy
+    "1268": { // Italy
       race_name: "Italian Grand Prix",
       picks_open: new Date("2025-09-06T08:00:00"),  
       picks_close: new Date("2025-09-07T06:00:00"), 
     },
-    "1270": { // Azerbaijan
+    "1269": { // Azerbaijan
       race_name: "Azerbaijan Grand Prix",
       picks_open: new Date("2025-09-20T06:00:00"),  
       picks_close: new Date("2025-09-21T04:00:00"), 
     },
-    "1271": { // Singapore
+    "1270": { // Singapore
       race_name: "Singapore Grand Prix",
       picks_open: new Date("2025-10-04T07:00:00"),  
       picks_close: new Date("2025-10-05T05:00:00"), 
     },
-    "1272": { // United States
+    "1271": { // United States
       race_name: "United States Grand Prix",
       picks_open: new Date("2025-10-18T15:00:00"),  
       picks_close: new Date("2025-10-19T12:00:00"), 
     },
-    "1273": { // Mexico
+    "1272": { // Mexico
       race_name: "Mexico Grand Prix",
       picks_open: new Date("2025-10-25T15:00:00"),  
       picks_close: new Date("2025-10-26T13:00:00"), 
     },
-    "1274": { // Brazil
+    "1273": { // Brazil
       race_name: "Brazilian Grand Prix",
       picks_open: new Date("2025-11-08T11:00:00"),  
       picks_close: new Date("2025-11-09T09:00:00"), 
     },
-    "1275": { // Las Vegas
+    "1274": { // Las Vegas
       race_name: "Las Vegas Grand Prix",
         picks_open: new Date("2025-11-21T21:00:00"),  
         picks_close: new Date("2025-11-22T20:00:00"), 
     },
-    "1276": { // Qatar
+    "1275": { // Qatar
       race_name: "Qatar Grand Prix",
       picks_open: new Date("2025-11-29T11:00:00"),  
       picks_close: new Date("2025-11-30T08:00:00"), 
     },
-    "1278": { // Abu Dhabi
+    "1276": { // Abu Dhabi
       race_name: "Abu Dhabi Grand Prix",
       picks_open: new Date("2025-12-06T07:00:00"),  
       picks_close: new Date("2025-12-07T05:00:00"),
