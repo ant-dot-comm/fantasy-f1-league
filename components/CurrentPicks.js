@@ -398,7 +398,7 @@ export default function CurrentPick({ season, username }) {
                         value={predictedDnfs}
                         onChange={(e) => setPredictedDnfs(e.target.value)}
                         placeholder="Enter number of DNFs"
-                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-neutral-700"
+                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-neutral-50"
                     />
                     <p className="text-xs text-neutral-400 mt-1">Leave empty if you don't want to predict DNFs</p>
                 </div>

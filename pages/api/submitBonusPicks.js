@@ -19,41 +19,43 @@ export default async function handler(req, res) {
             }
 
             // ✅ Find user and update bonus picks
-            const user = await User.findOne({ username });
+            let user = await User.findOne({ username }).lean();
             if (!user) {
                 return res.status(404).json({ error: "User not found" });
             }
 
             // ✅ Initialize picks structure if it doesn't exist
-            if (!user.picks.has(season.toString())) {
-                user.picks.set(season.toString(), new Map());
-            }
-
-            const seasonPicks = user.picks.get(season.toString());
-            if (!seasonPicks.has(meeting_key.toString())) {
-                seasonPicks.set(meeting_key.toString(), {
+            if (!user.picks) user.picks = {};
+            if (!user.picks[season]) user.picks[season] = {};
+            if (!user.picks[season][meeting_key]) {
+                user.picks[season][meeting_key] = {
                     autopick: false,
                     picks: [],
                     bonusPicks: {
                         worstDriver: null,
                         dnfs: null,
                     },
-                });
+                };
             }
-
-            const racePicks = seasonPicks.get(meeting_key.toString());
 
             // ✅ Update bonus picks
             if (worstDriver !== undefined) {
-                racePicks.bonusPicks.worstDriver = worstDriver;
+                user.picks[season][meeting_key].bonusPicks.worstDriver = parseInt(worstDriver);
+                // console.log("Setting worstDriver to:", parseInt(worstDriver));
             }
             if (dnfs !== undefined) {
-                racePicks.bonusPicks.dnfs = dnfs;
+                user.picks[season][meeting_key].bonusPicks.dnfs = parseInt(dnfs);
+                // console.log("Setting dnfs to:", parseInt(dnfs));
             }
 
-            await user.save();
+            // ✅ Save changes
+            await User.updateOne({ username }, { $set: { picks: user.picks } });
 
-            console.log(`✅ Bonus picks updated for ${username} - Race: ${meeting_key}, Worst Driver: ${worstDriver}, DNFs: ${dnfs}`);
+            // console.log("Race picks before save:", JSON.stringify(user.picks[season][meeting_key], null, 2));
+            // console.log("Full user picks before save:", JSON.stringify(user.picks, null, 2));
+
+            // const updatedUser = await User.findOne({ username });
+            // console.log("Race picks before save:", JSON.stringify(user.picks[season][meeting_key], null, 2));
 
             res.status(200).json({ 
                 message: "Bonus picks submitted successfully",

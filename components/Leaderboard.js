@@ -58,7 +58,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
     }
 
     // console.log({leaderBoardScores});
-    // console.log({selectePlayerRaceData});
+    console.log({selectePlayerRaceData});
     return (
         <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200 sm:min-h-[30rem]")}>
             <ul className="flex gap-2 flex-col">
@@ -223,7 +223,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                                 return driverPoints + bonusPoints;
                                             })()}
                                         </span>
-                                        {race.results[0].autoPicks && <span className="absolute top-[2px] right-[2px] text-xs">*</span>}
+                                        {race.results[0]?.autoPicks && <span className="absolute top-[2px] right-[2px] text-xs">*</span>}
                                         <div className="text-[8px] absolute w-full text-center bottom-full left-1/2 -translate-x-1/2">Total</div>
                                     </div>
                                 </div>
