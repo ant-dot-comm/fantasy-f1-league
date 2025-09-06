@@ -35,6 +35,11 @@ export default function RulesAndGuide() {
                     <ul className="list-disc pl-6 text-sm mb-4">
                         <li>In addition to position gained bonuses, <span className="font-bold">+3 bonus points</span> if you select the race winner</li>
                     </ul>
+                    Bonus Picks
+                    <ul className="list-disc pl-6 text-sm mb-4">
+                        <li>Worst Driver Scoring: +1 point for each position lost, -1 point for each position gained</li>
+                        <li>DNF Prediction Scoring: <span className="font-bold">+5 points</span> if you guess exactly right, 0 points otherwise</li>
+                    </ul>  
                 </div>
             </Accordion>
 
