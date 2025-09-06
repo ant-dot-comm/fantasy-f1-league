@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import classNames from "classnames";
 import { motion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { LayoutList } from "lucide-react";
 
 import Modal from "./Modal"; // Import the reusable modal
@@ -11,6 +12,8 @@ export default function Leaderboard({ season, loggedInUser, className }) {
     const [loading, setLoading] = useState(true);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [selectePlayerRaceData, setSelectedPlayerRaceData] = useState({});
+    const [expandedBonusRace, setExpandedBonusRace] = useState(null);
+
 
     useEffect(() => {
         async function fetchScores() {
@@ -55,6 +58,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
     }
 
     // console.log({leaderBoardScores});
+    // console.log({selectePlayerRaceData});
     return (
         <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200 sm:min-h-[30rem]")}>
             <ul className="flex gap-2 flex-col">
@@ -137,11 +141,12 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                             {
                                 // Reduce all race results to a single total
                                 selectePlayerRaceData[selectedPlayer].reduce((acc, race) => {
-                                    return (
-                                        acc + race.results.reduce((sum, driver) => sum + driver.points, 0)
-                                );
+                                    const driverPoints = race.results.reduce((sum, driver) => sum + driver.points, 0);
+                                    const bonusPoints = race.bonusPoints || 0;
+                                    
+                                    return acc + driverPoints + bonusPoints;
                                 }, 0)
-                        }
+                            }
                         </p>
                         {(() => {
                             const usedAutoPicks = selectePlayerRaceData[selectedPlayer].some(race =>
@@ -157,77 +162,173 @@ export default function Leaderboard({ season, loggedInUser, className }) {
 
                     {/* 2️⃣ Render each race’s details */}
                     {selectePlayerRaceData[selectedPlayer].map((race, index) => (
-                        <div key={race.meeting_key} className="mt-6 mb-10 relative">
-                        <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
-                            {race.results.length >= 2 && (
-                                <div className="grid grid-cols-3 gap-2 absolute top-[-1.5rem] left-1/2 -translate-x-1/2 items-center">
-                                    <p className="text-lg font-display text-right">
-                                        {race.results[0].points}
-                                    </p>
-                                    <div className="text-center bg-cyan-800 rounded w-10 relative">
-                                        <span className="font-display text-2xl">{race.results.reduce((acc, d) => acc + d.points, 0)}</span>
+                        <>
+                        <div className="mb-6">
+                            <h4 className="flex flex-row items-center justify-between px-4">
+                                <p className="font-bold text-center text-sm text-neutral-500 leading-none">{race.race}</p>
+                                <p className="leading-none text-[10px] font-bold text-neutral-500 uppercase">Round {index + 1}</p>
+                            </h4>
+                            <div className="bg-neutral-500 rounded-lg p-2 mx-2">
+                                <div className="-mx-4 flex flex-row gap-2 mt-4">
+                                    {race.results.map((driver, idx) => (
+                                        <li
+                                            key={driver.name_acronym}
+                                            className="flex flex-col relative rounded-lg w-full"
+                                        >
+                                            <div className="bg-neutral-50 rounded-md w-full relative">
+                                                <img
+                                                    src={driver.headshot_url}
+                                                    alt={driver.driver_name}
+                                                    className="h-14 w-14 mr-2 -mt-6"
+                                                />
+                                                <div className="absolute -top-4 right-1">
+                                                    <p className="font-display text-md leading-none text-right">
+                                                        {driver.name_acronym}
+                                                    </p>
+                                                    <p className="text-[10px] font-bold leading-none text-neutral-700">
+                                                        P{driver.race_startPosition} -{" "}
+                                                        {driver.race_position === 0
+                                                        ? "DNF"
+                                                        : `P${driver.race_position}`}
+                                                    </p>
+                                                    <p className="font-display text-lg text-neutral-700 leading-none text-right">
+                                                        {driver.points}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {driver.bonusTitle &&(
+                                                <div className="bg-cyan-700 text-neutral-100 text-[8px] px-1 mx-2 rounded-b-sm leading-none py-1 text-center text-wrap -mb-3">{driver.bonusTitle}</div>
+                                            )}
+                                        </li>
+                                    ))}
+                                    {race.bonusPoints !== null && (
+                                        <div 
+                                            className="bg-cyan-700 rounded-md flex items-center justify-center gap-1 relative h-8 w-64"
+                                            onClick={() => setExpandedBonusRace(expandedBonusRace === race.meeting_key ? null : race.meeting_key)}
+                                        >
+                                            <p className="font-display text-2xl leading-none">
+                                                {race.bonusPoints >= 0 && (<>+</>)}{race.bonusPoints}
+                                            </p>
+                                            <ChevronDown size={12} strokeWidth={2.5} />
+                                            <div className="text-[8px] absolute w-full text-center bottom-full left-1/2 -translate-x-1/2">Bonus Picks</div>
+                                        </div>
+                                    )}
+                                    <div className="bg-cyan-700 rounded-md flex items-center justify-center relative h-8 w-64">
+                                        <span className="font-display text-2xl leading-none">
+                                            {(() => {
+                                                const driverPoints = race.results.reduce((acc, d) => acc + d.points, 0);
+                                                const bonusFromTitle = race.results.find(d => d.bonusTitle)?.bonusTitle?.match(/\+(\d+)/)?.[1];
+                                                const bonusPoints = race.bonusPoints || 0;
+                                                console.log({driverPoints, bonusFromTitle, bonusPoints});
+                                                return driverPoints + bonusPoints;
+                                            })()}
+                                        </span>
                                         {race.results[0].autoPicks && <span className="absolute top-[2px] right-[2px] text-xs">*</span>}
+                                        <div className="text-[8px] absolute w-full text-center bottom-full left-1/2 -translate-x-1/2">Total</div>
                                     </div>
-                                    <p className="text-lg font-display text-left">
-                                        {race.results[1].points}
-                                    </p>
+                                </div>
+                            </div>
+                            {/* ✅ Bonus Points Display */}
+                            {expandedBonusRace === race.meeting_key && (
+                                <div className="p-2 bg-neutral-800 rounded-b-lg mx-4 text-xs">
+                                    <div className="font-bold text-cyan-700 mb-1 block">Bonus Picks:</div>
+                                    {(race.bonusPicks.worstDriver === null && race.bonusPicks.dnfs === null) && <>no picks made</>}
+                                    {race.bonusPicks.worstDriver && (
+                                        <div className="text-cyan-700 ">
+                                            Worst Driver: #{race.bonusPicks.worstDriver} - {race.pickedWorstDriver?.name_acronym} | P{race.pickedWorstDriver?.race_startPosition} - P{race.pickedWorstDriver?.race_position} 
+                                            <span className="text-neutral-50 ml-4">
+                                                {race.pickedWorstDriver?.race_position - race.pickedWorstDriver?.race_startPosition >= 0 && (<>+</>)} 
+                                                {race.pickedWorstDriver?.race_position - race.pickedWorstDriver?.race_startPosition}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {race.bonusPicks.dnfs !== null && (
+                                        <div className="text-cyan-700 flex items-center gap-1">
+                                            DNFs:{race.bonusPicks.dnfs} ( {race.actualDnfs} actual ) <span className="text-neutral-50 ml-4">{race.bonusPicks.dnfs === race.actualDnfs ? "+5" : "+0"}</span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
-
-                            {race.results.map((driver, idx) => (
-                                <li
-                                    key={driver.name_acronym}
-                                    className={classNames(
-                                    "flex flex-col relative -mt-4 rounded-lg",
-                                    idx === 1 ? "items-end -mr-2" : "items-start -ml-2"
-                                    )}
-                                >
-                                    <img
-                                        src={driver.headshot_url}
-                                        alt={driver.driver_name}
-                                        className="h-14 mr-2 shrink-0"
-                                    />
-                                        {driver.bonusTitle &&(
-                                            <div className="bg-cyan-700 text-neutral-100 text-[8px] px-1 mx-4 rounded-b-sm absolute top-full w-[120px]">{driver.bonusTitle}</div>
-                                        )}
-                                        {driver.gpWinner && (
-                                            <p className="text-xs text-neutral-500 absolute top-0 right-0">🏆</p>
-                                        )}
-                                    <div
-                                    className={classNames(
-                                        "absolute top-0 flex flex-col w-max",
-                                        idx === 1 ? "right-12 text-right" : "left-10 text-left"
-                                    )}
-                                    >
-                                    <div
-                                        className={classNames(
-                                        "flex items-end",
-                                        idx === 1 ? "flex-row-reverse" : "flex-row"
-                                        )}
-                                    >
-                                        <p className="font-display text-lg leading-none">
-                                            {driver.name_acronym}
+                        </div>
+                        {/*  old */}
+                        {/* <div key={race.meeting_key} className="mt-12 relative">
+                            <ul className="text-sm bg-neutral-300 rounded-lg flex items-end justify-between relative">
+                                {race.results.length >= 2 && (
+                                    <div className={classNames("grid grid-cols-3 gap-2 absolute left-1/2 -translate-x-1/2 items-center", race.bonusPoints > 0 ? "top-[-2.5rem]" : "top-[-1.5rem]")}>
+                                        <p className="text-lg font-display text-right">
+                                            {race.results[0].points}
+                                        </p>
+                                        <div>
+                                            {race.bonusPoints > 0 && (
+                                                <p className="font-bold mt-1 text-xs">Bonus +{race.bonusPoints}</p>
+                                            )}
+                                            <div className="text-center bg-cyan-800 rounded w-10 relative">
+                                                <span className="font-display text-2xl">{race.results.reduce((acc, d) => acc + d.points, 0)}</span>
+                                                {race.results[0].autoPicks && <span className="absolute top-[2px] right-[2px] text-xs">*</span>}
+                                            </div>
+                                        </div>
+                                        <p className="text-lg font-display text-left">
+                                            {race.results[1].points}
                                         </p>
                                     </div>
-                                    <p className="text-xs font-bold leading-none text-neutral-700">
-                                        P{driver.race_startPosition} -{" "}
-                                        {driver.race_position === 0
-                                        ? "DNF"
-                                        : `P${driver.race_position}`}
-                                    </p>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                        <h4 className="text-center absolute bottom-1 left-1/2 -translate-x-1/2 w-[75%]">
-                            <p className="leading-none text-[10px] font-bold text-neutral-500 uppercase">
-                            Round {index + 1}
-                            </p>
-                            <p className="font-bold text-center text-sm text-neutral-700 leading-none">
-                            {race.race}
-                            </p>
-                        </h4>
-                        </div>
+                                )}
+
+                                {race.results.map((driver, idx) => (
+                                    <li
+                                        key={driver.name_acronym}
+                                        className={classNames(
+                                        "flex flex-col relative -mt-4 rounded-lg",
+                                        idx === 1 ? "items-end -mr-2" : "items-start -ml-2"
+                                        )}
+                                    >
+                                        <img
+                                            src={driver.headshot_url}
+                                            alt={driver.driver_name}
+                                            className="h-14 mr-2 shrink-0"
+                                        />
+                                            {driver.bonusTitle &&(
+                                                <div className="bg-cyan-700 text-neutral-100 text-[8px] px-1 mx-4 rounded-b-sm absolute top-full w-[120px]">{driver.bonusTitle}</div>
+                                            )}
+                                            {driver.gpWinner && (
+                                                <p className="text-xs text-neutral-500 absolute top-0 right-0">🏆</p>
+                                            )}
+                                        <div
+                                        className={classNames(
+                                            "absolute top-0 flex flex-col w-max",
+                                            idx === 1 ? "right-12 text-right" : "left-10 text-left"
+                                        )}
+                                        >
+                                        <div
+                                            className={classNames(
+                                            "flex items-end",
+                                            idx === 1 ? "flex-row-reverse" : "flex-row"
+                                            )}
+                                        >
+                                            <p className="font-display text-lg leading-none">
+                                                {driver.name_acronym}
+                                            </p>
+                                        </div>
+                                        <p className="text-xs font-bold leading-none text-neutral-700">
+                                            P{driver.race_startPosition} -{" "}
+                                            {driver.race_position === 0
+                                            ? "DNF"
+                                            : `P${driver.race_position}`}
+                                        </p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <h4 className="text-center absolute bottom-1 left-1/2 -translate-x-1/2 w-[75%]">
+                                <p className="leading-none text-[10px] font-bold text-neutral-500 uppercase">
+                                Round {index + 1}
+                                </p>
+                                <p className="font-bold text-center text-sm text-neutral-700 leading-none">
+                                {race.race}
+                                </p>
+                            </h4>
+                        </div> */}
+                        
+                        </>
                     ))}
                     </>
                 ) : (

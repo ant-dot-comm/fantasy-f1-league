@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/mongodb";
-import { activeScoringModel } from "@/lib/utils/scoringModel";
+import { activeScoringModel, calculateBonusPicksScore } from "@/lib/utils/scoringModel";
 import User from "@/models/User";
 import Race from "@/models/Race";
 import Driver from "@/models/Driver";
@@ -46,6 +46,8 @@ export default async function handler(req, res) {
                 ? Object.fromEntries(userPicks[season])
                 : userPicks[season];
 
+        // console.log(`🔍 Season picks structure:`, JSON.stringify(seasonPicks, null, 2));
+
         if (!seasonPicks) {
             return res
                 .status(404)
@@ -57,23 +59,30 @@ export default async function handler(req, res) {
         for (const [meetingKey, raceData] of Object.entries(seasonPicks)) {
             if (!raceData.picks || raceData.picks.length === 0) continue;
 
+            // ✅ Convert Mongoose document to plain object if needed
+            const plainRaceData = raceData.toObject ? raceData.toObject() : raceData;
+
+            // console.log(`🔍 Processing ${meetingKey}:`, {
+            //     raceDataKeys: Object.keys(plainRaceData),
+            //     hasBonusPicks: 'bonusPicks' in plainRaceData,
+            //     bonusPicksValue: plainRaceData.bonusPicks,
+            //     raceDataType: typeof plainRaceData
+            // });
+
             const raceEntry = await Race.findOne({
                 meeting_key: meetingKey,
                 year: season,
             });
             if (!raceEntry) {
-                console.log(`⚠️ No race data found for ${meetingKey}`);
                 continue;
             }
-            // console.log(`🔎 Found race ${raceEntry.meeting_name} for ${meetingKey}`);
-            // console.log(`🏁 Race results:`, raceEntry.race_results);
 
             const driverDetails = await Driver.find({
-                driver_number: { $in: raceData.picks },
+                driver_number: { $in: plainRaceData.picks },
                 // year: season,
             });
 
-            const results = raceData.picks
+            const results = plainRaceData.picks
                 .map((driverNumber) => {
                     const qualiResult = raceEntry.qualifying_results.find(
                         (d) => d.driverNumber === driverNumber
@@ -106,7 +115,7 @@ export default async function handler(req, res) {
                         bonusTitle,
                         gpWinner,
                         name_acronym: driverInfo.name_acronym,
-                        autoPicks: raceData.autopick,
+                        autoPicks: plainRaceData.autopick,
                         headshot_url: driverInfo.name_acronym
                             ? `/drivers/${season}/${driverInfo.name_acronym}.png`
                             : `/drivers/${season}/default.png`,
@@ -118,7 +127,64 @@ export default async function handler(req, res) {
                 race: raceEntry.meeting_name,
                 meeting_key: meetingKey,
                 results,
+                bonusPicks: plainRaceData.bonusPicks || null,
+                bonusPoints: 0, // Will be calculated below
+                actualDnfs: raceEntry.dnfs || 0, // Use the dnf field from the race document
+                pickedWorstDriver: null, // Will be calculated below
             });
+            
+            console.log(`🔍 Added to raceBreakdown for ${meetingKey}:`, {
+                race: raceEntry.meeting_name,
+                bonusPicks: plainRaceData.bonusPicks,
+                hasBonusPicks: !!plainRaceData.bonusPicks
+            });
+        }
+
+        // ✅ Calculate bonus points for each race
+        for (const race of raceBreakdown) {
+            if (race.bonusPicks && (race.bonusPicks.worstDriver || race.bonusPicks.dnfs !== null)) {
+                const raceEntry = await Race.findOne({
+                    meeting_key: race.meeting_key,
+                    year: season,
+                });
+                
+                if (raceEntry) {
+                    const { bonusPoints } = calculateBonusPicksScore(
+                        race.bonusPicks,
+                        raceEntry.race_results || [],
+                        raceEntry.qualifying_results || [],
+                        raceEntry.dnfs || 0
+                    );
+                    race.bonusPoints = bonusPoints;
+
+                    // ✅ Get actual performance data for the driver the user picked as "worst driver"
+                    if (race.bonusPicks.worstDriver) {
+                        const pickedDriverResult = raceEntry.race_results.find(
+                            d => d.driverNumber === race.bonusPicks.worstDriver
+                        );
+                        const pickedDriverQuali = raceEntry.qualifying_results.find(
+                            d => d.driverNumber === race.bonusPicks.worstDriver
+                        );
+                        const pickedDriverInfo = await Driver.findOne({
+                            driver_number: race.bonusPicks.worstDriver
+                        });
+
+                        if (pickedDriverResult && pickedDriverQuali && pickedDriverInfo) {
+                            race.pickedWorstDriver = {
+                                driver_name: pickedDriverInfo.full_name,
+                                team: pickedDriverInfo.team_name,
+                                qualifying_position: pickedDriverQuali.finishPosition,
+                                race_startPosition: pickedDriverResult.startPosition,
+                                race_position: pickedDriverResult.finishPosition,
+                                name_acronym: pickedDriverInfo.name_acronym,
+                                headshot_url: pickedDriverInfo.name_acronym
+                                    ? `/drivers/${season}/${pickedDriverInfo.name_acronym}.png`
+                                    : `/drivers/${season}/default.png`,
+                            };
+                        }
+                    }
+                }
+            }
         }
 
         playerRaceCache.set(cacheKey, raceBreakdown);

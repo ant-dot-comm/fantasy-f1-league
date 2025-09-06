@@ -16,6 +16,7 @@ const RaceSchema = new mongoose.Schema(
     picks_closed: { type: Date }, // ✅ Updated field for Race start
     qualifying_results: { type: [DriverResultSchema], default: [] },
     race_results: { type: [DriverResultSchema], default: [] },
+    dnfs: { type: Number, default: 0 }, // ✅ Number of DNFs in the race
   },
   { timestamps: true }
 );

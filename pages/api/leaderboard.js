@@ -2,7 +2,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Race from "@/models/Race";
 import Driver from "@/models/Driver";
-import { activeScoringModel } from "@/lib/utils/scoringModel";
+import { activeScoringModel, calculateBonusPicksScore } from "@/lib/utils/scoringModel";
 
 // Enhanced cache with TTL (time to live)
 const leaderboardCache = new Map();
@@ -78,6 +78,7 @@ export default async function handler(req, res) {
       
       let totalPoints = 0;
       let autoPicksCount = 0;
+      let bonusPicksCount = 0;
 
       if (seasonPicks) {
         Object.entries(seasonPicks).forEach(([meetingKey, raceData]) => {
@@ -88,10 +89,18 @@ export default async function handler(req, res) {
 
           if (raceData.autopick) autoPicksCount++;
 
+          // ✅ Calculate regular picks points
           raceData.picks.forEach(driverNumber => {
             const qualiResult = race.qualifying_results?.find(d => d.driverNumber === driverNumber);
             const raceResult = race.race_results?.find(d => d.driverNumber === driverNumber);
             
+            // if (raceResult && qualiResult) {
+            //   const { points } = activeScoringModel(
+            //     raceResult.startPosition,
+            //     raceResult.finishPosition
+            //   );
+            //   totalPoints += points;
+            // }
             if (raceResult && qualiResult) {
               const { points } = activeScoringModel(
                 raceResult.startPosition,
@@ -100,6 +109,18 @@ export default async function handler(req, res) {
               totalPoints += points;
             }
           });
+
+          // ✅ Calculate bonus picks points
+          if (raceData.bonusPicks && (raceData.bonusPicks.worstDriver || raceData.bonusPicks.dnfs !== null)) {
+            bonusPicksCount++;
+            const { bonusPoints } = calculateBonusPicksScore(
+              raceData.bonusPicks,
+              race.race_results || [],
+              race.qualifying_results || [],
+              race.dnfs || 0
+            );
+            totalPoints += bonusPoints;
+          }
         });
       }
 
@@ -108,6 +129,7 @@ export default async function handler(req, res) {
         username: user.username,
         points: totalPoints,
         autoPicks: autoPicksCount,
+        bonusPicks: bonusPicksCount,
       };
     });
 

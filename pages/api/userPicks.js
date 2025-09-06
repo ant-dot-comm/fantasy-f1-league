@@ -29,7 +29,14 @@ export default async function handler(req, res) {
 
       if (!racePicks || !racePicks.picks || racePicks.picks.length === 0) {
         console.log(`No picks found for ${username} in season ${season}, race ${meeting_key}`);
-        return res.status(200).json({ picks: [], autopick: false });
+        return res.status(200).json({ 
+          picks: [], 
+          autopick: false,
+          bonusPicks: {
+            worstDriver: null,
+            dnfs: null,
+          }
+        });
       }
 
       const driverDetails = await Driver.find({
@@ -47,7 +54,14 @@ export default async function handler(req, res) {
         name_acronym: driver.name_acronym,
       }));
 
-      res.status(200).json({ picks: enrichedPicks, autopick: racePicks.autopick || false });
+      res.status(200).json({ 
+        picks: enrichedPicks, 
+        autopick: racePicks.autopick || false,
+        bonusPicks: racePicks.bonusPicks || {
+          worstDriver: null,
+          dnfs: null,
+        }
+      });
     } catch (error) {
       console.error("Error fetching user picks:", error);
       res.status(500).json({ error: "Internal Server Error" });

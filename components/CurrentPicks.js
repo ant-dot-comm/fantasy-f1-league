@@ -20,6 +20,10 @@ export default function CurrentPick({ season, username }) {
     const [pickStatusMessage, setPickStatusMessage] = useState("");
     const [isCurrentRaceLoading, setIsCurrentRaceLoading] = useState(true);
     const [showFinalResults, setShowFinalResults] = useState(false);
+    const [isBonusModalOpen, setIsBonusModalOpen] = useState(false);
+    const [selectedWorstDriver, setSelectedWorstDriver] = useState(null);
+    const [predictedDnfs, setPredictedDnfs] = useState("");
+    const [userBonusPicks, setUserBonusPicks] = useState({ worstDriver: null, dnfs: null });
     const router = useRouter();
 
     // console.log('here', { currentRace, selectedDrivers, userPicks, bottomDrivers });
@@ -109,6 +113,7 @@ export default function CurrentPick({ season, username }) {
                 setUserPicks(res.data.picks || []);
                 setAutoPicked(res.data.autopick);
                 setSelectedDrivers(res.data.picks.map(p => p.driverNumber) || []);
+                setUserBonusPicks(res.data.bonusPicks || { worstDriver: null, dnfs: null });
             } catch (error) {
                 console.error("❌ Error fetching user pick:", error);
                 if (error.response?.status === 401) {
@@ -179,6 +184,34 @@ export default function CurrentPick({ season, username }) {
         }
     }
 
+    // ✅ Submit bonus picks
+    async function submitBonusPicks() {
+        try {
+            const token = Cookies.get("token");
+            await axios.post("/api/submitBonusPicks", {
+                username,
+                season,
+                meeting_key: currentRace.meeting_key,
+                worstDriver: selectedWorstDriver,
+                dnfs: predictedDnfs ? parseInt(predictedDnfs) : null,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            setIsBonusModalOpen(false);
+            setSelectedWorstDriver(null);
+            setPredictedDnfs("");
+            router.reload();
+        } catch (error) {
+            console.error("❌ Error submitting bonus picks:", error);
+            if (error.response?.status === 401) {
+                console.error("Authentication failed. Please log in again.");
+            }
+        }
+    }
+
     // ✅ Display current picks with autopick indicator
     return (
         <>
@@ -212,17 +245,42 @@ export default function CurrentPick({ season, username }) {
                     
                     {(autoPicked && userPicks.length > 0) && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
 
-                    {/* ✅ Pick Button */}
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className={classNames(
-                            "-mb-6 px-6 py-4 mt-4 rounded-lg text-neutral-100 shadow-md z-10",
-                            !picksOpen ? "bg-neutral-500" : "bg-cyan-800"
+                    {/* ✅ Display Bonus Picks */}
+                    {(userBonusPicks.worstDriver || userBonusPicks.dnfs !== null) && (
+                        <div className="mt-4 text-center">
+                            <p className="text-xs text-neutral-400 mb-2">Bonus Picks</p>
+                            {userBonusPicks.worstDriver && (
+                                <p className="text-xs text-neutral-300">Worst Driver: #{userBonusPicks.worstDriver}</p>
+                            )}
+                            {userBonusPicks.dnfs !== null && (
+                                <p className="text-xs text-neutral-300">DNFs: {userBonusPicks.dnfs}</p>
+                            )}
+                        </div>
+                    )}
+
+                    <div className="flex flex-row items-center gap-4 -mb-6  mt-4">
+                        {/* ✅ Pick Button */}
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className={classNames(
+                                "px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10",
+                                !picksOpen ? "bg-neutral-500" : "bg-cyan-800 hover:bg-cyan-700"
+                            )}
+                            disabled={!picksOpen}
+                            >
+                            {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
+                        </button>
+
+                        {/* ✅ Bonus Picks Button */}
+                        {picksOpen && (
+                            <button
+                                onClick={() => setIsBonusModalOpen(true)}
+                                className="px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10 bg-cyan-800 hover:bg-cyan-700"
+                            >
+                                Bonus Picks
+                            </button>
                         )}
-                        disabled={!picksOpen}
-                    >
-                        {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
-                    </button>
+                    </div>
                 </>
             )}
             
@@ -283,6 +341,74 @@ export default function CurrentPick({ season, username }) {
                     disabled={selectedDrivers.length !== 2}
                 >
                     Confirm Picks
+                </button>
+            </Modal>
+
+            {/* ✅ Bonus Picks Modal */}
+            <Modal isOpen={isBonusModalOpen} onClose={() => setIsBonusModalOpen(false)} user={username} title="Bonus Picks">
+                <p className="font-bold leading-none">{season} {currentRace?.meeting_name}</p>
+                <h3 className="mb-4 text-sm text-neutral-400">Select worst driver & predict DNFs (optional)</h3>
+
+                {/* ✅ Worst Driver Selection */}
+                <div className="mb-4">
+                    <h4 className="text-sm font-bold mb-2">Worst Driver (who will lose most positions)</h4>
+                    <ul className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                        {bottomDrivers.sort((a, b) => a.qualifyingPosition - b.qualifyingPosition)
+                            .map(driver => (
+                                <li key={driver.driverNumber}>
+                                    <button
+                                        className={classNames(
+                                            "flex flex-row items-center text-xs w-full text-left rounded-lg shadow-2xl",
+                                            selectedWorstDriver === driver.driverNumber
+                                                ? "bg-cyan-600 text-neutral-200 shadow-md"
+                                                : "bg-neutral-200 text-neutral-700",
+                                            driver.headshot_url ? "pr-2" : "px-1"
+                                        )}
+                                        onClick={() => setSelectedWorstDriver(
+                                            selectedWorstDriver === driver.driverNumber ? null : driver.driverNumber
+                                        )}
+                                    >
+                                        <div className="rounded-l-md" style={{ backgroundColor: `#${driver.teamColour}` }}>
+                                            <img src={driver.headshot_url} alt={driver.fullName} className="h-12 -mt-4"/>
+                                        </div>
+                                        <div className="mx-2 flex flex-row items-center">
+                                            <span className={classNames(
+                                                "mr-2 font-display leading-none",
+                                                selectedWorstDriver === driver.driverNumber ? "text-neutral-300" : "text-neutral-500"
+                                            )}>
+                                                P{driver.qualifyingPosition}
+                                            </span>
+                                            <div className="text-[16px] font-bold">
+                                                <div className="text-[16px] font-bold leading-none">{driver.fullName}</div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </li>
+                            ))}
+                    </ul>
+                </div>
+
+                {/* ✅ DNFs Prediction */}
+                <div className="mb-4">
+                    <h4 className="text-sm font-bold mb-2">Number of DNFs (optional)</h4>
+                    <input
+                        type="number"
+                        min="0"
+                        max="20"
+                        value={predictedDnfs}
+                        onChange={(e) => setPredictedDnfs(e.target.value)}
+                        placeholder="Enter number of DNFs"
+                        className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-neutral-700"
+                    />
+                    <p className="text-xs text-neutral-400 mt-1">Leave empty if you don't want to predict DNFs</p>
+                </div>
+
+                {/* ✅ Submit Button */}
+                <button
+                    className="px-4 py-2 w-full bg-cyan-800 text-white rounded-lg font-bold"
+                    onClick={submitBonusPicks}
+                >
+                    Confirm Bonus Picks
                 </button>
             </Modal>
         </div>

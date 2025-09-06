@@ -7,6 +7,10 @@ const RacePickSchema = new mongoose.Schema({
     type: [Number], // ✅ Array of driver numbers (can be empty or null)
     default: undefined, // ✅ Allows unselected picks to remain undefined
   },
+  bonusPicks: {
+    worstDriver: { type: Number, default: null }, // ✅ Driver number for worst driver pick
+    dnfs: { type: Number, default: null }, // ✅ Number of DNFs predicted
+  },
 });
 
 // ✅ Define the main User schema
