@@ -76,8 +76,8 @@ const raceSchedule = {
     },
     "1268": { // Italy
       race_name: "Italian Grand Prix",
-      picks_open: new Date("2025-09-06T08:00:00"),  
-      picks_close: new Date("2025-09-07T06:00:00"), 
+      picks_open: new Date("2025-09-06T15:00:00"),  // 3 PM UTC (8 AM PST)
+      picks_close: new Date("2025-09-07T13:00:00"), // 1 PM UTC (6 AM PST)
     },
     "1269": { // Azerbaijan
       race_name: "Azerbaijan Grand Prix",
