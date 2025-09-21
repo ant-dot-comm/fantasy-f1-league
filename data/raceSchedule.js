@@ -81,8 +81,8 @@ const raceSchedule = {
     },
     "1269": { // Azerbaijan
       race_name: "Azerbaijan Grand Prix",
-      picks_open: new Date("2025-09-20T06:00:00"),  
-      picks_close: new Date("2025-09-21T04:00:00"), 
+      picks_open: new Date("2025-09-06T15:00:00"), // (3 PM UTC),
+      picks_close: new Date("2025-09-07T13:00:00") //(1 PM UTC),
     },
     "1270": { // Singapore
       race_name: "Singapore Grand Prix",

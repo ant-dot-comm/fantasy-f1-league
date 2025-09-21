@@ -98,8 +98,13 @@ async function storeRaceData(year, meetingKey = null) {
         // ✅ Fetch Qualifying & Race Results if available
         if (sessionKeyQualifying) {
             try {
-                raceEntry.qualifying_results = await fetchAllDriverPositions(sessionKeyQualifying);
-                console.log(`✅ Stored qualifying results for ${meeting_name}`);
+                const newQualifyingResults = await fetchAllDriverPositions(sessionKeyQualifying);
+                if (newQualifyingResults.length > 0) {
+                    raceEntry.qualifying_results = newQualifyingResults;
+                    console.log(`✅ Stored qualifying results for ${meeting_name}`);
+                } else {
+                    console.log(`⚠️ No qualifying results found for ${meeting_name}, keeping existing data`);
+                }
             } catch (error) {
                 console.error(`❌ Error fetching qualifying results for ${meeting_name}:`, error);
             }
@@ -107,8 +112,13 @@ async function storeRaceData(year, meetingKey = null) {
 
         if (sessionKeyRace) {
             try {
-                raceEntry.race_results = await fetchAllDriverPositions(sessionKeyRace);
-                console.log(`✅ Stored race results for ${meeting_name}`);
+                const newRaceResults = await fetchAllDriverPositions(sessionKeyRace);
+                if (newRaceResults.length > 0) {
+                    raceEntry.race_results = newRaceResults;
+                    console.log(`✅ Stored race results for ${meeting_name}`);
+                } else {
+                    console.log(`⚠️ No race results found for ${meeting_name}, keeping existing data`);
+                }
             } catch (error) {
                 console.error(`❌ Error fetching race results for ${meeting_name}:`, error);
             }
@@ -124,7 +134,7 @@ async function storeRaceData(year, meetingKey = null) {
 }
 
 // storeRaceData("2023"); // Call for a specific year & meeting if needed
-storeRaceData("2025", "1268"); // Call for a specific year & meeting if needed
+storeRaceData("2025", "1269"); // Call for a specific year & meeting if needed
 
 // 🔥 Fetch ALL driver positions for a session at once **(Optimized)**
 async function fetchAllDriverPositions(sessionKey) {
