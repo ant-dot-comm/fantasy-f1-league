@@ -260,7 +260,7 @@ export default function CurrentPick({ season, username }) {
 
                     <div className="flex flex-row items-center gap-4 -mb-6  mt-4">
                         {/* ✅ Pick Button */}
-                        <button
+                        {/* <button
                             onClick={() => setIsModalOpen(true)}
                             className={classNames(
                                 "px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10",
@@ -269,17 +269,17 @@ export default function CurrentPick({ season, username }) {
                             disabled={!picksOpen}
                             >
                             {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
-                        </button>
+                        </button> */}
 
                         {/* ✅ Bonus Picks Button */}
-                        {picksOpen && (
+                        {/* {picksOpen && (
                             <button
                                 onClick={() => setIsBonusModalOpen(true)}
                                 className="px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10 bg-cyan-800 hover:bg-cyan-700"
                             >
                                 Bonus Picks
                             </button>
-                        )}
+                        )} */}
                     </div>
                 </>
             )}
