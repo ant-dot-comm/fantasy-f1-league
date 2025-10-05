@@ -20,8 +20,9 @@ export default async function handler(req, res) {
   }
 
   const now = new Date();
-  const picksOpenTime = new Date(raceInfo.picks_open);
-  const picksCloseTime = new Date(raceInfo.picks_close);
+  // Treat raceSchedule times as local time (PST/CST), not UTC
+  const picksOpenTime = new Date(raceInfo.picks_open.getTime() + (raceInfo.picks_open.getTimezoneOffset() * 60000));
+  const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
   
   const isOpen = now >= picksOpenTime && now <= picksCloseTime;
   const hasNotOpened = now < picksOpenTime;
