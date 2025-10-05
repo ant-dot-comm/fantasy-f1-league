@@ -87,7 +87,7 @@ const raceSchedule = {
     "1270": { // Singapore
       race_name: "Singapore Grand Prix",
       picks_open: new Date("2025-10-04T07:00:00"),  
-      picks_close: new Date("2025-10-05T05:00:00"), 
+      picks_close: new Date("2025-10-06T12:00:00"), // 12 PM UTC (6 AM CST)
     },
     "1271": { // United States
       race_name: "United States Grand Prix",
