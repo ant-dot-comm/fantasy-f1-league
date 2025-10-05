@@ -61,7 +61,8 @@ export default function CurrentPick({ season, username }) {
             async function fetchPicksStatus() {
                 try {
                     const res = await axios.get(`/api/picksStatus?meeting_key=${currentRace.meeting_key}`);
-                    const { is_open } = res.data;
+                    // const { is_open } = res.data;
+                    const is_open = false
                     
                     const nextScheduleSessionId = Number(currentRace.meeting_key) + 1;
                     const prevScheduleSessionId = is_open ? Number(currentRace.meeting_key) - 1 : Number(currentRace.meeting_key);
@@ -260,7 +261,7 @@ export default function CurrentPick({ season, username }) {
 
                     <div className="flex flex-row items-center gap-4 -mb-6  mt-4">
                         {/* ✅ Pick Button */}
-                        {/* <button
+                        <button
                             onClick={() => setIsModalOpen(true)}
                             className={classNames(
                                 "px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10",
@@ -269,17 +270,17 @@ export default function CurrentPick({ season, username }) {
                             disabled={!picksOpen}
                             >
                             {!picksOpen ? "Picks Locked" : userPicks.length > 0 ? "Update Picks" : "Make Picks"}
-                        </button> */}
+                        </button>
 
                         {/* ✅ Bonus Picks Button */}
-                        {/* {picksOpen && (
+                        {picksOpen && (
                             <button
                                 onClick={() => setIsBonusModalOpen(true)}
                                 className="px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10 bg-cyan-800 hover:bg-cyan-700"
                             >
                                 Bonus Picks
                             </button>
-                        )} */}
+                        )}
                     </div>
                 </>
             )}
