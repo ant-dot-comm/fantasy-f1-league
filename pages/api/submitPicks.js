@@ -27,17 +27,30 @@ export default async function handler(req, res) {
       });
     }
 
-    const now = new Date();
-    // Treat raceSchedule times as local time (PST/CST), not UTC - match picksStatus.js logic
-    const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
-    
-    if (now > picksCloseTime) {
-      return res.status(403).json({ 
-        error: "Picks deadline exceeded", 
-        message: `Picks for ${raceInfo.race_name} closed at ${picksCloseTime.toLocaleString()}. Current time: ${now.toLocaleString()}`,
-        picks_close: picksCloseTime.toISOString(),
-        current_time: now.toISOString()
-      });
+    // 🎛️ Check for manual override first
+    if (raceInfo.manualControl !== null && raceInfo.manualControl !== undefined) {
+      if (raceInfo.manualControl !== true) {
+        return res.status(403).json({ 
+          error: "Picks manually closed", 
+          message: `Picks for ${raceInfo.race_name} are manually closed by admin`,
+          manual_control: true
+        });
+      }
+      // If manually open, skip time validation and proceed
+    } else {
+      // Use time-based validation
+      const now = new Date();
+      // Treat raceSchedule times as local time (PST/CST), not UTC - match picksStatus.js logic
+      const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
+      
+      if (now > picksCloseTime) {
+        return res.status(403).json({ 
+          error: "Picks deadline exceeded", 
+          message: `Picks for ${raceInfo.race_name} closed at ${picksCloseTime.toLocaleString()}. Current time: ${now.toLocaleString()}`,
+          picks_close: picksCloseTime.toISOString(),
+          current_time: now.toISOString()
+        });
+      }
     }
 
     try {

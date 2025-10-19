@@ -19,6 +19,27 @@ export default async function handler(req, res) {
     });
   }
 
+  // 🎛️ Check for manual override first
+  if (raceInfo.manualControl !== null && raceInfo.manualControl !== undefined) {
+    const isOpen = raceInfo.manualControl === true;
+    const status = isOpen ? "open" : "closed";
+    const message = isOpen 
+      ? `Picks for ${raceInfo.race_name} are MANUALLY OPEN` 
+      : `Picks for ${raceInfo.race_name} are MANUALLY CLOSED`;
+    
+    return res.status(200).json({
+      race_name: raceInfo.race_name,
+      meeting_key,
+      status,
+      message,
+      is_open: isOpen,
+      manual_control: true,
+      picks_open: raceInfo.picks_open.toISOString(),
+      picks_close: raceInfo.picks_close.toISOString(),
+      current_time: new Date().toISOString(),
+    });
+  }
+
   const now = new Date();
   // Treat raceSchedule times as local time (PST/CST), not UTC
   const picksOpenTime = new Date(raceInfo.picks_open.getTime() + (raceInfo.picks_open.getTimezoneOffset() * 60000));

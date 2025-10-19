@@ -3,6 +3,7 @@ const raceSchedule = {
       race_name: "Australian Grand Prix",
       picks_open: new Date("2025-03-14T23:00:00"),
       picks_close: new Date("2025-03-15T21:00:00"),
+      manualControl: null, // Set to true or false to manually override time-based logic
     },
     "1255": { // China
       race_name: "Chinese Grand Prix",
@@ -92,7 +93,8 @@ const raceSchedule = {
     "1271": { // United States
       race_name: "United States Grand Prix",
       picks_open: new Date("2025-10-18T15:00:00"),  
-      picks_close: new Date("2025-10-19T12:00:00"), 
+      picks_close: new Date("2025-10-19T12:00:00"),
+      manualControl: true, // 👈 Set to true (open), false (closed), or null (use time-based logic)
     },
     "1272": { // Mexico
       race_name: "Mexico Grand Prix",
