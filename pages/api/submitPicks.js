@@ -28,7 +28,8 @@ export default async function handler(req, res) {
     }
 
     const now = new Date();
-    const picksCloseTime = new Date(raceInfo.picks_close);
+    // Treat raceSchedule times as local time (PST/CST), not UTC - match picksStatus.js logic
+    const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
     
     if (now > picksCloseTime) {
       return res.status(403).json({ 

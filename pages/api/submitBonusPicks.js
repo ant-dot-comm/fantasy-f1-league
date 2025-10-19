@@ -1,6 +1,7 @@
 import dbConnect from "../../lib/mongodb";
 import User from "../../models/User";
 import { authenticateAndAuthorizeUser } from "../../lib/middleware";
+import raceSchedule from "../../data/raceSchedule";
 
 export default async function handler(req, res) {
     if (req.method !== "POST") {
@@ -16,6 +17,28 @@ export default async function handler(req, res) {
 
             if (!username || !season || !meeting_key) {
                 return res.status(400).json({ error: "Missing required fields" });
+            }
+
+            // ✅ Time-based validation: Check if picks submission is still allowed
+            const raceInfo = raceSchedule[meeting_key];
+            if (!raceInfo) {
+                return res.status(400).json({ 
+                    error: "Invalid race", 
+                    message: `No race found for meeting key: ${meeting_key}` 
+                });
+            }
+
+            const now = new Date();
+            // Treat raceSchedule times as local time (PST/CST), not UTC - match picksStatus.js logic
+            const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
+            
+            if (now > picksCloseTime) {
+                return res.status(403).json({ 
+                    error: "Picks deadline exceeded", 
+                    message: `Bonus picks for ${raceInfo.race_name} closed at ${picksCloseTime.toLocaleString()}. Current time: ${now.toLocaleString()}`,
+                    picks_close: picksCloseTime.toISOString(),
+                    current_time: now.toISOString()
+                });
             }
 
             // ✅ Find user and update bonus picks

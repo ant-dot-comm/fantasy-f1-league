@@ -61,8 +61,7 @@ export default function CurrentPick({ season, username }) {
             async function fetchPicksStatus() {
                 try {
                     const res = await axios.get(`/api/picksStatus?meeting_key=${currentRace.meeting_key}`);
-                    // const { is_open } = res.data;
-                    const is_open = true
+                    const { is_open } = res.data;
                     
                     const nextScheduleSessionId = Number(currentRace.meeting_key) + 1;
                     const prevScheduleSessionId = is_open ? Number(currentRace.meeting_key) - 1 : Number(currentRace.meeting_key);
