@@ -27,6 +27,10 @@ export default async function handler(req, res) {
       });
     }
 
+    // Define time variables (needed for response even with manual control)
+    const now = new Date();
+    const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
+
     // 🎛️ Check for manual override first
     if (raceInfo.manualControl !== null && raceInfo.manualControl !== undefined) {
       if (raceInfo.manualControl !== true) {
@@ -39,10 +43,6 @@ export default async function handler(req, res) {
       // If manually open, skip time validation and proceed
     } else {
       // Use time-based validation
-      const now = new Date();
-      // Treat raceSchedule times as local time (PST/CST), not UTC - match picksStatus.js logic
-      const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
-      
       if (now > picksCloseTime) {
         return res.status(403).json({ 
           error: "Picks deadline exceeded", 
