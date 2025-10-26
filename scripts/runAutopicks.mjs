@@ -7,7 +7,7 @@ async function runAutoPicks() {
 
     const season = "2025"; // Set the season
     // Determine the current race (this should be dynamic; here it's hardcoded)
-    const currentMeetingKey = "1271"; // e.g. the current race meeting key
+    const currentMeetingKey = "1272"; // e.g. the current race meeting key
 
     console.log(`🚀 Running auto-picks for season ${season} on race ${currentMeetingKey}`);
 

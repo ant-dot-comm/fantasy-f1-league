@@ -100,6 +100,7 @@ const raceSchedule = {
       race_name: "Mexico Grand Prix",
       picks_open: new Date("2025-10-25T15:00:00"),  
       picks_close: new Date("2025-10-26T13:00:00"), 
+      manualControl: true, 
     },
     "1273": { // Brazil
       race_name: "Brazilian Grand Prix",
