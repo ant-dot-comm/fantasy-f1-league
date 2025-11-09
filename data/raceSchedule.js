@@ -106,6 +106,7 @@ const raceSchedule = {
       race_name: "Brazilian Grand Prix",
       picks_open: new Date("2025-11-08T11:00:00"),  
       picks_close: new Date("2025-11-09T09:00:00"), 
+      manualControl: true, 
     },
     "1274": { // Las Vegas
       race_name: "Las Vegas Grand Prix",
