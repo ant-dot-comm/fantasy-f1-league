@@ -112,6 +112,7 @@ const raceSchedule = {
       race_name: "Las Vegas Grand Prix",
         picks_open: new Date("2025-11-21T21:00:00"),  
         picks_close: new Date("2025-11-22T20:00:00"), 
+        manualControl: false, 
     },
     "1275": { // Qatar
       race_name: "Qatar Grand Prix",
