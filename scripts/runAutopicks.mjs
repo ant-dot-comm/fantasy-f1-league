@@ -51,7 +51,7 @@ async function runAutoPicks() {
 
         // Select eligible drivers from P11 to P20 in qualifying
         const eligibleDrivers = race.qualifying_results
-            .filter(d => d.finishPosition && d.finishPosition >= 11 && d.finishPosition <= 20)
+            .filter(d => d.finishPosition && d.finishPosition >= 11 && d.finishPosition <= 22)
             .map(d => d.driverNumber);
 
         if (eligibleDrivers.length < 2) {

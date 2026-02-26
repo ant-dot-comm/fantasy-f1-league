@@ -46,7 +46,7 @@ export default function SignupForm({ onClose }) {
 
 
       <p className="text-sm font-bold leading-none">Enter your email</p>
-      <p className="text-xs leading-none">We'll only use this for password resets.</p>
+      <p className="text-xs leading-none">We'll only use this for password resets and notifications when picks are open.</p>
       <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="text-input mb-4" required />
 
       <p className="text-sm font-bold leading-none">Don't forget your password!</p>

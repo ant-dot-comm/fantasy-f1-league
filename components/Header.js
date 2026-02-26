@@ -44,28 +44,86 @@ export default function Header() {
         }, 100);
     };
 
-    const signupBeforeDate = new Date(raceSchedule["1254"].picks_close); // Convert to Date object
+    const signupBeforeDate = new Date(raceSchedule["1300"].picks_close); // Convert to Date object
     const formattedTime = signupBeforeDate.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
     });
+    const currentYear = new Date().getFullYear();
     const hideAtSeasonStart  = signupBeforeDate > new Date() && !username
 
+    // Fetch current user's seasons when logged in (for "join new season" banner)
+    const [userSeasons, setUserSeasons] = useState(null);
+    const [joinSeasonLoading, setJoinSeasonLoading] = useState(false);
+    useEffect(() => {
+        if (!username) {
+            setUserSeasons(null);
+            return;
+        }
+        const token = Cookies.get("token");
+        if (!token) return;
+        fetch("/api/user/me", { headers: { Authorization: `Bearer ${token}` } })
+            .then((res) => (res.ok ? res.json() : { seasons: [] }))
+            .then((data) => setUserSeasons(data.seasons || []))
+            .catch(() => setUserSeasons([]));
+    }, [username]);
+
+    const needsJoinSeason = username && Array.isArray(userSeasons) && !userSeasons.includes(currentYear);
+
+    const handleJoinSeason = async () => {
+        const token = Cookies.get("token");
+        if (!token) return;
+        setJoinSeasonLoading(true);
+        try {
+            const res = await fetch("/api/user/joinSeason", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ season: currentYear }),
+            });
+            const data = await res.json();
+            if (data.seasons) setUserSeasons(data.seasons);
+        } catch (e) {
+            console.error("Join season error:", e);
+        } finally {
+            setJoinSeasonLoading(false);
+        }
+    };
 
     return (
         <header className="border-b-8 border-neutral-700">
-            {/* {hideAtSeasonStart && (
+            {hideAtSeasonStart && (
                 <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
-                    Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString()}</span> to be eligible for the 2025 season!
+                    Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString()}</span> to be eligible for the {currentYear} season!
+                    <p className="text-sm text-neutral-200">Returning user? Log in, then join the new season from your account.</p>
+                    <div className="flex flex-wrap justify-center gap-2 mt-2">
+                        <button
+                            onClick={() => setIsSignupOpen(true)}
+                            className="font-bold text-lg bg-neutral-100 text-cyan-800 rounded-md px-2 shadow-2xl"
+                        >
+                            Sign Up
+                        </button>
+                        <button
+                            onClick={() => setIsLoginOpen(true)}
+                            className="font-bold text-lg bg-neutral-100 text-cyan-800 rounded-md px-2 shadow-2xl"
+                        >
+                            Login
+                        </button>
+                    </div>
+                </div>
+            )}
+            {needsJoinSeason && (
+                <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
+                    Welcome back! Join the {currentYear} season to make picks and appear on the leaderboard.
                     <button
-                        onClick={() => setIsSignupOpen(true)}
-                        className="font-bold text-lg block mx-auto bg-neutral-100 text-cyan-800 rounded-md px-2 mt-2 shadow-2xl"
+                        onClick={handleJoinSeason}
+                        disabled={joinSeasonLoading}
+                        className="font-bold text-lg block mx-auto bg-neutral-100 text-cyan-800 rounded-md px-2 mt-2 shadow-2xl disabled:opacity-70"
                     >
-                        Sign Up
+                        {joinSeasonLoading ? "Joining…" : `Join ${currentYear} season`}
                     </button>
                 </div>
-            )} */}
+            )}
             {/* <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
                 If your scores havent updated, try opening page in a new browser window. Few scoring bugs to fix ... will have all scoring based on your picks fixed ASAP. Thanks for your patience! 
             </div> */}

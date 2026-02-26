@@ -19,6 +19,7 @@ export default function CurrentPick({ season, username }) {
     const [picksOpen, setPicksOpen] = useState(false);
     const [pickStatusMessage, setPickStatusMessage] = useState("");
     const [isCurrentRaceLoading, setIsCurrentRaceLoading] = useState(true);
+    const [seasonNotStarted, setSeasonNotStarted] = useState(false);
     const [showFinalResults, setShowFinalResults] = useState(false);
     const [isBonusModalOpen, setIsBonusModalOpen] = useState(false);
     const [selectedWorstDriver, setSelectedWorstDriver] = useState(null);
@@ -31,15 +32,22 @@ export default function CurrentPick({ season, username }) {
     // ✅ Fetch current race details
     useEffect(() => {
         setIsCurrentRaceLoading(true);
+        setSeasonNotStarted(false);
         async function fetchRace() {
             try {
                 const res = await axios.get(`/api/currentRace?season=${season}`);
-                setCurrentRace(res.data);
+                const race = res.data;
+                setCurrentRace(race);
                 setSelectedDrivers([]);
                 setUserPicks([]);
+                if (!race) {
+                    setSeasonNotStarted(true);
+                }
                 setIsCurrentRaceLoading(false);
             } catch (error) {
                 console.error("❌ Error fetching current race:", error);
+                setSeasonNotStarted(true);
+                setIsCurrentRaceLoading(false);
             }
         }
 
@@ -52,7 +60,7 @@ export default function CurrentPick({ season, username }) {
      useEffect(() => {
         if (!currentRace) return;
 
-        if (season < 2025) {
+        if (season < 2026) {
             // 🔴 Disable picks for past seasons
             setPicksOpen(false);
             setShowFinalResults(true);
@@ -60,7 +68,17 @@ export default function CurrentPick({ season, username }) {
             // Use the API to get picks status instead of manual calculation
             async function fetchPicksStatus() {
                 try {
-                    const res = await axios.get(`/api/picksStatus?meeting_key=${currentRace.meeting_key}`);
+                    // Don't throw on 404 so Next.js error overlay doesn't show (season not in schedule yet)
+                    const res = await axios.get(`/api/picksStatus?meeting_key=${currentRace.meeting_key}`, {
+                        validateStatus: (status) => status === 200 || status === 404,
+                    });
+                    if (res.status === 404) {
+                        setSeasonNotStarted(true);
+                        setPicksOpen(false);
+                        setShowFinalResults(true);
+                        return;
+                    }
+                    setSeasonNotStarted(false);
                     const { is_open } = res.data;
                     
                     const nextScheduleSessionId = Number(currentRace.meeting_key) + 1;
@@ -83,7 +101,7 @@ export default function CurrentPick({ season, username }) {
                     setPicksOpen(is_open);
                 } catch (error) {
                     console.error("❌ Error fetching picks status:", error);
-                    // Fallback to closed state on error
+                    setSeasonNotStarted(true);
                     setPicksOpen(false);
                     setShowFinalResults(true);
                 }
@@ -212,14 +230,26 @@ export default function CurrentPick({ season, username }) {
         }
     }
 
+    // ✅ Season hasn't started: no race in DB or race not in schedule yet
+    const showSeasonNotStarted = seasonNotStarted || (!isCurrentRaceLoading && !currentRace);
+
     // ✅ Display current picks with autopick indicator
     return (
         <>
         <div id="current-picks" className={classNames(
             "flex flex-col items-center mb-12 pt-16 relative text-neutral-300",
-            userPicks.length > 0 || showFinalResults ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
+            showSeasonNotStarted ? "bg-neutral-700" : userPicks.length > 0 || showFinalResults ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
         )}>
-            {showFinalResults ? (
+            {isCurrentRaceLoading ? (
+                <p className="text-neutral-400">Loading…</p>
+            ) : showSeasonNotStarted ? (
+                <div className="text-center px-4 py-6">
+                    <h2 className="text-xl font-display text-neutral-100 mb-2">Season hasn&apos;t started yet</h2>
+                    <p className="text-sm text-neutral-400 max-w-sm">
+                        There&apos;s no race data for {season} yet. Check back once the first race weekend is in the system and picks will open here.
+                    </p>
+                </div>
+            ) : showFinalResults ? (
                 <Top3Players season={season} />
             ) : (
                 <>
@@ -299,7 +329,7 @@ export default function CurrentPick({ season, username }) {
                     Confirm Picks
                 </button>
 
-                {/* ✅ Display Bottom 10 Drivers */}
+                {/* ✅ Display Bottom 12 Drivers */}
                 <ul className="flex flex-col gap-2">
                     {bottomDrivers.sort((a, b) => a.qualifyingPosition - b.qualifyingPosition)
                         .map(driver => (
