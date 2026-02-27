@@ -424,7 +424,7 @@ export default function CurrentPick({ season, username }) {
                     <input
                         type="number"
                         min="0"
-                        max="20"
+                        max="22"
                         value={predictedDnfs}
                         onChange={(e) => setPredictedDnfs(e.target.value)}
                         placeholder="Enter number of DNFs"

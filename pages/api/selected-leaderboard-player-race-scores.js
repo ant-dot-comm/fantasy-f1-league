@@ -1,5 +1,4 @@
 import dbConnect from "@/lib/mongodb";
-import { activeScoringModel, calculateBonusPicksScore } from "@/lib/utils/scoringModel";
 import User from "@/models/User";
 import Race from "@/models/Race";
 import Driver from "@/models/Driver";
@@ -79,41 +78,32 @@ export default async function handler(req, res) {
 
             const driverDetails = await Driver.find({
                 driver_number: { $in: plainRaceData.picks },
-                // year: season,
             });
+
+            // ✅ Only trust stored driverScores/bonusPoints from runCalculateScores
+            const hasStoredScores = Array.isArray(plainRaceData.driverScores) && plainRaceData.driverScores.length > 0;
+            if (!hasStoredScores) {
+                console.warn(
+                    `⚠️ Missing stored driverScores for ${username} in season ${season}, meeting_key ${meetingKey}. Skipping race in breakdown.`
+                );
+                continue;
+            }
 
             const results = plainRaceData.picks
                 .map((driverNumber) => {
-                    const qualiResult = raceEntry.qualifying_results.find(
-                        (d) => d.driverNumber === driverNumber
-                    );
-                    const raceResult = raceEntry.race_results.find(
-                        (d) => d.driverNumber === driverNumber
-                    );
-                    const driverInfo = driverDetails.find(
-                        (d) => d.driver_number === driverNumber
-                    );
-
-                    if (!raceResult || !qualiResult|| !driverInfo) return null; // ✅ Handles missing data
-
-                    const { points: driverPoints, bonusTitle, gpWinner } = activeScoringModel(
-                        raceResult.startPosition,
-                        raceResult.finishPosition
-                    );
-
-                    // console.log(
-                    //     `🏎 ${driverInfo.full_name} scored ${driverPoints} points`
-                    // );
-
+                    const stored = plainRaceData.driverScores.find((d) => d.driverNumber === driverNumber);
+                    const driverInfo = driverDetails.find((d) => d.driver_number === driverNumber);
+                    const qualiResult = raceEntry.qualifying_results?.find((d) => d.driverNumber === driverNumber);
+                    if (!driverInfo) return null;
                     return {
                         driver_name: driverInfo.full_name,
                         team: driverInfo.team_name,
-                        qualifying_position: qualiResult.finishPosition,  // ✅ Use the actual qualifying finish position
-                        race_startPosition: raceResult.startPosition,  // ✅ Use the actual qualifying finish position
-                        race_position: raceResult.finishPosition,  // 0 if DNF
-                        points: driverPoints,
-                        bonusTitle,
-                        gpWinner,
+                        qualifying_position: stored?.startPosition ?? qualiResult?.finishPosition,
+                        race_startPosition: stored?.startPosition,
+                        race_position: stored?.finishPosition,
+                        points: stored?.points ?? 0,
+                        bonusTitle: stored?.bonusTitle ?? null,
+                        gpWinner: raceEntry.race_results?.find((d) => d.driverNumber === driverNumber)?.finishPosition === 1,
                         name_acronym: driverInfo.name_acronym,
                         autoPicks: plainRaceData.autopick,
                         headshot_url: driverInfo.name_acronym
@@ -123,14 +113,28 @@ export default async function handler(req, res) {
                 })
                 .filter(Boolean);
 
+            if (
+                plainRaceData.bonusPicks &&
+                typeof plainRaceData.bonusPoints !== "number"
+            ) {
+                console.warn(
+                    `⚠️ Missing stored bonusPoints for ${username} in season ${season}, meeting_key ${meetingKey}. Using 0.`
+                );
+            }
+
+            const bonusPoints =
+                typeof plainRaceData.bonusPoints === "number"
+                    ? plainRaceData.bonusPoints
+                    : 0;
+
             raceBreakdown.push({
                 race: raceEntry.meeting_name,
                 meeting_key: meetingKey,
                 results,
                 bonusPicks: plainRaceData.bonusPicks || null,
-                bonusPoints: 0, // Will be calculated below
-                actualDnfs: raceEntry.dnfs || 0, // Use the dnf field from the race document
-                pickedWorstDriver: null, // Will be calculated below
+                bonusPoints,
+                actualDnfs: raceEntry.dnfs || 0,
+                pickedWorstDriver: null,
             });
             
             console.log(`🔍 Added to raceBreakdown for ${meetingKey}:`, {
@@ -140,7 +144,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // ✅ Calculate bonus points for each race
+        // ✅ Populate pickedWorstDriver for each race (does not change scores)
         for (const race of raceBreakdown) {
             if (race.bonusPicks && (race.bonusPicks.worstDriver || race.bonusPicks.dnfs !== null)) {
                 const raceEntry = await Race.findOne({
@@ -149,14 +153,6 @@ export default async function handler(req, res) {
                 });
                 
                 if (raceEntry) {
-                    const { bonusPoints } = calculateBonusPicksScore(
-                        race.bonusPicks,
-                        raceEntry.race_results || [],
-                        raceEntry.qualifying_results || [],
-                        raceEntry.dnfs || 0
-                    );
-                    race.bonusPoints = bonusPoints;
-
                     // ✅ Get actual performance data for the driver the user picked as "worst driver"
                     if (race.bonusPicks.worstDriver) {
                         const pickedDriverResult = raceEntry.race_results.find(

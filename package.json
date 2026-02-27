@@ -9,7 +9,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "deploy": "gh-pages -d out"
+    "deploy": "gh-pages -d out",
+    "storeracedata": "node scripts/storeRaceData.mjs",
+    "runautopicks": "node scripts/runAutopicks.mjs",
+    "runcalculatescores": "node scripts/runCalculateScores.mjs"
   },
   "dependencies": {
     "axios": "^1.8.1",

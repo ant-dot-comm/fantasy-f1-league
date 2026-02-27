@@ -14,9 +14,9 @@ export default async function handler(req, res) {
         }
 
             // console.log(race.qualifying_results)
-        // ✅ Get drivers who finished in positions 11-20 in qualifying
+        // ✅ Get drivers who finished in positions 11-22 in qualifying
         const bottomDrivers = race.qualifying_results
-            .filter(driver => driver.finishPosition >= 11 && driver.finishPosition <= 20);
+            .filter(driver => driver.finishPosition >= 11 && driver.finishPosition <= 22);
 
         if (bottomDrivers.length === 0) {
             return res.status(404).json({ error: "No bottom drivers found" });
