@@ -31,17 +31,17 @@ export default function RulesAndGuide() {
                         <li>
                             If a driver starts <span className="font-bold">P11–P16</span> and gains:
                             <ul className="list-disc pl-6 mt-1">
-                                <li>10–13 positions: <span className="font-bold">+2 bonus points</span> (Big Overtake Artist)</li>
-                                <li>14–17 positions: <span className="font-bold">+3 bonus points</span> (Big Track Titan)</li>
-                                <li>18+ positions: <span className="font-bold">+4 bonus points</span> (Big Zero to Hero)</li>
+                                <li>10–12 positions: <span className="font-bold">+2 bonus points</span> (Big Overtake Artist)</li>
+                                <li>13–14 positions: <span className="font-bold">+3 bonus points</span> (Big Track Titan)</li>
+                                <li>15+ positions: <span className="font-bold">+4 bonus points</span> (Big Zero to Hero)</li>
                             </ul>
                         </li>
                         <li className="mt-2">
                             If a driver starts <span className="font-bold">P17–P22</span> and gains:
                             <ul className="list-disc pl-6 mt-1">
-                                <li>10–13 positions: <span className="font-bold">+1 bonus point</span> (Little Overtake Artist)</li>
-                                <li>14–17 positions: <span className="font-bold">+2 bonus points</span> (Little Track Titan)</li>
-                                <li>18+ positions: <span className="font-bold">+2 bonus points</span> (Little Zero to Hero)</li>
+                                <li>10–14 positions: <span className="font-bold">+1 bonus point</span> (Little Overtake Artist)</li>
+                                <li>15–18 positions: <span className="font-bold">+2 bonus points</span> (Little Track Titan)</li>
+                                <li>19+ positions: <span className="font-bold">+2 bonus points</span> (Little Zero to Hero)</li>
                             </ul>
                         </li>
                     </ul>
