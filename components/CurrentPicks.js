@@ -151,8 +151,18 @@ export default function CurrentPick({ season, username }) {
         async function fetchBottomDrivers() {
             try {
                 const res = await axios.get(
-                    `/api/bottomDrivers?meeting_key=${currentRace.meeting_key}&season=${season}`
+                    `/api/bottomDrivers?meeting_key=${currentRace.meeting_key}&season=${season}`,
+                    {
+                        // Treat 404 as an expected “no data yet” state, not a hard error
+                        validateStatus: (status) => status === 200 || status === 404,
+                    }
                 );
+
+                if (res.status === 404) {
+                    setBottomDrivers([]);
+                    return;
+                }
+
                 setBottomDrivers(res.data);
             } catch (error) {
                 console.error("❌ Error fetching bottom 10 drivers:", error);
