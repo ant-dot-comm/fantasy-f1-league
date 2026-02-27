@@ -95,15 +95,26 @@ async function storeRaceData(year, meetingKey = null) {
         // ✅ Store new drivers **without making unnecessary API calls**
         await checkAndStoreNewDrivers([...allDriverNumbers], sessionKeyQualifying || sessionKeyRace, year);
 
-        // ✅ Fetch Qualifying & Race Results if available
+        // ✅ Fetch Qualifying & Race Results using session_result endpoint if available
         if (sessionKeyQualifying) {
             try {
-                const newQualifyingResults = await fetchAllDriverPositions(sessionKeyQualifying);
-                if (newQualifyingResults.length > 0) {
-                    raceEntry.qualifying_results = newQualifyingResults;
+                console.log(`🔎 Fetching qualifying classification for session: ${sessionKeyQualifying}...`);
+                const qualiRes = await axios.get(
+                    `https://api.openf1.org/v1/session_result?session_key=${sessionKeyQualifying}`
+                );
+                const qualiResults = qualiRes.data;
+
+                if (Array.isArray(qualiResults) && qualiResults.length > 0) {
+                    raceEntry.qualifying_results = qualiResults.map((d) => ({
+                        driverNumber: d.driver_number,
+                        // Qualifying position in the final classification (1 = pole)
+                        finishPosition: d.position || 0,
+                    }));
                     console.log(`✅ Stored qualifying results for ${meeting_name}`);
                 } else {
-                    console.log(`⚠️ No qualifying results found for ${meeting_name}, keeping existing data`);
+                    console.log(
+                        `⚠️ No qualifying results found via session_result for ${meeting_name}, keeping existing data`
+                    );
                 }
             } catch (error) {
                 console.error(`❌ Error fetching qualifying results for ${meeting_name}:`, error);
@@ -112,12 +123,41 @@ async function storeRaceData(year, meetingKey = null) {
 
         if (sessionKeyRace) {
             try {
-                const newRaceResults = await fetchAllDriverPositions(sessionKeyRace);
-                if (newRaceResults.length > 0) {
-                    raceEntry.race_results = newRaceResults;
-                    console.log(`✅ Stored race results for ${meeting_name}`);
+                console.log(`🔎 Fetching race classification for session: ${sessionKeyRace}...`);
+                const raceRes = await axios.get(
+                    `https://api.openf1.org/v1/session_result?session_key=${sessionKeyRace}`
+                );
+                const raceResults = raceRes.data;
+
+                if (Array.isArray(raceResults) && raceResults.length > 0) {
+                    // Build map from qualifying results for start positions
+                    const qualifyingMap = {};
+                    (raceEntry.qualifying_results || []).forEach((q) => {
+                        qualifyingMap[q.driverNumber] = q.finishPosition;
+                    });
+
+                    const formattedRaceResults = raceResults.map((d) => ({
+                        driverNumber: d.driver_number,
+                        // Start position = qualifying position when available
+                        startPosition: qualifyingMap[d.driver_number] || 0,
+                        // Finish position from race classification (0 when null / not classified or non-starter)
+                        finishPosition: d.position || 0,
+                    }));
+
+                    // Count all non-finishers (DNF, DNS, DSQ) for bonus pick logic
+                    const dnfs = raceResults.filter(
+                        (d) => d.dnf === true || d.dns === true || d.dsq === true
+                    ).length;
+                    raceEntry.race_results = formattedRaceResults;
+                    raceEntry.dnfs = dnfs;
+
+                    console.log(
+                        `✅ Stored race results for ${meeting_name} (DNFs: ${dnfs})`
+                    );
                 } else {
-                    console.log(`⚠️ No race results found for ${meeting_name}, keeping existing data`);
+                    console.log(
+                        `⚠️ No race results found via session_result for ${meeting_name}, keeping existing data`
+                    );
                 }
             } catch (error) {
                 console.error(`❌ Error fetching race results for ${meeting_name}:`, error);
@@ -135,46 +175,6 @@ async function storeRaceData(year, meetingKey = null) {
 
 // storeRaceData("2023"); // Call for a specific year & meeting if needed
 storeRaceData("2026", "1279"); // Call for a specific year & meeting if needed
-
-// 🔥 Fetch ALL driver positions for a session at once **(Optimized)**
-async function fetchAllDriverPositions(sessionKey) {
-    try {
-        console.log(
-            `🔎 Fetching driver positions for session: ${sessionKey}...`
-        );
-        const response = await axios.get(
-            `https://api.openf1.org/v1/position?session_key=${sessionKey}`
-        );
-        const positions = response.data;
-
-        if (!positions.length) {
-            console.warn(`⚠️ No position data found for session ${sessionKey}`);
-            return [];
-        }
-
-        let driverPositions = {};
-        positions.forEach((entry) => {
-            if (!driverPositions[entry.driver_number]) {
-                driverPositions[entry.driver_number] = {
-                    driverNumber: entry.driver_number,
-                    startPosition: entry.position,
-                    finishPosition: entry.position,
-                };
-            } else {
-                driverPositions[entry.driver_number].finishPosition =
-                    entry.position;
-            }
-        });
-
-        return Object.values(driverPositions);
-    } catch (error) {
-        console.error(
-            `❌ Error fetching positions for session ${sessionKey}:`,
-            error
-        );
-        return [];
-    }
-}
 
 // 🔥 Fetch all unique driver numbers for a given session
 async function fetchDriverNumbers(sessionKey) {

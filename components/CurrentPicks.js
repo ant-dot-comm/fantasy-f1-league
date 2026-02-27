@@ -428,7 +428,7 @@ export default function CurrentPick({ season, username }) {
                     </ul>
                 </div>
 
-                {/* ✅ DNFs Prediction */}
+                {/* ✅ DNFs Prediction (DNF / DNS / DSQ) */}
                 <div className="mb-4">
                     <h4 className="text-sm font-bold mb-2">Number of DNFs (optional)</h4>
                     <input
@@ -437,10 +437,13 @@ export default function CurrentPick({ season, username }) {
                         max="22"
                         value={predictedDnfs}
                         onChange={(e) => setPredictedDnfs(e.target.value)}
-                        placeholder="Enter number of DNFs"
+                        placeholder="Enter number of DNFs (includes DNS/DSQ)"
                         className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-neutral-50"
                     />
-                    <p className="text-xs text-neutral-400 mt-1">Leave empty if you don't want to predict DNFs</p>
+                    <p className="text-xs text-neutral-400 mt-1">
+                        Includes all non-finishers: DNF (Did Not Finish), DNS (Did Not Start), and DSQ (Disqualified).
+                        Leave empty if you don't want to predict DNFs.
+                    </p>
                 </div>
 
                 {/* ✅ Submit Button */}

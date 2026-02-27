@@ -9,8 +9,8 @@ export default function RulesAndGuide() {
                     <h3 className="font-bold mb-4">How to Play</h3>
                     <ul className="list-disc pl-6 text-sm">
                         <li>Each race weekend, you must select 2 drivers.</li>
-                        <li>Only drivers starting 11th - 20th in qualifying are eligible.</li>
-                        <li>Points are awarded based on how much your drivers improve their finishing position.</li>
+                        <li>Only drivers starting 11th - 22nd in qualifying are eligible.</li>
+                        <li>Points are awarded based on how much your drivers improve (or lose) positions from start to finish.</li>
                         <li>Picks lock at the start of the race.</li>
                         <li>Picks are auto-generated to ensure every participant has a selection for the weekend. You can adjust your picks after qualifying and before the race starts.</li>
                     </ul>
@@ -21,15 +21,29 @@ export default function RulesAndGuide() {
                     <h3 className="font-bold mb-4">Scoring System</h3>
                     Base Scoring
                     <ul className="list-disc pl-6 text-sm mb-4">
-                        <li>+1 point for each position gained from start to finish</li>
-                        <li>-1 point for each position lost from start to finish</li>
-                        <li>0 points if driver did not finish race</li>
+                        <li>For each driver we compare <span className="font-bold">qualifying position vs. race finish</span>.</li>
+                        <li>If the driver does not finish (DNF/DNS/DSQ), they score <span className="font-bold">-1 point</span>.</li>
+                        <li>If the driver starts <span className="font-bold">P11–P16</span>, they get about <span className="font-bold">1.5 points per position gained</span> (and lose ~1.5 points per position lost), rounded to the nearest whole number.</li>
+                        <li>If the driver starts <span className="font-bold">P17–P22</span>, they get about <span className="font-bold">0.75 points per position gained</span> (and lose ~0.75 points per position lost), rounded to the nearest whole number.</li>
                     </ul>
-                    Position Gained Bonus
+                    Big / Little Position Gain Bonuses
                     <ul className="list-disc pl-6 text-sm mb-4">
-                        <li>Overtake Artist: <span className="font-bold">+2 bonus points</span> if 10-13 positions gained</li>
-                        <li>Track Titan: <span className="font-bold">+3 bonus points</span> if 14-17 positions gained</li>
-                        <li>Zero to Hero: <span className="font-bold">+4 bonus points</span> if 18-19 positions gained</li>
+                        <li>
+                            If a driver starts <span className="font-bold">P11–P16</span> and gains:
+                            <ul className="list-disc pl-6 mt-1">
+                                <li>10–13 positions: <span className="font-bold">+2 bonus points</span> (Big Overtake Artist)</li>
+                                <li>14–17 positions: <span className="font-bold">+3 bonus points</span> (Big Track Titan)</li>
+                                <li>18+ positions: <span className="font-bold">+4 bonus points</span> (Big Zero to Hero)</li>
+                            </ul>
+                        </li>
+                        <li className="mt-2">
+                            If a driver starts <span className="font-bold">P17–P22</span> and gains:
+                            <ul className="list-disc pl-6 mt-1">
+                                <li>10–13 positions: <span className="font-bold">+1 bonus point</span> (Little Overtake Artist)</li>
+                                <li>14–17 positions: <span className="font-bold">+2 bonus points</span> (Little Track Titan)</li>
+                                <li>18+ positions: <span className="font-bold">+2 bonus points</span> (Little Zero to Hero)</li>
+                            </ul>
+                        </li>
                     </ul>
                     Race Winner Bonus
                     <ul className="list-disc pl-6 text-sm mb-4">
@@ -37,8 +51,17 @@ export default function RulesAndGuide() {
                     </ul>
                     Bonus Picks
                     <ul className="list-disc pl-6 text-sm mb-4">
-                        <li>Worst Driver Scoring: +1 point for each position lost, -1 point for each position gained</li>
-                        <li>DNF Prediction Scoring: <span className="font-bold">+5 points</span> if you guess exactly right, 0 points otherwise</li>
+                        <li>
+                            Worst Driver Scoring: pick a “worst driver” from your eligible grid.
+                            <ul className="list-disc pl-6 mt-1">
+                                <li>+1 point for each position they <span className="font-bold">lose</span> (falling backwards)</li>
+                                <li>-1 point for each position they <span className="font-bold">gain</span> (if they outperform expectations)</li>
+                                <li>0 points if they DNF</li>
+                            </ul>
+                        </li>
+                        <li className="mt-2">
+                            DNFs Prediction Scoring: <span className="font-bold">+5 points</span> if you guess the exact number of DNFs in the race, <span className="font-bold">0 points</span> otherwise.
+                        </li>
                     </ul>  
                 </div>
             </Accordion>
