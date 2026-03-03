@@ -68,10 +68,10 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                         .map((user, index) => (
                             <li key={user.username}>
                                 <button
-                                    onClick={() => {
-                                        setSelectedPlayer(user.username);
-                                        fetchSelectedPlayerRaceData(user.username);
-                                    }}
+                                    // onClick={() => {
+                                    //     setSelectedPlayer(user.username);
+                                    //     fetchSelectedPlayerRaceData(user.username);
+                                    // }}
                                     className={classNames(
                                         "w-full text-left font-bold bg-neutral-200 max-sm:pr-10 sm:px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-all duration-200 relative",
                                         "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12",
