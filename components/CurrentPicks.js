@@ -18,6 +18,7 @@ export default function CurrentPick({ season, username }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [picksOpen, setPicksOpen] = useState(false);
     const [pickStatusMessage, setPickStatusMessage] = useState("");
+    const [picksStatusApiMessage, setPicksStatusApiMessage] = useState("");
     const [isCurrentRaceLoading, setIsCurrentRaceLoading] = useState(true);
     const [seasonNotStarted, setSeasonNotStarted] = useState(false);
     const [showFinalResults, setShowFinalResults] = useState(false);
@@ -60,6 +61,8 @@ export default function CurrentPick({ season, username }) {
      useEffect(() => {
         if (!currentRace) return;
 
+        setPicksStatusApiMessage("");
+
         if (season < 2026) {
             // 🔴 Disable picks for past seasons
             setPicksOpen(false);
@@ -76,10 +79,12 @@ export default function CurrentPick({ season, username }) {
                         setSeasonNotStarted(true);
                         setPicksOpen(false);
                         setShowFinalResults(true);
+                        setPicksStatusApiMessage("");
                         return;
                     }
                     setSeasonNotStarted(false);
-                    const { is_open } = res.data;
+                    const { is_open, message } = res.data;
+                    setPicksStatusApiMessage(message || "");
                     
                     const nextScheduleSessionId = Number(currentRace.meeting_key) + 1;
                     const prevScheduleSessionId = is_open ? Number(currentRace.meeting_key) - 1 : Number(currentRace.meeting_key);
@@ -104,6 +109,7 @@ export default function CurrentPick({ season, username }) {
                     setSeasonNotStarted(true);
                     setPicksOpen(false);
                     setShowFinalResults(true);
+                    setPicksStatusApiMessage("");
                 }
             }
 
@@ -246,6 +252,11 @@ export default function CurrentPick({ season, username }) {
     // ✅ Display current picks with autopick indicator
     return (
         <>
+        {picksStatusApiMessage && (
+            <p className="text-center text-sm text-neutral-400 mb-2 px-3" role="status">
+                {picksStatusApiMessage}
+            </p>
+        )}
         <div id="current-picks" className={classNames(
             "flex flex-col items-center mb-12 pt-16 relative text-neutral-300",
             showSeasonNotStarted ? "bg-neutral-700" : userPicks.length > 0 || showFinalResults ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
