@@ -23,25 +23,25 @@ export default function RulesAndGuide() {
                     <ul className="list-disc pl-6 text-sm mb-4">
                         <li>For each driver we compare <span className="font-bold">qualifying position vs. race finish</span>.</li>
                         <li>If the driver does not finish (DNF/DNS/DSQ), they score <span className="font-bold">-1 point</span>.</li>
-                        <li>If the driver starts <span className="font-bold">P11–P16</span>, they get about <span className="font-bold">1.5 points per position gained</span> (and lose ~1.5 points per position lost), rounded to the nearest whole number.</li>
-                        <li>If the driver starts <span className="font-bold">P17–P22</span>, they get about <span className="font-bold">0.75 points per position gained</span> (and lose ~0.75 points per position lost), rounded to the nearest whole number.</li>
+                        <li>If the driver starts <span className="font-bold">P11–P16</span>, they get about <span className="font-bold">1.5 points per position gained</span> (and lose ~1.5 points per position lost).</li>
+                        <li>If the driver starts <span className="font-bold">P17–P22</span>, they get about <span className="font-bold">0.75 points per position gained</span> (and lose ~0.75 points per position lost).</li>
                     </ul>
-                    Big / Little Position Gain Bonuses
+                    Front / Back Position Gain Bonuses
                     <ul className="list-disc pl-6 text-sm mb-4">
                         <li>
                             If a driver starts <span className="font-bold">P11–P16</span> and gains:
                             <ul className="list-disc pl-6 mt-1">
-                                <li>10–12 positions: <span className="font-bold">+2 bonus points</span> (Big Overtake Artist)</li>
-                                <li>13–14 positions: <span className="font-bold">+3 bonus points</span> (Big Track Titan)</li>
-                                <li>15+ positions: <span className="font-bold">+4 bonus points</span> (Big Zero to Hero)</li>
+                                <li>10–12 positions: <span className="font-bold">+2 bonus points</span> (Front Overtake Artist)</li>
+                                <li>13–14 positions: <span className="font-bold">+3 bonus points</span> (Front Grid Charger)</li>
+                                <li>15+ positions: <span className="font-bold">+4 bonus points</span> (Front Midfield Mauler)</li>
                             </ul>
                         </li>
                         <li className="mt-2">
                             If a driver starts <span className="font-bold">P17–P22</span> and gains:
                             <ul className="list-disc pl-6 mt-1">
-                                <li>10–14 positions: <span className="font-bold">+1 bonus point</span> (Little Overtake Artist)</li>
-                                <li>15–18 positions: <span className="font-bold">+2 bonus points</span> (Little Track Titan)</li>
-                                <li>19+ positions: <span className="font-bold">+2 bonus points</span> (Little Zero to Hero)</li>
+                                <li>10–14 positions: <span className="font-bold">+1 bonus point</span> (Back Apex Assassin)</li>
+                                <li>15–18 positions: <span className="font-bold">+2 bonus points</span> (Back Track Titan)</li>
+                                <li>19+ positions: <span className="font-bold">+2 bonus points</span> (Back Zero to Hero)</li>
                             </ul>
                         </li>
                     </ul>
