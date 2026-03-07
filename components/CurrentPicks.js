@@ -14,6 +14,7 @@ export default function CurrentPick({ season, username }) {
     const [userPicks, setUserPicks] = useState([]);
     const [autoPicked, setAutoPicked] = useState(false);
     const [bottomDrivers, setBottomDrivers] = useState([]);
+    const [bottomDriversLoaded, setBottomDriversLoaded] = useState(false);
     const [selectedDrivers, setSelectedDrivers] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [picksOpen, setPicksOpen] = useState(false);
@@ -154,6 +155,8 @@ export default function CurrentPick({ season, username }) {
     useEffect(() => {
         if (!currentRace) return;
 
+        setBottomDriversLoaded(false);
+
         async function fetchBottomDrivers() {
             try {
                 const res = await axios.get(
@@ -166,17 +169,19 @@ export default function CurrentPick({ season, username }) {
 
                 if (res.status === 404) {
                     setBottomDrivers([]);
-                    return;
+                } else {
+                    setBottomDrivers(res.data);
                 }
-
-                setBottomDrivers(res.data);
             } catch (error) {
                 console.error("❌ Error fetching bottom 10 drivers:", error);
+                setBottomDrivers([]);
+            } finally {
+                setBottomDriversLoaded(true);
             }
         }
 
         fetchBottomDrivers();
-    }, [currentRace]);
+    }, [currentRace, season]);
 
     // ✅ Handle driver selection logic (only 2 picks)
     function toggleDriverSelection(driverNumber) {
@@ -249,6 +254,9 @@ export default function CurrentPick({ season, username }) {
     // ✅ Season hasn't started: no race in DB or race not in schedule yet
     const showSeasonNotStarted = seasonNotStarted || (!isCurrentRaceLoading && !currentRace);
 
+    // ✅ Picks open (per schedule) but OpenF1 data not in yet (10–15 min delay after session)
+    const picksOpenNoDataYet = picksOpen && currentRace && bottomDriversLoaded && bottomDrivers.length === 0 && !showFinalResults;
+
     // ✅ Display current picks with autopick indicator
     return (
         <>
@@ -272,6 +280,15 @@ export default function CurrentPick({ season, username }) {
                 </div>
             ) : showFinalResults ? (
                 <Top3Players season={season} />
+            ) : picksOpenNoDataYet ? (
+                <div className="text-center px-4 py-6">
+                    <h2 className="text-xl font-display text-neutral-100 mb-2">
+                        {season} {currentRace?.meeting_name}
+                    </h2>
+                    <p className="text-sm text-neutral-400 max-w-md">
+                        Populating race data. Check back soon. An email will be sent out when picks open up.
+                    </p>
+                </div>
             ) : (
                 <>
                     {currentRace && (
