@@ -36,11 +36,14 @@ async function runRaceResults(meetingKey, sessionKey) {
 
         console.log(`📊 Found ${raceResults.length} drivers in race results`);
 
-        // ✅ Convert to race results format using qualifying data for start positions
+        // ✅ Convert to race results format (OpenF1 session_result: position, dnf, dns, dsq)
         const formattedResults = raceResults.map(driver => ({
             driverNumber: driver.driver_number,
-            startPosition: qualifyingMap[driver.driver_number] || 0, // Use qualifying position
-            finishPosition: driver.position || 0, // Use 0 if position is null
+            startPosition: qualifyingMap[driver.driver_number] ?? 0,
+            finishPosition: driver.position ?? 0,
+            dnf: driver.dnf === true,
+            dns: driver.dns === true,
+            dsq: driver.dsq === true,
         }));
 
         // ✅ Update race entry

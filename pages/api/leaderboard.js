@@ -14,6 +14,7 @@ export default async function handler(req, res) {
 
   await dbConnect();
   const { season } = req.query;
+  const year = Number(season);
 
   const cacheKey = `leaderboard-${season}`;
   const cached = leaderboardCache.get(cacheKey);
@@ -25,10 +26,10 @@ export default async function handler(req, res) {
   try {
     console.time(`🏁 Leaderboard calculation for ${season}`);
 
-    // ✅ OPTIMIZATION 1: Fetch all users with their picks in one query
-    const users = await User.find({ seasons: season })
+    // ✅ Only show users who are in this season
+    const users = await User.find({ seasons: year })
       .select("username first_name picks")
-      .lean(); // .lean() for better performance
+      .lean();
 
     if (!users.length) {
       return res.status(200).json({ leaderboard: [] });
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
     const [allRaces, allDrivers] = await Promise.all([
       Race.find({ 
         meeting_key: { $in: Array.from(allMeetingKeys) }, 
-        year: season 
+        year 
       }).lean(),
       Driver.find({ 
         driver_number: { $in: Array.from(allDriverNumbers) } 

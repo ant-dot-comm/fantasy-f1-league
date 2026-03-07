@@ -10,7 +10,7 @@ import classNames from "classnames";
 import RulesAndScoring from "@/components/RulesAndScoring";
 
 export default function Home() {
-    const [season, setSeason] = useState(new Date().getFullYear());
+    const [season, setSeason] = useState(() => new Date().getFullYear());
     const [username, setUsername] = useState(null);
     const [topRaceScoresData, setTopRaceScoresData] = useState([]);
     const [averageRaceScoresData, setAverageRaceScoresData] = useState([]);

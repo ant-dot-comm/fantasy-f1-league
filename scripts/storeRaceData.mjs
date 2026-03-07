@@ -3,6 +3,13 @@ import dbConnect from "../lib/mongodb.js";
 import Races from "../models/Race.js";
 import Driver from "../models/Driver.js";
 
+// OpenF1 rate limit: max 3 requests/second
+const OPENF1_DELAY_MS = 400;
+
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function storeRaceData(year, meetingKey = null) {
     await dbConnect();
 
@@ -37,6 +44,9 @@ async function storeRaceData(year, meetingKey = null) {
                 year,
             });
             console.log(`✅ Created new race entry: ${meeting_name} (${country_name})`);
+        } else {
+            // Ensure year is set so /api/currentRace?season=X finds this race
+            raceEntry.year = Number(year);
         }
 
         // ✅ Fetch session data **ONCE** and store what is available
@@ -79,47 +89,73 @@ async function storeRaceData(year, meetingKey = null) {
         if (qualifyingEndTime) raceEntry.picks_open = qualifyingEndTime;
         if (raceStartTime) raceEntry.picks_closed = raceStartTime;
 
-        // ✅ Fetch driver numbers **only for available sessions**
+        // ✅ Fetch driver numbers from position endpoint (and from starting_grid when available)
         let allDriverNumbers = new Set();
         if (sessionKeyQualifying) {
-            let qualifyingDriverNumbers = await fetchDriverNumbers(sessionKeyQualifying);
-            allDriverNumbers = new Set([...allDriverNumbers, ...qualifyingDriverNumbers]);
+            const qualifyingDriverNumbers = await fetchDriverNumbers(sessionKeyQualifying);
+            qualifyingDriverNumbers.forEach((n) => allDriverNumbers.add(n));
         }
         if (sessionKeyRace) {
-            let raceDriverNumbers = await fetchDriverNumbers(sessionKeyRace);
-            allDriverNumbers = new Set([...allDriverNumbers, ...raceDriverNumbers]);
+            const raceDriverNumbers = await fetchDriverNumbers(sessionKeyRace);
+            raceDriverNumbers.forEach((n) => allDriverNumbers.add(n));
+        }
+
+        // ✅ Prefer starting_grid for "qualifying_results": all 22 drivers (including DNS/DNF in quali)
+        let qualifyingResultsFromStartingGrid = false;
+        const sessionKeysToTry = [sessionKeyRace, sessionKeyQualifying].filter(Boolean);
+        for (const sk of sessionKeysToTry) {
+            if (qualifyingResultsFromStartingGrid) break;
+            try {
+                const gridRes = await axios.get(
+                    `https://api.openf1.org/v1/starting_grid?session_key=${sk}`,
+                    { validateStatus: (s) => s === 200 || s === 404 }
+                );
+                if (gridRes.status === 200 && Array.isArray(gridRes.data) && gridRes.data.length > 0) {
+                    raceEntry.qualifying_results = gridRes.data.map((d) => ({
+                        driverNumber: d.driver_number,
+                        finishPosition: d.position ?? 0,
+                    }));
+                    gridRes.data.forEach((d) => allDriverNumbers.add(d.driver_number));
+                    qualifyingResultsFromStartingGrid = true;
+                    console.log(`✅ Stored starting grid for ${meeting_name} (${raceEntry.qualifying_results.length} drivers, session_key=${sk})`);
+                    if (raceEntry.qualifying_results.length < 22) {
+                        console.warn(`⚠️ Starting grid has ${raceEntry.qualifying_results.length} drivers; expected 22. OpenF1 may not have full grid yet.`);
+                    }
+                }
+            } catch (error) {
+                console.warn(`⚠️ starting_grid session_key=${sk} for ${meeting_name}:`, error.message);
+            }
+        }
+
+        if (!qualifyingResultsFromStartingGrid && sessionKeyQualifying) {
+            try {
+                console.log(`🔎 No starting grid yet; fetching qualifying session_result for ${meeting_name}...`);
+                const qualiRes = await axios.get(
+                    `https://api.openf1.org/v1/session_result?session_key=${sessionKeyQualifying}`
+                );
+                const qualiResults = qualiRes.data;
+                if (Array.isArray(qualiResults) && qualiResults.length > 0) {
+                    raceEntry.qualifying_results = qualiResults.map((d) => ({
+                        driverNumber: d.driver_number,
+                        finishPosition: d.position ?? 0,
+                        dnf: d.dnf === true,
+                        dns: d.dns === true,
+                        dsq: d.dsq === true,
+                    }));
+                    qualiResults.forEach((d) => allDriverNumbers.add(d.driver_number));
+                    console.log(`✅ Stored qualifying results (fallback, ${qualiResults.length} drivers) for ${meeting_name}`);
+                } else {
+                    console.log(`⚠️ No qualifying results for ${meeting_name}, keeping existing data`);
+                }
+            } catch (error) {
+                console.error(`❌ Error fetching qualifying results for ${meeting_name}:`, error.message);
+            }
         }
 
         console.log(`🔎 Total Drivers Found: ${allDriverNumbers.size}`);
 
         // ✅ Store new drivers **without making unnecessary API calls**
         await checkAndStoreNewDrivers([...allDriverNumbers], sessionKeyQualifying || sessionKeyRace, year);
-
-        // ✅ Fetch Qualifying & Race Results using session_result endpoint if available
-        if (sessionKeyQualifying) {
-            try {
-                console.log(`🔎 Fetching qualifying classification for session: ${sessionKeyQualifying}...`);
-                const qualiRes = await axios.get(
-                    `https://api.openf1.org/v1/session_result?session_key=${sessionKeyQualifying}`
-                );
-                const qualiResults = qualiRes.data;
-
-                if (Array.isArray(qualiResults) && qualiResults.length > 0) {
-                    raceEntry.qualifying_results = qualiResults.map((d) => ({
-                        driverNumber: d.driver_number,
-                        // Qualifying position in the final classification (1 = pole)
-                        finishPosition: d.position || 0,
-                    }));
-                    console.log(`✅ Stored qualifying results for ${meeting_name}`);
-                } else {
-                    console.log(
-                        `⚠️ No qualifying results found via session_result for ${meeting_name}, keeping existing data`
-                    );
-                }
-            } catch (error) {
-                console.error(`❌ Error fetching qualifying results for ${meeting_name}:`, error);
-            }
-        }
 
         if (sessionKeyRace) {
             try {
@@ -138,10 +174,11 @@ async function storeRaceData(year, meetingKey = null) {
 
                     const formattedRaceResults = raceResults.map((d) => ({
                         driverNumber: d.driver_number,
-                        // Start position = qualifying position when available
-                        startPosition: qualifyingMap[d.driver_number] || 0,
-                        // Finish position from race classification (0 when null / not classified or non-starter)
-                        finishPosition: d.position || 0,
+                        startPosition: qualifyingMap[d.driver_number] ?? 0,
+                        finishPosition: d.position ?? 0,
+                        dnf: d.dnf === true,
+                        dns: d.dns === true,
+                        dsq: d.dsq === true,
                     }));
 
                     // Count all non-finishers (DNF, DNS, DSQ) for bonus pick logic
@@ -160,7 +197,11 @@ async function storeRaceData(year, meetingKey = null) {
                     );
                 }
             } catch (error) {
-                console.error(`❌ Error fetching race results for ${meeting_name}:`, error);
+                if (error.response?.status === 404) {
+                    console.warn(`⚠️ Race results not available yet for ${meeting_name} (404). Run again after the race.`);
+                } else {
+                    console.error(`❌ Error fetching race results for ${meeting_name}:`, error.message);
+                }
             }
         }
 
@@ -176,19 +217,24 @@ async function storeRaceData(year, meetingKey = null) {
 // storeRaceData("2023"); // Call for a specific year & meeting if needed
 storeRaceData("2026", "1279"); // Call for a specific year & meeting if needed
 
-// 🔥 Fetch all unique driver numbers for a given session
+// 🔥 Fetch all unique driver numbers for a given session (uses /v1/position; 404 = no data yet e.g. race not run)
 async function fetchDriverNumbers(sessionKey) {
     try {
         console.log(`🔎 Fetching driver numbers for session: ${sessionKey}...`);
         const response = await axios.get(
-            `https://api.openf1.org/v1/position?session_key=${sessionKey}`
+            `https://api.openf1.org/v1/position?session_key=${sessionKey}`,
+            { validateStatus: (s) => s === 200 || s === 404 }
         );
+        if (response.status === 404) {
+            console.warn(`⚠️ No position data for session ${sessionKey} (404).`);
+            return [];
+        }
         const uniqueDrivers = new Set(
             response.data.map((entry) => entry.driver_number)
         );
         return Array.from(uniqueDrivers);
     } catch (error) {
-        console.error("❌ Error fetching driver numbers:", error);
+        console.error("❌ Error fetching driver numbers:", error.message);
         return [];
     }
 }
@@ -207,12 +253,24 @@ async function checkAndStoreNewDrivers(driverNumbers, sessionKey) {
         console.log(`🔍 Checking driver ${driverNumber}...`);
 
         try {
-            const response = await axios.get(
-                `https://api.openf1.org/v1/drivers?driver_number=${driverNumber}&session_key=${sessionKey}`
+            let response = await axios.get(
+                `https://api.openf1.org/v1/drivers?driver_number=${driverNumber}&session_key=${sessionKey}`,
+                { validateStatus: (s) => s === 200 || s === 429 }
             );
+
+            // ✅ Respect OpenF1 rate limit (3 req/s): retry once after delay if 429
+            if (response.status === 429) {
+                const retryAfter = Number(response.headers["retry-after"]) || 1;
+                console.warn(`⚠️ Rate limited (429). Waiting ${retryAfter}s before retry...`);
+                await delay(retryAfter * 1000);
+                response = await axios.get(
+                    `https://api.openf1.org/v1/drivers?driver_number=${driverNumber}&session_key=${sessionKey}`
+                );
+            }
 
             if (!response.data.length) {
                 console.warn(`⚠️ No driver data found for number ${driverNumber}`);
+                await delay(OPENF1_DELAY_MS);
                 continue;
             }
 
@@ -221,12 +279,14 @@ async function checkAndStoreNewDrivers(driverNumbers, sessionKey) {
             // ✅ Check by full_name instead of year
             if (existingDriverNames.has(driverData.full_name)) {
                 console.log(`✅ Driver ${driverData.full_name} already exists. Skipping.`);
+                await delay(OPENF1_DELAY_MS);
                 continue;
             }
 
             // ✅ Ensure required fields exist before saving
             if (!driverData.first_name || !driverData.last_name) {
                 console.warn(`⚠️ Missing required fields for driver #${driverNumber}, skipping...`, driverData);
+                await delay(OPENF1_DELAY_MS);
                 continue;
             }
 
@@ -248,7 +308,9 @@ async function checkAndStoreNewDrivers(driverNumbers, sessionKey) {
             // ✅ Add to set to prevent duplicate API checks
             existingDriverNames.add(driverData.full_name);
         } catch (error) {
-            console.error(`❌ Error fetching driver data for ${driverNumber}:`, error);
+            console.error(`❌ Error fetching driver data for ${driverNumber}:`, error.message);
         }
+
+        await delay(OPENF1_DELAY_MS);
     }
 }

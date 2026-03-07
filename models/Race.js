@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
 
+// Aligned with OpenF1 session_result: position = final position; no startPosition in API.
+// startPosition only set for race_results (from qualifying/grid); optional for qualifying_results.
 const DriverResultSchema = new mongoose.Schema({
   driverNumber: { type: Number, required: true },
-  startPosition: { type: Number, required: true },
-  finishPosition: { type: Number, required: true },
+  startPosition: { type: Number, required: false }, // optional; only for race (from grid)
+  finishPosition: { type: Number, required: true }, // maps from OpenF1 "position"
+  dnf: { type: Boolean, default: false },
+  dns: { type: Boolean, default: false },
+  dsq: { type: Boolean, default: false },
 });
 
 const RaceSchema = new mongoose.Schema(

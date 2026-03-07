@@ -12,7 +12,8 @@ export default async function handler(req, res) {
 
   try {
     // ✅ Fetch the latest race from the requested season (sort by createdAt)
-    const latestRace = await Race.findOne({ year: season }).sort({ createdAt: -1 });
+    const year = Number(season);
+    const latestRace = await Race.findOne({ year }).sort({ createdAt: -1 });
 
     if (!latestRace) {
       console.error(`❌ No race data found for season ${season}.`);

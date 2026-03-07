@@ -8,13 +8,13 @@ export default async function handler(req, res) {
     const { meeting_key, season } = req.query;
 
     try {
-        const race = await Races.findOne({ meeting_key }).lean();
+        const year = Number(season);
+        const race = await Races.findOne({ meeting_key, year }).lean();
         if (!race || !race.qualifying_results) {
             return res.status(404).json({ error: "Race not found or missing qualifying results" });
         }
 
-            // console.log(race.qualifying_results)
-        // ✅ Get drivers who finished in positions 11-22 in qualifying
+        // qualifying_results should come from starting_grid (22 drivers); session_result only has ~19 (excludes DNS/DNF)
         const bottomDrivers = race.qualifying_results
             .filter(driver => driver.finishPosition >= 11 && driver.finishPosition <= 22);
 
