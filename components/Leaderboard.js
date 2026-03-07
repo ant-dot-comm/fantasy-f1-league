@@ -58,7 +58,7 @@ export default function Leaderboard({ season, loggedInUser, className }) {
     }
 
     // console.log({leaderBoardScores});
-    console.log({selectePlayerRaceData});
+    // console.log({selectePlayerRaceData});
     return (
         <div className={classNames(className, "p-6 bg-neutral-700 rounded-2xl text-neutral-200 sm:min-h-[30rem]")}>
             <ul className="flex gap-2 flex-col">
