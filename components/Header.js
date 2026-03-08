@@ -44,12 +44,13 @@ export default function Header() {
         }, 100);
     };
 
-    const signupBeforeDate = new Date(raceSchedule["1279"].picks_close); // Convert to Date object
+    const signupBeforeDate = new Date(raceSchedule["1279"].picks_close);
     const formattedTime = signupBeforeDate.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
-    });
+        timeZone: "UTC",
+    }) + " UTC";
     const currentYear = new Date().getFullYear();
     const hideAtSeasonStart = signupBeforeDate > new Date() && !username
 
@@ -94,7 +95,7 @@ export default function Header() {
         <header className="border-b-8 border-neutral-700">
             {hideAtSeasonStart && (
                 <div className="bg-gradient-to-b from-cyan-800 to-neutral-700 text-neutral-100 p-2 text-center leading-none py-4">
-                    Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString()}</span> to be eligible for the {currentYear} season!
+                    Sign up before <span className="font-bold text-white">{formattedTime} on {signupBeforeDate.toLocaleDateString(undefined, { timeZone: "UTC" })} UTC</span> to be eligible for the {currentYear} season!
                     <p className="text-sm mt-1 text-neutral-200">Returning user? Log in, then join the new season from your account.</p>
                     <div className="flex flex-wrap justify-center gap-2 mt-2">
                         <button

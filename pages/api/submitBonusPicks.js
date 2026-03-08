@@ -1,6 +1,7 @@
 import dbConnect from "../../lib/mongodb";
 import User from "../../models/User";
 import { authenticateAndAuthorizeUser } from "../../lib/middleware";
+import { getNowUTC } from "../../lib/getNowUTC";
 import raceSchedule from "../../data/raceSchedule";
 
 export default async function handler(req, res) {
@@ -28,9 +29,9 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Define time variables (needed for potential response)
-            const now = new Date();
-            const picksCloseTime = new Date(raceInfo.picks_close.getTime() + (raceInfo.picks_close.getTimezoneOffset() * 60000));
+            // Same "now" as picksStatus so local and production match
+            const now = await getNowUTC();
+            const picksCloseTime = raceInfo.picks_close;
 
             // 🎛️ Check for manual override first
             if (raceInfo.manualControl !== null && raceInfo.manualControl !== undefined) {
@@ -45,11 +46,11 @@ export default async function handler(req, res) {
             } else {
                 // Use time-based validation
                 if (now > picksCloseTime) {
-                    return res.status(403).json({ 
-                        error: "Picks deadline exceeded", 
-                        message: `Bonus picks for ${raceInfo.race_name} closed at ${picksCloseTime.toLocaleString()}. Current time: ${now.toLocaleString()}`,
+                    return res.status(403).json({
+                        error: "Picks deadline exceeded",
+                        message: `Bonus picks for ${raceInfo.race_name} are closed.`,
                         picks_close: picksCloseTime.toISOString(),
-                        current_time: now.toISOString()
+                        current_time: now.toISOString(),
                     });
                 }
             }

@@ -58,6 +58,8 @@ export default function CurrentPick({ season, username }) {
 
         setPicksStatusApiMessage("");
 
+        setPicksStatusApiMessage("");
+
         if (season < 2026) {
             setPicksOpen(false);
             setShowFinalResults(true);

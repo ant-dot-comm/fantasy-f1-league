@@ -1,16 +1,5 @@
 import raceSchedule from "../../data/raceSchedule";
-
-// Get current time in UTC; use worldtimeapi so open/close matches real time even if server clock is wrong
-async function getNowUTC() {
-  try {
-    const res = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC");
-    const data = await res.json();
-    if (data.datetime) return new Date(data.datetime);
-  } catch (e) {
-    // fallback to server time
-  }
-  return new Date();
-}
+import { getNowUTC } from "../../lib/getNowUTC";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -62,16 +51,17 @@ export default async function handler(req, res) {
   let status;
   let message;
   
+  const utcOpt = { timeZone: "UTC" };
   if (hasNotOpened) {
     status = "not_opened";
-    message = `Picks for ${raceInfo.race_name} will open at ${picksOpenTime.toLocaleString()}`;
+    message = `Picks for ${raceInfo.race_name} will open at ${picksOpenTime.toLocaleString(undefined, utcOpt)} UTC`;
   } else if (isOpen) {
     status = "open";
     const minutesRemaining = Math.floor((picksCloseTime - now) / 1000 / 60);
-    message = `Picks for ${raceInfo.race_name} are open. ${minutesRemaining} minutes remaining.`;
+    message = `Picks for ${raceInfo.race_name} are open. ${minutesRemaining} minutes remaining (close at ${picksCloseTime.toLocaleString(undefined, utcOpt)} UTC).`;
   } else {
     status = "closed";
-    message = `Picks for ${raceInfo.race_name} closed at ${picksCloseTime.toLocaleString()}`;
+    message = `Picks for ${raceInfo.race_name} closed at ${picksCloseTime.toLocaleString(undefined, utcOpt)} UTC`;
   }
 
   res.status(200).json({
