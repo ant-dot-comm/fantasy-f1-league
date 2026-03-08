@@ -1,8 +1,20 @@
 import raceSchedule from "../../data/raceSchedule";
 
+// Get current time in UTC; use worldtimeapi so open/close matches real time even if server clock is wrong
+async function getNowUTC() {
+  try {
+    const res = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC");
+    const data = await res.json();
+    if (data.datetime) return new Date(data.datetime);
+  } catch (e) {
+    // fallback to server time
+  }
+  return new Date();
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({ message: "Method Not Allowed" });
   }
 
   const { meeting_key } = req.query;
@@ -13,38 +25,36 @@ export default async function handler(req, res) {
 
   const raceInfo = raceSchedule[meeting_key];
   if (!raceInfo) {
-    return res.status(404).json({ 
-      error: "Race not found", 
-      message: `No race found for meeting key: ${meeting_key}` 
+    return res.status(404).json({
+      error: "Race not found",
+      message: `No race found for meeting key: ${meeting_key}`,
     });
   }
 
-  // 🎛️ Check for manual override first
+  // Manual override only when explicitly set (true = force open, false = force closed)
   if (raceInfo.manualControl !== null && raceInfo.manualControl !== undefined) {
     const isOpen = raceInfo.manualControl === true;
-    const status = isOpen ? "open" : "closed";
-    const message = isOpen 
-      ? `Picks for ${raceInfo.race_name} are MANUALLY OPEN` 
-      : `Picks for ${raceInfo.race_name} are MANUALLY CLOSED`;
-    
+    const now = await getNowUTC();
     return res.status(200).json({
       race_name: raceInfo.race_name,
       meeting_key,
-      status,
-      message,
+      status: isOpen ? "open" : "closed",
+      message: isOpen
+        ? `Picks for ${raceInfo.race_name} are MANUALLY OPEN`
+        : `Picks for ${raceInfo.race_name} are MANUALLY CLOSED`,
       is_open: isOpen,
       manual_control: true,
       picks_open: raceInfo.picks_open.toISOString(),
       picks_close: raceInfo.picks_close.toISOString(),
-      current_time: new Date().toISOString(),
+      current_time: now.toISOString(),
     });
   }
 
-  const now = new Date();
-  // Schedule times are stored as UTC (ISO strings with Z); use as-is for global consistency
+  // Schedule-based: use reliable UTC "now" so open/close follows raceSchedule exactly
+  const now = await getNowUTC();
   const picksOpenTime = raceInfo.picks_open;
   const picksCloseTime = raceInfo.picks_close;
-  
+
   const isOpen = now >= picksOpenTime && now <= picksCloseTime;
   const hasNotOpened = now < picksOpenTime;
   const hasClosed = now > picksCloseTime;
