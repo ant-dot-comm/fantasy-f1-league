@@ -127,7 +127,7 @@ export default function Home() {
                 )}
 
                 <div className="sm:w-1/2 sm:max-w-[600px] mx-3 sm:mx-auto z-10">
-                    <h2 className="font-display text-2xl px-4 -mb-2.5">Leaderboard</h2>
+                    <h2 className="font-display text-2xl px-4 -mb-2.5 text-center">Leaderboard</h2>
                     <Leaderboard
                         season={season}
                         loggedInUser={username}
