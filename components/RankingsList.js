@@ -35,9 +35,9 @@ export default function RankingsList({ scores, loggedInUser, title, className, l
                   </div>
                 )}
                 <p className={classNames(
-                    "grow leading-none text-sm",
+                    "grow leading-none text-xs",
                 )}>{entry.username}</p>
-                <p className="shrink-0">{entry.finalResult}</p>
+                <p className="shrink-0 text-xs">{entry.finalResult}</p>
               </div>
             </li>
           ))

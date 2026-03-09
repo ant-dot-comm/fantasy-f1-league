@@ -14,7 +14,11 @@ export default function Home() {
     const [username, setUsername] = useState(null);
     const [topRaceScoresData, setTopRaceScoresData] = useState([]);
     const [averageRaceScoresData, setAverageRaceScoresData] = useState([]);
-    const [driverSelectionData, setDriverSelectionData] = useState([]);
+    const [bonusPickLeaders, setBonusPickLeaders] = useState([]);
+    const [moverBonusLeaders, setMoverBonusLeaders] = useState([]);
+    const [driverMostPicked, setDriverMostPicked] = useState([]);
+    const [driverHighestScoring, setDriverHighestScoring] = useState([]);
+    const [driverBandComparison, setDriverBandComparison] = useState([]);
     const [loadingTopScores, setLoadingTopScores] = useState(true);
 
     // ✅ Get Logged-in Username from JWT Token
@@ -44,10 +48,20 @@ export default function Home() {
 
                 setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
                 setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
+                setBonusPickLeaders(raceStatsData.bonusPickLeaders || []);
+                setMoverBonusLeaders(raceStatsData.moverBonusLeaders || []);
+                setDriverMostPicked(raceStatsData.driverMostPicked || []);
+                setDriverHighestScoring(raceStatsData.driverHighestScoring || []);
+                setDriverBandComparison(raceStatsData.driverBandComparison || []);
             } catch (error) {
                 console.error("❌ Error fetching race stats:", error);
                 setTopRaceScoresData([]);
                 setAverageRaceScoresData([]);
+                setBonusPickLeaders([]);
+                setMoverBonusLeaders([]);
+                setDriverMostPicked([]);
+                setDriverHighestScoring([]);
+                setDriverBandComparison([]);
             } finally {
                 setLoadingTopScores(false);
             }
@@ -56,10 +70,8 @@ export default function Home() {
         fetchStats();
     }, [season]);
 
-//   console.log({driverSelectionData});
-
     const leagueStats = (
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:ml-3">
+        <>
             <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Single Race Scores</h2>
                 <RankingsList loading={loadingTopScores} scores={topRaceScoresData} loggedInUser={username} title="Single Race Scores" />
@@ -68,7 +80,15 @@ export default function Home() {
                 <h2 className="font-bold px-2 leading-none mb-1">Average Scores</h2>
                 <RankingsList loading={loadingTopScores} scores={averageRaceScoresData} loggedInUser={username} title="Average Scores" />
             </div>
-        </div>
+            <div className="w-full">
+                <h2 className="font-bold px-2 leading-none mb-1">Most Bonus Pick Points</h2>
+                <RankingsList loading={loadingTopScores} scores={bonusPickLeaders} loggedInUser={username} title="Most Bonus Pick Points" />
+            </div>
+            <div className="w-full">
+                <h2 className="font-bold px-2 leading-none mb-1">Most Mover Bonus Points</h2>
+                <RankingsList loading={loadingTopScores} scores={moverBonusLeaders} loggedInUser={username} title="Most Mover Bonus Points" />
+            </div>
+        </>
     )
           
     return (
@@ -106,37 +126,30 @@ export default function Home() {
                     <CurrentPick season={season} username={username} />
                 )}
 
-                <div className="flex flex-col sm:flex-row sm:justify-center mx-auto relative gap-4">
-                    <div className="responsive-contianer relative sm:absolute sm:w-full sm:mt-10 max-sm:mb-4">
-                        <div className="responsive-line" />
-                        <div className="flex flex-col items-end w-1/2 sm:px-8">
-                            <div className="responsive-xl">League</div>
-                            <div className="responsive-lg text-neutral-500 z-[1]">
-                                Stats
-                            </div>
-                        </div>
-                    </div>
-                    <div className="max-sm:hidden w-1/2 max-w-[600px] flex items-start mt-[20%] xl:mt-[260px]">
-                        {leagueStats}
-                    </div>
-                    <div className="sm:w-1/2 sm:max-w-[600px] sm:mr-3 max-sm:mx-3 z-10">
-                        <h2 className="font-display text-2xl px-4 -mb-2.5">Leaderboard</h2>
-                        <Leaderboard
-                            season={season}
-                            loggedInUser={username}
-                        />
-                    </div>
+                <div className="sm:w-1/2 sm:max-w-[600px] mx-3 sm:mx-auto z-10">
+                    <h2 className="font-display text-2xl px-4 -mb-2.5">Leaderboard</h2>
+                    <Leaderboard
+                        season={season}
+                        loggedInUser={username}
+                    />
                 </div>
             </section>
 
-            {/* ✅ Top Race Scores */}
-            <section>
-              <div className="mt-8 px-3 sm:mt-32">
-                <div className="sm:hidden">{leagueStats}</div>
-              </div>
+            <div className="responsive-contianer flex justify-start relative w-full my-12 sm:my-24 max-sm:mb-4">
+                <div className="responsive-line" />
+                <div className="flex flex-col items-start w-1/2 sm:px-8 px-3">
+                    <div className="responsive-xl">League</div>
+                    <div className="responsive-lg text-neutral-500 z-[1]">
+                        Stats
+                    </div>
+                </div>
+            </div>
+
+            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center max-w-2xl lg:max-w-4xl mx-auto mt-10 sm:mt-24 sm:mb-28 px-3">
+                {leagueStats}
             </section>
 
-            {/* <div className="responsive-contianer flex justify-end relative w-full my-12 max-sm:mb-4">
+            <div className="responsive-contianer flex justify-end relative w-full my-12 max-sm:mb-4">
                 <div className="responsive-line" />
                 <div className="flex flex-col items-end w-1/2 sm:px-8 px-3">
                     <div className="responsive-xl">Driver</div>
@@ -146,20 +159,20 @@ export default function Home() {
                 </div>
             </div>
 
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center max-w-2xl lg:max-w-4xl mx-auto mt-10 sm:mt-24 px-3">
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center max-w-2xl lg:max-w-4xl mx-auto mt-10 sm:mt-24 px-3">
               <div className="w-full">
                 <h2 className="font-bold px-2 leading-none mb-1">Most Picked Drivers</h2>
-                <RankingsList loading={loadingTopScores} scores={driverSelectionData} title="Most Picked Drivers" />
+                <RankingsList loading={loadingTopScores} scores={driverMostPicked} title="Most Picked Drivers" />
               </div>
               <div className="w-full">
-                <h2 className="font-bold px-2 leading-none mb-1">Top Scoring Drivers</h2>
-                <RankingsList loading={loadingTopScores} scores={topScoringDrivers} title="Top Scoring Drivers" />
+                <h2 className="font-bold px-2 leading-none mb-1">Highest Scoring Drivers</h2>
+                <RankingsList loading={loadingTopScores} scores={driverHighestScoring} title="Highest Scoring Drivers" />
               </div>
               <div className="w-full">
-                <h2 className="font-bold px-2 leading-none mb-1">Points Per Selection</h2>
-                <RankingsList loading={loadingTopScores} scores={underratedDrivers} title="Top Scoring Drivers" />
+                <h2 className="font-bold px-2 leading-none mb-1">Band Comparison (Front vs Back)</h2>
+                <RankingsList loading={loadingTopScores} scores={driverBandComparison} title="Band Comparison (Front vs Back)" />
               </div>
-            </section> */}
+            </section>
 
             <div className="responsive-contianer flex justify-start relative w-full my-12 sm:my-32 max-sm:mb-4">
                 <div className="responsive-line" />
