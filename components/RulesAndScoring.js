@@ -41,7 +41,7 @@ export default function RulesAndGuide() {
                             <ul className="list-disc pl-6 mt-1">
                                 <li>10–14 positions: <span className="font-bold">+1 bonus point</span> (Back Apex Assassin)</li>
                                 <li>15–18 positions: <span className="font-bold">+2 bonus points</span> (Back Track Titan)</li>
-                                <li>19+ positions: <span className="font-bold">+2 bonus points</span> (Back Zero to Hero)</li>
+                                <li>19+ positions: <span className="font-bold">+3 bonus points</span> (Back Zero to Hero)</li>
                             </ul>
                         </li>
                     </ul>
@@ -56,7 +56,7 @@ export default function RulesAndGuide() {
                             <ul className="list-disc pl-6 mt-1">
                                 <li>+1 point for each position they <span className="font-bold">lose</span> (falling backwards)</li>
                                 <li>-1 point for each position they <span className="font-bold">gain</span> (if they outperform expectations)</li>
-                                <li>0 points if they DNF</li>
+                                <li>+1 point if they DNF</li>
                             </ul>
                         </li>
                         <li className="mt-2">

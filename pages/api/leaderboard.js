@@ -3,10 +3,6 @@ import User from "@/models/User";
 import Race from "@/models/Race";
 import Driver from "@/models/Driver";
 
-// Enhanced cache with TTL (time to live)
-const leaderboardCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method Not Allowed" });
@@ -15,13 +11,6 @@ export default async function handler(req, res) {
   await dbConnect();
   const { season } = req.query;
   const year = Number(season);
-
-  const cacheKey = `leaderboard-${season}`;
-  const cached = leaderboardCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log(`⚡ Returning cached leaderboard for ${season}`);
-    return res.status(200).json({ leaderboard: cached.data });
-  }
 
   try {
     console.time(`🏁 Leaderboard calculation for ${season}`);
@@ -119,12 +108,6 @@ export default async function handler(req, res) {
 
     // ✅ Sort by points
     leaderboard.sort((a, b) => b.points - a.points);
-
-    // ✅ Cache with timestamp
-    leaderboardCache.set(cacheKey, {
-      data: leaderboard,
-      timestamp: Date.now()
-    });
 
     console.timeEnd(`🏁 Leaderboard calculation for ${season}`);
     console.log(`📊 Processed ${users.length} users, ${allMeetingKeys.size} races, ${allDriverNumbers.size} drivers`);

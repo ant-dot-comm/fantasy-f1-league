@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { LayoutList } from "lucide-react";
 
+import DriverScorePopover from "./DriverScorePopover";
+import BonusPicksPopover from "./BonusPicksPopover";
+
 import Modal from "./Modal"; // Import the reusable modal
 
 export default function Leaderboard({ season, loggedInUser, className }) {
@@ -12,9 +15,6 @@ export default function Leaderboard({ season, loggedInUser, className }) {
     const [loading, setLoading] = useState(true);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [selectePlayerRaceData, setSelectedPlayerRaceData] = useState({});
-    const [expandedBonusRace, setExpandedBonusRace] = useState(null);
-
-
     useEffect(() => {
         async function fetchScores() {
             setLoading(true);
@@ -68,17 +68,17 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                         .map((user, index) => (
                             <li key={user.username}>
                                 <button
-                                    // onClick={() => {
-                                    //     setSelectedPlayer(user.username);
-                                    //     fetchSelectedPlayerRaceData(user.username);
-                                    // }}
+                                    onClick={() => {
+                                        setSelectedPlayer(user.username);
+                                        fetchSelectedPlayerRaceData(user.username);
+                                    }}
                                     className={classNames(
                                         "w-full text-left font-bold bg-neutral-200 max-sm:pr-10 sm:px-2 rounded-lg flex items-center justify-between gap-4 border-b-8 group transition-all duration-200 relative",
                                         "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12",
                                         user.username === loggedInUser ? "border-cyan-800 text-cyan-800 shadow-md" : "border-neutral-500 text-neutral-500",
                                         // { "hover:bg-neutral-50 hover:text-neutral-700 hover:shadow-md hover:cursor-pointer hover:pr-12": user.points !== 0 }
                                     )}
-                                    // disabled={user.points === null || user.points === 0}
+                                    disabled={user.points === null || user.points === 0}
                                 >
                                     <p className={classNames(
                                         "font-display text-2xl -mb-3 leading-none shrink-0 w-10 text-center",
@@ -173,45 +173,50 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     {race.results.map((driver, idx) => (
                                         <li
                                             key={driver.name_acronym}
-                                            className="flex flex-col relative rounded-lg w-full"
+                                            className="flex flex-col relative rounded-lg w-full group"
                                         >
-                                            <div className="bg-neutral-50 rounded-md w-full relative">
-                                                <img
-                                                    src={driver.headshot_url}
-                                                    alt={driver.driver_name}
-                                                    className="h-14 w-14 mr-2 -mt-6"
-                                                />
-                                                <div className="absolute -top-4 right-1">
-                                                    <p className="font-display text-md leading-none text-right">
-                                                        {driver.name_acronym}
-                                                    </p>
-                                                    <p className="text-[10px] font-bold leading-none text-neutral-700">
-                                                        P{driver.race_startPosition} -{" "}
-                                                        {driver.race_position === 0
-                                                        ? "DNF"
-                                                        : `P${driver.race_position}`}
-                                                    </p>
-                                                    <p className="font-display text-lg text-neutral-700 leading-none text-right">
-                                                        {driver.points}
-                                                    </p>
+                                            <DriverScorePopover driver={driver}>
+                                                <div className="bg-neutral-50 rounded-md w-full relative cursor-pointer group-hover:bg-neutral-300 transition-all duration-200">
+                                                    <img
+                                                        src={driver.headshot_url}
+                                                        alt={driver.driver_name}
+                                                        className="h-14 w-14 mr-2 -mt-6"
+                                                    />
+                                                    <div className="absolute -top-3 right-1">
+                                                        <p className="font-display text-md leading-none text-right">
+                                                            {driver.name_acronym}
+                                                        </p>
+                                                        <p className="text-[10px] font-bold leading-none text-neutral-700">
+                                                            P{driver.race_startPosition} -{" "}
+                                                            {driver.race_position === 0
+                                                                ? "DNF"
+                                                                : `P${driver.race_position}`}
+                                                        </p>
+                                                        <p className="font-display text-lg text-neutral-700 leading-none text-right">
+                                                            {driver.points}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            {driver.bonusTitle &&(
-                                                <div className="bg-cyan-700 text-neutral-100 text-[8px] px-1 mx-2 rounded-b-sm leading-none py-1 text-center text-wrap -mb-3">{driver.bonusTitle}</div>
+                                            </DriverScorePopover>
+                                            {driver.bonusTitle && (
+                                                <div className="bg-cyan-700 text-neutral-100 text-[8px] px-1 mx-2 rounded-b-sm leading-none py-1 text-center text-wrap -mb-3">
+                                                    {driver.bonusTitle}
+                                                </div>
                                             )}
                                         </li>
                                     ))}
                                     {race.bonusPoints !== null && (
-                                        <div 
-                                            className="bg-cyan-700 rounded-md flex items-center justify-center gap-1 relative h-8 w-64"
-                                            onClick={() => setExpandedBonusRace(expandedBonusRace === race.meeting_key ? null : race.meeting_key)}
-                                        >
-                                            <p className="font-display text-2xl leading-none">
-                                                {race.bonusPoints >= 0 && (<>+</>)}{race.bonusPoints}
-                                            </p>
-                                            <ChevronDown size={12} strokeWidth={2.5} />
-                                            <div className="text-[8px] absolute w-full text-center bottom-full left-1/2 -translate-x-1/2">Bonus Picks</div>
-                                        </div>
+                                        <BonusPicksPopover race={race}>
+                                            <div 
+                                                className="bg-cyan-700 rounded-md flex items-center justify-center gap-1 relative h-8 w-64 cursor-pointer hover:bg-cyan-600 transition-all duration-200"
+                                            >
+                                                <p className="font-display text-2xl leading-none">
+                                                    {race.bonusPoints >= 0 && (<>+</>)}{race.bonusPoints}
+                                                </p>
+                                                <ChevronDown size={12} strokeWidth={2.5} />
+                                                <div className="text-[8px] absolute w-full text-center bottom-full left-1/2 -translate-x-1/2">Bonus Picks</div>
+                                            </div>
+                                        </BonusPicksPopover>
                                     )}
                                     <div className="bg-cyan-700 rounded-md flex items-center justify-center relative h-8 w-64">
                                         <span className="font-display text-2xl leading-none">
@@ -228,27 +233,6 @@ export default function Leaderboard({ season, loggedInUser, className }) {
                                     </div>
                                 </div>
                             </div>
-                            {/* ✅ Bonus Points Display */}
-                            {expandedBonusRace === race.meeting_key && (
-                                <div className="p-2 bg-neutral-800 rounded-b-lg mx-4 text-xs">
-                                    <div className="font-bold text-cyan-700 mb-1 block">Bonus Picks:</div>
-                                    {(race.bonusPicks.worstDriver === null && race.bonusPicks.dnfs === null) && <>no picks made</>}
-                                    {race.bonusPicks.worstDriver && (
-                                        <div className="text-cyan-700 ">
-                                            Worst Driver: #{race.bonusPicks.worstDriver} - {race.pickedWorstDriver?.name_acronym} | P{race.pickedWorstDriver?.race_startPosition} - P{race.pickedWorstDriver?.race_position} 
-                                            <span className="text-neutral-50 ml-4">
-                                                {race.pickedWorstDriver?.race_position - race.pickedWorstDriver?.race_startPosition >= 0 && (<>+</>)} 
-                                                {race.pickedWorstDriver?.race_position - race.pickedWorstDriver?.race_startPosition}
-                                            </span>
-                                        </div>
-                                    )}
-                                    {race.bonusPicks.dnfs !== null && (
-                                        <div className="text-cyan-700 flex items-center gap-1">
-                                            DNFs:{race.bonusPicks.dnfs} ( {race.actualDnfs} actual ) <span className="text-neutral-50 ml-4">{race.bonusPicks.dnfs === race.actualDnfs ? "+5" : "+0"}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
                         </div>
                         {/*  old */}
                         {/* <div key={race.meeting_key} className="mt-12 relative">

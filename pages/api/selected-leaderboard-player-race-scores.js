@@ -3,9 +3,6 @@ import User from "@/models/User";
 import Race from "@/models/Race";
 import Driver from "@/models/Driver";
 
-// In-memory cache for race breakdowns
-const playerRaceCache = new Map();
-
 export default async function handler(req, res) {
     if (req.method !== "GET") {
         return res.status(405).json({ message: "Method Not Allowed" });
@@ -13,17 +10,6 @@ export default async function handler(req, res) {
 
     await dbConnect();
     const { username, season } = req.query;
-    const cacheKey = `${username}-${season}`;
-
-    // ✅ Check cache before querying DB
-    if (playerRaceCache.has(cacheKey)) {
-        console.log(
-            `⚡ Returning cached race breakdown for ${username} in ${season}`
-        );
-        return res
-            .status(200)
-            .json({ raceBreakdown: playerRaceCache.get(cacheKey) });
-    }
 
     try {
         const user = await User.findOne({ username });
@@ -183,7 +169,6 @@ export default async function handler(req, res) {
             }
         }
 
-        playerRaceCache.set(cacheKey, raceBreakdown);
         res.status(200).json({ raceBreakdown });
     } catch (error) {
         res.status(500).json({ message: "Internal server error" });

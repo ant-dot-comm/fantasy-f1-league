@@ -53,9 +53,21 @@ async function runCalculateScores(season, meetingKeyFilter = null) {
 
     const usersWithPicks = [];
 
+    const seasonKey = String(season);
+    const meetingKeyStr = String(meetingKey);
+
     for (const user of users) {
-      const picks = user.picks?.get?.(season) ?? user.picks?.[season];
-      const raceData = (picks?.get?.(meetingKey) ?? picks?.[meetingKey])?.toObject?.() ?? picks?.[meetingKey];
+      const picks =
+        user.picks?.get?.(seasonKey) ??
+        user.picks?.get?.(season) ??
+        user.picks?.[seasonKey] ??
+        user.picks?.[season];
+      const raw =
+        picks?.get?.(meetingKeyStr) ??
+        picks?.get?.(meetingKey) ??
+        picks?.[meetingKeyStr] ??
+        picks?.[meetingKey];
+      const raceData = raw?.toObject?.() ?? raw;
       if (!raceData?.picks?.length) continue;
 
       const computed = computeRaceScoreForUser(raceData, race, activeScoringModel);
@@ -73,12 +85,20 @@ async function runCalculateScores(season, meetingKeyFilter = null) {
     }
 
     for (const { user, raceData, totalScore, driverScores, bonusPoints } of usersWithPicks) {
-      const seasonMap = user.picks?.get?.(season) ?? user.picks?.[season];
-      const pickDoc = seasonMap?.get?.(meetingKey) ?? (seasonMap && seasonMap[meetingKey]);
+      const seasonMap =
+        user.picks?.get?.(seasonKey) ??
+        user.picks?.get?.(season) ??
+        user.picks?.[seasonKey] ??
+        user.picks?.[season];
+      const pickDoc =
+        seasonMap?.get?.(meetingKeyStr) ??
+        seasonMap?.get?.(meetingKey) ??
+        (seasonMap && (seasonMap[meetingKeyStr] ?? seasonMap[meetingKey]));
       if (pickDoc) {
         pickDoc.score = totalScore;
         pickDoc.driverScores = driverScores;
         pickDoc.bonusPoints = bonusPoints;
+        user.markModified("picks");
       }
     }
 

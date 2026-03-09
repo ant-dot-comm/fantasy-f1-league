@@ -15,11 +15,14 @@
     "runcalculatescores": "node scripts/runCalculateScores.mjs"
   },
   "dependencies": {
+    "@heroui/popover": "^2.3.32",
+    "@heroui/system": "^2.4.28",
+    "@heroui/theme": "^2.4.26",
     "axios": "^1.8.1",
     "bcryptjs": "^3.0.2",
     "classnames": "^2.5.1",
     "dotenv": "^16.4.7",
-    "framer-motion": "^12.4.10",
+    "framer-motion": "^12.35.2",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
@@ -27,8 +30,8 @@
     "mongoose": "^8.12.1",
     "next": "15.2.8",
     "nodemailer": "^6.10.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
