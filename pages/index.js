@@ -31,48 +31,30 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-      async function fetchStats() {
-            // console.log("Fetching stats for season rightchere:", season);
-          const cacheKey = `stats-${season}`;
-          const cachedData = sessionStorage.getItem(cacheKey);
-          setLoadingTopScores(true);
-  
-          if (cachedData) {
-              const parsedData = JSON.parse(cachedData);
-              setTopRaceScoresData(parsedData.topSingleRaceScores || []); // good
-              setAverageRaceScoresData(parsedData.averagePointsPerUser || []); // good
-              setLoadingTopScores(false);
-              return;
-          }
-          
-          try {
-              const [raceStatsRes, driverSelectionRes] = await Promise.all([
-                  fetch(`/api/top-race-scores?season=${season}`), // good
-                //   fetch(`/api/driver-selection-stats?season=${season}`) // rework
-              ]);
+        async function fetchStats() {
+            setLoadingTopScores(true);
 
-              const raceStatsData = await raceStatsRes.json();
-  
-              setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
-              setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
-            //   setDriverSelectionData(driverSelectionRes.driverSelectionStats || []);
-  
-              sessionStorage.setItem(
-                  cacheKey,
-                  JSON.stringify({
-                        ...raceStatsData,
-                        // driverSelectionStats: driverSelectionRes.driverSelectionStats
-                  })
-              );
-          } catch (error) {
-              console.error("❌ Error fetching race stats:", error);
-          } finally {
-              setLoadingTopScores(false);
-          }
-      }
-  
-      fetchStats();
-  }, [season]);
+            try {
+                const raceStatsRes = await fetch(`/api/top-race-scores?season=${season}`);
+                if (!raceStatsRes.ok) {
+                    throw new Error(`Race stats request failed with ${raceStatsRes.status}`);
+                }
+
+                const raceStatsData = await raceStatsRes.json();
+
+                setTopRaceScoresData(raceStatsData.topSingleRaceScores || []);
+                setAverageRaceScoresData(raceStatsData.averagePointsPerUser || []);
+            } catch (error) {
+                console.error("❌ Error fetching race stats:", error);
+                setTopRaceScoresData([]);
+                setAverageRaceScoresData([]);
+            } finally {
+                setLoadingTopScores(false);
+            }
+        }
+
+        fetchStats();
+    }, [season]);
 
 //   console.log({driverSelectionData});
 

@@ -1,12 +1,7 @@
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Race from "@/models/Race";
-import Driver from "@/models/Driver";
-import { activeScoringModel } from "@/lib/utils/scoringModel";
-
-// Cache with TTL for race stats
-const raceStatsCache = new Map();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+import { computeRaceScoreForUser } from "@/lib/utils/raceScoring";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -16,21 +11,18 @@ export default async function handler(req, res) {
   await dbConnect();
   const { season } = req.query;
 
-  // Check cache
-  const cacheKey = `race-stats-${season}`;
-  const cached = raceStatsCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    console.log(`⚡ Returning cached race stats for ${season}`);
-    return res.status(200).json(cached.data);
-  }
-
   try {
     console.time(`🏁 Race stats calculation for ${season}`);
 
     // OPTIMIZATION 1: Get all users with picks in one query
-    const users = await User.find({ seasons: season })
+    const year = Number(season);
+    const users = await User.find({ seasons: year })
       .select("username first_name picks")
       .lean();
+
+    console.log(
+      `📊 top-race-scores: found ${users.length} users for season ${season}`
+    );
 
     if (!users.length) {
       return res.status(200).json({ 
@@ -58,23 +50,40 @@ export default async function handler(req, res) {
     });
 
     // OPTIMIZATION 3: Batch fetch all races in one query
-    const allRaces = await Race.find({ 
-      meeting_key: { $in: Array.from(allMeetingKeys) }, 
-      year: season 
+    const meetingKeyArray = Array.from(allMeetingKeys);
+    console.log(
+      `📊 top-race-scores: unique meeting keys from picks = ${meetingKeyArray.length}`,
+      meetingKeyArray
+    );
+
+    const allRaces = await Race.find({
+      meeting_key: { $in: meetingKeyArray },
+      year: year,
     }).lean();
 
     // OPTIMIZATION 4: Create race lookup map
     const raceMap = new Map();
-    allRaces.forEach(race => raceMap.set(race.meeting_key, race));
+    allRaces.forEach((race) => raceMap.set(race.meeting_key, race));
+
+    console.log(
+      `📊 top-race-scores: loaded ${allRaces.length} Race docs for season ${season}`
+    );
 
     // OPTIMIZATION 5: Process all data efficiently
     let topSingleRaceScores = [];
     let userStats = {}; // Stores both total points and race count per user
 
-    users.forEach(user => {
-      const userPicks = user.picks instanceof Map ? Object.fromEntries(user.picks) : user.picks;
-      const seasonPicks = userPicks?.[season] instanceof Map ? Object.fromEntries(userPicks[season]) : userPicks?.[season];
-      
+    let racesWithStoredScore = 0;
+    let racesWithRecomputedScore = 0;
+
+    users.forEach((user) => {
+      const userPicks =
+        user.picks instanceof Map ? Object.fromEntries(user.picks) : user.picks;
+      const seasonPicks =
+        userPicks?.[season] instanceof Map
+          ? Object.fromEntries(userPicks[season])
+          : userPicks?.[season];
+
       if (!seasonPicks) return;
 
       userStats[user.username] = { totalPoints: 0, raceCount: 0 };
@@ -85,34 +94,47 @@ export default async function handler(req, res) {
         const race = raceMap.get(meetingKey);
         if (!race) return;
 
-        let raceScore = 0;
+        // Prefer stored per-race score from runCalculateScores (driver + bonus picks)
+        let finalScore =
+          typeof raceData.score === "number" ? raceData.score : null;
 
-        raceData.picks.forEach(driverNumber => {
-          const qualiResult = race.qualifying_results?.find(d => d.driverNumber === driverNumber);
-          const raceResult = race.race_results?.find(d => d.driverNumber === driverNumber);
-          
-                     if (raceResult && qualiResult) {
-             const { points } = activeScoringModel(
-               raceResult.startPosition,
-               raceResult.finishPosition
-             );
-             raceScore += points;
-             userStats[user.username].totalPoints += points;
-           }
-        });
-
-        // Only count races where user actually had valid picks
-        if (raceScore > 0 || raceData.picks.length > 0) {
-          userStats[user.username].raceCount++;
-          
-          // Track single race scores
-          topSingleRaceScores.push({
-            username: user.username,
-            race: race.meeting_name,
-            meeting_key: meetingKey,
-            finalResult: raceScore,
-          });
+        if (finalScore === null) {
+          try {
+            const recomputed = computeRaceScoreForUser(
+              raceData,
+              race
+            );
+            finalScore = recomputed?.totalScore ?? null;
+            if (typeof finalScore === "number") {
+              racesWithRecomputedScore += 1;
+            }
+          } catch (err) {
+            console.error(
+              `❌ Failed to recompute score for ${user.username}, season ${season}, meeting_key ${meetingKey}:`,
+              err
+            );
+          }
+        } else {
+          racesWithStoredScore += 1;
         }
+
+        if (typeof finalScore !== "number") {
+          console.warn(
+            `⚠️ Unable to derive score for ${user.username} in season ${season}, meeting_key ${meetingKey}.`
+          );
+          return;
+        }
+
+        userStats[user.username].totalPoints += finalScore;
+        userStats[user.username].raceCount++;
+
+        // Track single race scores (highest single race totals across season)
+        topSingleRaceScores.push({
+          username: user.username,
+          race: race.meeting_name,
+          meeting_key: meetingKey,
+          finalResult: finalScore,
+        });
       });
     });
 
@@ -137,14 +159,11 @@ export default async function handler(req, res) {
       averagePointsPerUser,
     };
 
-    // Cache with timestamp
-    raceStatsCache.set(cacheKey, {
-      data: result,
-      timestamp: Date.now()
-    });
-
     console.timeEnd(`🏁 Race stats calculation for ${season}`);
-    console.log(`📊 Processed ${users.length} users, ${allMeetingKeys.size} races`);
+    console.log(
+      `📊 top-race-scores: processed ${users.length} users, ${allMeetingKeys.size} races. ` +
+        `${racesWithStoredScore} races used stored scores, ${racesWithRecomputedScore} races recomputed.`
+    );
 
     res.status(200).json(result);
   } catch (error) {
