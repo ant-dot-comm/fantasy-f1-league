@@ -94,14 +94,14 @@ export default function Home() {
     return (
         <div className="mb-32">
             <Header />
-            <div className="flex flex-col justify-center items-center py-10 max-w-screen-sm mx-auto">
+            {/* <div className="flex flex-col justify-center items-center py-10 max-w-screen-sm mx-auto">
                 <h1 className="text-xl font-display leading-none mb-4">
                     Best of the Rest
                 </h1>
                 <label className="text-sm leading-none text-center px-3">
-                    Redemption starts at the back! Pick your drivers wisely from the back half of the grid (P11-P22) and watch them climb to glory. The bigger the comeback, the bigger the rewards!
+                    Pick your drivers wisely from the back half of the grid (P11-P22) and watch them climb to glory. The bigger the comeback, the bigger the rewards!
                 </label>
-                <a href="#rules-and-guide" className="font-bold text-sm hover:text-neutral-500 mt-4 underline">See Rules and Guide</a>
+                <a href="#rules-and-guide" className="font-bold text-sm hover:text-neutral-500 mt-4 underline">See Rules and Guide</a> */}
                 {/* <select
                     value={season}
                     onChange={(e) => setSeason(parseInt(e.target.value))}
@@ -119,7 +119,7 @@ export default function Home() {
                         );
                     })}
                 </select> */}
-            </div>
+            {/* </div> */}
 
             <section>
                 {username && (

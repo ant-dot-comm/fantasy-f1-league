@@ -33,10 +33,10 @@ export default function DriverScorePopover({ driver, children }) {
 
   if (isFrontBand) {
     multiplier = 1.5;
-    bandLabel = "Front of Back grid (P11–P16)";
+    bandLabel = "Middle of the grid starter (P11–P16)";
   } else if (isBackBand) {
     multiplier = 0.75;
-    bandLabel = "Back of Back grid (P17–P22)";
+    bandLabel = "Back of the grid starter (P17–P22)";
   }
 
   const basePoints = Math.round(positionsGained * multiplier);
@@ -49,38 +49,45 @@ export default function DriverScorePopover({ driver, children }) {
   return (
     <Popover placement="bottom" showArrow>
       <PopoverTrigger>{children}</PopoverTrigger>
-      <PopoverContent className="bg-neutral-100 text-[10px] px-3 py-2 max-w-xs rounded-lg">
+      <PopoverContent className="bg-neutral-100 text-[10px] max-w-xs rounded-lg">
         <div className="flex flex-col gap-1">
-          <div className="flex justify-between items-baseline">
-            <p className="font-semibold">
-              {driver.name_acronym} • {totalPoints} pts
-            </p>
-            <p className="text-[9px] text-neutral-400">
-              P{start} → {finish === 0 ? "DNF" : `P${finish}`}
-            </p>
+          <div className="border-b-3 border-neutral-800 px-3 py-1">
+            <div className="flex justify-between">
+              <p className="font-semibold text-sm font-display leading-none">
+                {driver.name_acronym}
+              </p>
+              <p>
+                 P{start} → {finish === 0 ? "DNF" : `P${finish}`}
+              </p>
+            </div>
           </div>
-          <p className="text-[9px] text-neutral-400">{bandLabel}</p>
-          <p>
-            Base:{" "}
-            <span className="font-semibold">
-              {multiplier.toString().replace(".5", "½")}× {positionsGained} ={" "}
-              {basePoints}
-            </span>
-          </p>
-          {winnerBonus !== 0 && (
+          <div className="flex flex-col py-1 px-3">
+            <p className="text-neutral-400">{bandLabel}</p>
             <p>
-              Race winner bonus: <span className="font-semibold">+3</span>
+              Base:{" "}
+              <span className="font-semibold">
+                {multiplier.toString().replace(".5", "½")} × {positionsGained} ={" "}
+                {basePoints}
+              </span>
             </p>
-          )}
-          {bonusTitle && (
-            <p>
-              Driver bonus:{" "}
-                <span className="font-semibold">
-                  {bonusTitle}
-                  {moverBonus ? ` (${moverBonus >= 0 ? "+" : ""}${moverBonus})` : ""}
-                </span>
-            </p>
-          )}
+            {winnerBonus !== 0 && (
+              <p>
+                Race winner bonus: <span className="font-semibold">+3</span>
+              </p>
+            )}
+            {bonusTitle && (
+              <p>
+                Driver bonus:{" "}
+                  <span className="font-semibold">
+                    {bonusTitle}
+                    {/* {moverBonus ? `${moverBonus >= 0 ? "+" : ""}${moverBonus}` : ""} */}
+                  </span>
+              </p>
+            )}
+          </div>
+          <div className="border-t-3 border-neutral-800 px-3 pt-1 text-cyan-700 text-sm font-display text-center">
+            {totalPoints} pts
+          </div>
         </div>
       </PopoverContent>
     </Popover>

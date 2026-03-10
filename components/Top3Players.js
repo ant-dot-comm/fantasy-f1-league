@@ -76,7 +76,7 @@ export const Top3Players = ({ drivers, season }) => {
     return (
         <div ref={sectionRef} className="text-neutral-200 text-center relative">
             <h2 className="font-display text-2xl font-bold uppercase mb-2"> 
-                {season} Results
+            <span className="text-3xl">{season}</span> Leaders
             </h2>
             <div className="divider-glow-dark mb-4" />
 
