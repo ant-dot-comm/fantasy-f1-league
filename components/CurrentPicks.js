@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import classNames from "classnames";
 import axios from "axios";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
+import { motion, useScroll, useTransform } from "framer-motion";
 import Modal from "@/components/Modal";
 import raceSchedule from "../data/raceSchedule";
 import { Top3Players } from "./Top3Players";
+import { SelectedDriverLockup } from "./SelectedDriverLockup";
 
 export default function CurrentPick({ season, username }) {
     const [currentRace, setCurrentRace] = useState(null);
@@ -239,27 +241,54 @@ export default function CurrentPick({ season, username }) {
     // ✅ Picks open but OpenF1 driver list not in yet
     const picksOpenNoDataYet = picksOpen && currentRace && bottomDriversLoaded && bottomDrivers.length === 0 && !showFinalResults;
 
+    // Scroll-linked parallax for fantasy background
+    const sectionRef = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: sectionRef,
+        offset: ["start end", "end start"],
+    });
+    const backgroundX = useTransform(scrollYProgress, [0, 1], [10, -10]);
+
+    const worstDriverInfo = bottomDrivers.find(
+        d => d.driverNumber === userBonusPicks.worstDriver
+      );
+    const worstDriverName = worstDriverInfo?.fullName || `#${userBonusPicks.worstDriver}`;
+
     // ✅ Display current picks with autopick indicator
     return (
         <>
-        {picksStatusApiMessage && (
+        {/* {picksStatusApiMessage && (
             <p className="text-center text-sm text-neutral-400 mb-2 px-3" role="status">
                 {picksStatusApiMessage}
             </p>
-        )}
-        <div id="current-picks" className={classNames(
-            "flex flex-col items-center mb-12 pt-16 relative text-neutral-300",
-            userPicks.length > 0 || showFinalResults ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
-        )}>
+        )} */}
+        <div
+            ref={sectionRef}
+            id="current-picks"
+            className={classNames(
+                "flex flex-col items-center mb-12 pt-10 relative text-neutral-300",
+                userPicks.length > 0 || showFinalResults ? `bg-radial-[at_50%_75%] ${picksOpen ? "from-cyan-900" : "from-neutral-600"} to-neutral-700 to-80%` : "bg-neutral-700"
+            )}
+        >
+            {/* Scroll-animated background */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+                <img
+                    src="/pattern.png"
+                    alt=""
+                    className="min-w-[100%] min-h-full w-auto h-auto object-cover opacity-10"
+                    aria-hidden
+                />
+            </div>
+            <div className="relative z-10 flex flex-col items-center w-full">
             {isCurrentRaceLoading ? (
                 <p className="text-neutral-400">Loading…</p>
-            ) : !currentRace ? (
+            ) : false ? (
                 <div className="text-center px-4 py-6">
                     <p className="text-sm text-neutral-400">No race data for {season}.</p>
                 </div>
-            ) : showFinalResults ? (
+            ) : false ? (
                 <Top3Players season={season} />
-            ) : picksOpenNoDataYet ? (
+            ) : false ? (
                 <div className="text-center px-4 py-6">
                     <h2 className="text-xl font-display text-neutral-100 mb-2">
                         {season} {currentRace?.meeting_name}
@@ -273,22 +302,19 @@ export default function CurrentPick({ season, username }) {
                     {currentRace && (
                         <p className="leading-none text-sm">{pickStatusMessage}</p>
                     )}
-                    <h2 className="text-xl font-display">
+                    <h2 className="text-xl font-display mb-4">
                         {season} {currentRace?.meeting_name}
                     </h2>
                     {/* ✅ Display selected picks */}
-                    <div className="flex flex-row items-center">
+                    <div className="flex flex-row items-center pb-8">
                         {userPicks.map((driver, index) => (
-                            <div key={driver.driverNumber} className={classNames(
-                                "flex items-end mt-2",
-                                index === 0 ? "flex-row-reverse" : ""
-                            )}>
-                                <img src={driver.headshot_url} alt={driver.fullName} className="h-24 sm:h-32"/>
-                                <p className="text-2xl font-display leading-none -mb-1">{driver.name_acronym}</p>
-                            </div>
+                            <SelectedDriverLockup
+                                key={driver.driverNumber}
+                                driver={driver}
+                                index={index}
+                            />
                         ))}
                     </div>
-                    <div className="divider-glow-medium !w-4/5 sm:!w-1/2 mx-auto" />
                     
                     {(autoPicked && userPicks.length > 0) && <span className="text-xs text-neutral-300">(Auto-Picked)</span>}
 
@@ -296,12 +322,14 @@ export default function CurrentPick({ season, username }) {
                     {(userBonusPicks.worstDriver || userBonusPicks.dnfs !== null) && (
                         <div className="mt-4 text-center">
                             <p className="text-xs text-neutral-400 mb-2">Bonus Picks</p>
-                            {userBonusPicks.worstDriver && (
-                                <p className="text-xs text-neutral-300">Worst Driver: #{userBonusPicks.worstDriver}</p>
-                            )}
-                            {userBonusPicks.dnfs !== null && (
-                                <p className="text-xs text-neutral-300">DNFs: {userBonusPicks.dnfs}</p>
-                            )}
+                            <div className="flex flex-row items-center gap-6">
+                                {userBonusPicks.worstDriver && (
+                                    <p className="text-xs text-neutral-300">Worst Driver: {worstDriverName}</p>
+                                )}
+                                {userBonusPicks.dnfs !== null && (
+                                    <p className="text-xs text-neutral-300">DNFs: {userBonusPicks.dnfs}</p>
+                                )}
+                            </div>
                         </div>
                     )}
 
@@ -330,7 +358,7 @@ export default function CurrentPick({ season, username }) {
                     </div>
                 </>
             )}
-            
+            </div>
 
             {/* ✅ Modal for selecting picks */}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} user={username} title="Race Picks">
