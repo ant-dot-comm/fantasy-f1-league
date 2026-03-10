@@ -282,13 +282,13 @@ export default function CurrentPick({ season, username }) {
             <div className="relative z-10 flex flex-col items-center w-full">
             {isCurrentRaceLoading ? (
                 <p className="text-neutral-400">Loading…</p>
-            ) : false ? (
+            ) : !currentRace ? (
                 <div className="text-center px-4 py-6">
                     <p className="text-sm text-neutral-400">No race data for {season}.</p>
                 </div>
-            ) : false ? (
+            ) : showFinalResults ? (
                 <Top3Players season={season} />
-            ) : false ? (
+            ) : picksOpenNoDataYet ? (
                 <div className="text-center px-4 py-6">
                     <h2 className="text-xl font-display text-neutral-100 mb-2">
                         {season} {currentRace?.meeting_name}
