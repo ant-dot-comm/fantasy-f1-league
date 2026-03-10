@@ -226,6 +226,10 @@ export default function CurrentPick({ season, username }) {
                 }
             });
 
+            setUserBonusPicks({
+                worstDriver: selectedWorstDriver,
+                dnfs: predictedDnfs ? parseInt(predictedDnfs, 10) : null,
+            });
             setIsBonusModalOpen(false);
             setSelectedWorstDriver(null);
             setPredictedDnfs("");
@@ -333,13 +337,13 @@ export default function CurrentPick({ season, username }) {
                         </div>
                     )}
 
-                    <div className="flex flex-row items-center gap-4 -mb-6  mt-4">
+                    <div className="flex flex-row items-center gap-4 -mb-6  mt-6">
                         {/* ✅ Pick Button */}
                         <button
                             onClick={() => setIsModalOpen(true)}
                             className={classNames(
                                 "px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10",
-                                !picksOpen ? "bg-neutral-500" : "bg-cyan-800 hover:bg-cyan-700"
+                                !picksOpen ? "bg-neutral-500" : "bg-cyan-800 hover:bg-cyan-700 hover:cursor-pointer"
                             )}
                             disabled={!picksOpen}
                             >
@@ -349,8 +353,17 @@ export default function CurrentPick({ season, username }) {
                         {/* ✅ Bonus Picks Button */}
                         {picksOpen && (
                             <button
-                                onClick={() => setIsBonusModalOpen(true)}
-                                className="px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10 bg-cyan-800 hover:bg-cyan-700"
+                                onClick={() => {
+                                    setSelectedWorstDriver(userBonusPicks.worstDriver ?? null);
+                                    setPredictedDnfs(
+                                        userBonusPicks.dnfs !== null &&
+                                        userBonusPicks.dnfs !== undefined
+                                            ? String(userBonusPicks.dnfs)
+                                            : ""
+                                    );
+                                    setIsBonusModalOpen(true);
+                                }}
+                                className="px-6 py-4 rounded-lg text-neutral-100 shadow-md z-10 bg-cyan-800 hover:bg-cyan-700 hover:cursor-pointer"
                             >
                                 Bonus Picks
                             </button>
@@ -425,9 +438,9 @@ export default function CurrentPick({ season, username }) {
                 <h3 className="mb-4 text-sm text-neutral-400">Select worst driver & predict DNFs (optional)</h3>
 
                 {/* ✅ Worst Driver Selection */}
-                <div className="mb-4">
+                <div className="mb-4 relative">
                     <h4 className="text-sm font-bold mb-2">Worst Driver (who will lose most positions)</h4>
-                    <ul className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                    <ul className="flex flex-col gap-2 max-h-56 overflow-y-auto pt-4 pb-8">
                         {bottomDrivers.sort((a, b) => a.qualifyingPosition - b.qualifyingPosition)
                             .map(driver => (
                                 <li key={driver.driverNumber}>
@@ -453,14 +466,15 @@ export default function CurrentPick({ season, username }) {
                                             )}>
                                                 P{driver.qualifyingPosition}
                                             </span>
-                                            <div className="text-[16px] font-bold">
-                                                <div className="text-[16px] font-bold leading-none">{driver.fullName}</div>
+                                            <div className="text-[16px] font-bold leading-none">
+                                                {driver.fullName}
                                             </div>
                                         </div>
                                     </button>
                                 </li>
                             ))}
                     </ul>
+                    <div className="content-fade w-full h-12 absolute left-0 -b-2xl bottom-0 bg-gradient-to-b transparent to-80% to-neutral-700 z-[2] pointer-events-none" />
                 </div>
 
                 {/* ✅ DNFs Prediction (DNF / DNS / DSQ) */}
