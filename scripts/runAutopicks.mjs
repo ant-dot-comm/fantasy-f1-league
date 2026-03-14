@@ -110,15 +110,13 @@ async function runAutoPicks() {
         }
         const autoPicks = eligibleDrivers.slice(0, 2);
 
-        // --- Step 8: Save only this race's picks for this user (autopick: true) ---
+        // --- Step 8: Set only autopick and picks (preserve score, bonusPoints, bonusPicks) ---
         await User.updateOne(
             { _id: user._id },
             {
                 $set: {
-                    [`picks.${season}.${currentMeetingKey}`]: {
-                        autopick: true,
-                        picks: autoPicks,
-                    },
+                    [`picks.${season}.${currentMeetingKey}.autopick`]: true,
+                    [`picks.${season}.${currentMeetingKey}.picks`]: autoPicks,
                 },
             }
         );

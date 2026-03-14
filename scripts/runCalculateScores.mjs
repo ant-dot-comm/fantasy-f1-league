@@ -13,7 +13,7 @@ import { computeRaceScoreForUser } from "../lib/utils/raceScoring.js";
 import { activeScoringModel } from "../lib/utils/scoringModel.js";
 
 const SEASON = 2026;
-const MEETING_KEY = "1279"; // set to a string (e.g. "1279") to run for one race only
+const MEETING_KEY = "1280"; // set to a string (e.g. "1279") to run for one race only
 
 async function runCalculateScores(season, meetingKeyFilter = null) {
   await dbConnect();
