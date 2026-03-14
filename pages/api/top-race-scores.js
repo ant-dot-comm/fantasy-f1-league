@@ -4,6 +4,16 @@ import Race from "@/models/Race";
 import Driver from "@/models/Driver";
 import { computeRaceScoreForUser } from "@/lib/utils/raceScoring";
 
+// Mover bonus point values by title (scoringModel doesn't include +N in the string)
+const BONUS_TITLE_TO_MOVER_POINTS = {
+  "Overtake Artist Bonus": 2,
+  "Grid Charger Bonus": 3,
+  "Midfield Mauler Bonus": 4,
+  "Apex Assassin Bonus": 1,
+  "Track Titan Bonus": 2,
+  "Zero to Hero Bonus": 3,
+};
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method Not Allowed" });
@@ -126,6 +136,9 @@ export default async function handler(req, res) {
         const race = raceMap.get(meetingKey);
         if (!race) return;
 
+        // Only include races that have been run (have results) in aggregates and averages
+        if (!race.race_results?.length) return;
+
         // Always use unified scoring helper so stats stay consistent
         let computed;
         try {
@@ -181,10 +194,9 @@ export default async function handler(req, res) {
             }
           }
 
-          // Mover bonuses: sum their point value and count types (only when present)
+          // Mover bonuses: sum point value from title (scoringModel doesn't put +N in title)
           if (ds.bonusTitle) {
-            const match = ds.bonusTitle.match(/\+(\d+)/);
-            const bonusValue = match ? parseInt(match[1], 10) : 0;
+            const bonusValue = BONUS_TITLE_TO_MOVER_POINTS[ds.bonusTitle] ?? 0;
             userAgg.moverPointsTotal += bonusValue;
             userAgg.moverCounts[ds.bonusTitle] =
               (userAgg.moverCounts[ds.bonusTitle] || 0) + 1;
