@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import classNames from "classnames";
+import { teamNameToImageSlug } from "../lib/teamImageUtils";
 
 export function SelectedDriverLockup({ driver, index = 0 }) {
   const baseDelay = 0.15 + index * 0.12;
@@ -43,7 +44,7 @@ export function SelectedDriverLockup({ driver, index = 0 }) {
 
       {/* Car slides in from the left */}
       <motion.img
-        src={`/cars/2026/cars/${driver.team}.png`}
+        src={`/cars/2026/cars/${teamNameToImageSlug(driver.team)}.png`}
         alt={driver.team}
         className="h-16 -mb-4 z-10"
         variants={{

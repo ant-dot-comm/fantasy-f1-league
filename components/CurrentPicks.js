@@ -258,6 +258,8 @@ export default function CurrentPick({ season, username }) {
       );
     const worstDriverName = worstDriverInfo?.fullName || `#${userBonusPicks.worstDriver}`;
 
+    // console.log(bottomDrivers)
+
     // ✅ Display current picks with autopick indicator
     return (
         <>
