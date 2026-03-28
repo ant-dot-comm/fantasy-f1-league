@@ -47,7 +47,7 @@ Each race weekend you should run scripts **after qualifying** and **after the ra
 |------|-------------|--------|
 | **Check Meeting Key** 
 | **After qualifying** (once quali results are in) | 1. Store qualifying data for the current race | `npm run storeracedata` |
-| Same run | 2. Auto-assign picks for users who didn’t make selections | `npm run runautopicks` |
+| Same run | 2. Auto-assign picks for users who didn’t make selections | `npm run runautopicks` or `MEETING_KEY=1281 npm run runautopicks` |
 | **After the race** (once official race results are in) | 3. Store updated race results + DNFs from OpenF1 | `npm run storeracedata` |
 | Same run | 4. Calculate and save scores for all users | `npm run runcalculatescores` |
 
