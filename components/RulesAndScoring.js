@@ -23,8 +23,8 @@ export default function RulesAndGuide() {
                     <ul className="list-disc pl-6 text-sm mb-4">
                         <li>For each driver we compare <span className="font-bold">qualifying position vs. race finish</span>.</li>
                         <li>If the driver does not finish (DNF/DNS/DSQ), they score <span className="font-bold">-1 point</span>.</li>
-                        <li>If the driver starts <span className="font-bold">P11–P16</span>, they get about <span className="font-bold">1.5 points per position gained</span> (and lose ~1.5 points per position lost).</li>
-                        <li>If the driver starts <span className="font-bold">P17–P22</span>, they get about <span className="font-bold">0.75 points per position gained</span> (and lose ~0.75 points per position lost).</li>
+                        <li>If the driver starts <span className="font-bold">P11–P16</span>, they get <span className="font-bold">1.5 points per position gained</span> (and lose 1.5 per position lost).</li>
+                        <li>If the driver starts <span className="font-bold">P17–P22</span>, they get <span className="font-bold">0.75 points per position gained</span> (and lose 0.75 per position lost).</li>
                     </ul>
                     Front / Back Position Gain Bonuses
                     <ul className="list-disc pl-6 text-sm mb-4">

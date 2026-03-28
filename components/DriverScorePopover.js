@@ -1,4 +1,5 @@
 import { Popover, PopoverTrigger, PopoverContent } from "@heroui/popover";
+import { roundScorePoints } from "../lib/utils/scoringModel";
 
 /**
  * DriverScorePopover – wraps driver card and shows scoring breakdown.
@@ -39,7 +40,7 @@ export default function DriverScorePopover({ driver, children }) {
     bandLabel = "Back of the grid starter (P17–P22)";
   }
 
-  const basePoints = Math.round(positionsGained * multiplier);
+  const basePoints = roundScorePoints(positionsGained * multiplier);
   const winnerBonus = finish === 1 ? 3 : 0;
   const moverBonus =
     bonusTitle && typeof totalPoints === "number"
