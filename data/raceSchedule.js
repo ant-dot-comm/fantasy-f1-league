@@ -171,7 +171,7 @@ const raceSchedule = {
     "1284": { // Miami Sprint – API Q end 21:00 May 2, R start 20:00 May 3; SQ end 21:14 May 1, S start 16:00 May 2
       race_name: "Miami Grand Prix",
       picks_open: new Date("2026-05-02T21:00:00Z"),   // PST: 2:00 PM May 2
-      picks_close: new Date("2026-05-03T20:00:00Z"),  // PST: 12:00 PM May 3
+      picks_close: new Date("2026-05-03T18:00:00Z"),  // PST: 10:00 AM May 3
       race_end: new Date("2026-05-03T22:00:00Z"),     // PST: 2:00 PM May 3
       sprint_picks_open: new Date("2026-05-01T21:14:00Z"),   // PST: 2:14 PM May 1
       sprint_picks_closed: new Date("2026-05-02T16:00:00Z"), // PST: 9:00 AM May 2
