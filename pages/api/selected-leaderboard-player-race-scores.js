@@ -2,6 +2,7 @@ import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 import Race from "@/models/Race";
 import Driver from "@/models/Driver";
+import { getEffectiveFinishPosition } from "@/lib/utils/scoringModel";
 
 export default async function handler(req, res) {
     if (req.method !== "GET") {
@@ -89,7 +90,9 @@ export default async function handler(req, res) {
                         race_position: stored?.finishPosition,
                         points: stored?.points ?? 0,
                         bonusTitle: stored?.bonusTitle ?? null,
-                        gpWinner: raceEntry.race_results?.find((d) => d.driverNumber === driverNumber)?.finishPosition === 1,
+                        gpWinner: getEffectiveFinishPosition(
+                            raceEntry.race_results?.find((d) => d.driverNumber === driverNumber)
+                        ) === 1,
                         name_acronym: driverInfo.name_acronym,
                         autoPicks: plainRaceData.autopick,
                         headshot_url: driverInfo.name_acronym
@@ -157,7 +160,7 @@ export default async function handler(req, res) {
                                 team: pickedDriverInfo.team_name,
                                 qualifying_position: pickedDriverQuali.finishPosition,
                                 race_startPosition: pickedDriverResult.startPosition,
-                                race_position: pickedDriverResult.finishPosition,
+                                race_position: getEffectiveFinishPosition(pickedDriverResult),
                                 name_acronym: pickedDriverInfo.name_acronym,
                                 headshot_url: pickedDriverInfo.name_acronym
                                     ? `/drivers/${season}/${pickedDriverInfo.name_acronym}.png`
