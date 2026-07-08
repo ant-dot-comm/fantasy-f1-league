@@ -1,0 +1,41 @@
+name: Race weekend automation
+
+# Runs the race-weekend scripts automatically. The dispatcher reads
+# data/raceSchedule.js + the current time to decide what (if anything) is due,
+# so this can run harmlessly year-round — it no-ops outside race windows.
+on:
+  schedule:
+    # Hourly, on the hour (UTC). GitHub may delay scheduled runs a few minutes
+    # under load; that's fine for our multi-hour windows.
+    - cron: "0 * * * *"
+  # Lets you trigger a run by hand from the Actions tab (useful for testing).
+  workflow_dispatch:
+    inputs:
+      season:
+        description: "Season year"
+        required: false
+        default: "2026"
+
+# Never let two runs overlap (e.g. a manual run during a scheduled one).
+concurrency:
+  group: race-weekend
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Run race-weekend dispatcher
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          SEASON: ${{ github.event.inputs.season || '2026' }}
+        run: node scripts/dispatchRaceWeekend.mjs

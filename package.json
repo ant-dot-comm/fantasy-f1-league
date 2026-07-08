@@ -12,7 +12,8 @@
     "deploy": "gh-pages -d out",
     "storeracedata": "node scripts/storeRaceData.mjs",
     "runautopicks": "node scripts/runAutopicks.mjs",
-    "runcalculatescores": "node scripts/runCalculateScores.mjs"
+    "runcalculatescores": "node scripts/runCalculateScores.mjs",
+    "dispatch": "node scripts/dispatchRaceWeekend.mjs"
   },
   "dependencies": {
     "@heroui/popover": "^2.3.32",

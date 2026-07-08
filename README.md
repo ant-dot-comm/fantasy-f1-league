@@ -39,17 +39,39 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
 
-## Race weekend scripts
+## Race weekend automation
 
-Each race weekend you should run scripts **after qualifying** and **after the race** so the app has picks, results, and scores.
+Race-weekend processing runs **automatically via GitHub Actions** — no more copying meeting keys.
+
+The workflow [`.github/workflows/race-weekend.yml`](.github/workflows/race-weekend.yml) runs **hourly** and calls `scripts/dispatchRaceWeekend.mjs`. That dispatcher reads [`data/raceSchedule.js`](data/raceSchedule.js) and the current time to decide what (if anything) is due, then runs the right scripts. It no-ops outside race windows and every step is idempotent, so running it repeatedly is safe.
+
+| Phase (auto-detected from the schedule) | Window | Runs |
+|---|---|---|
+| **After qualifying** | `picks_open ≤ now < picks_close` | `storeRaceData` → `runAutopicks` |
+| **After the race** | `race_end ≤ now < race_end + 12h` | `storeRaceData` → `runCalculateScores` |
+
+Because manual picks override auto-picks right up until race start ([`submitPicks.js`](pages/api/submitPicks.js)), running auto-picks throughout the picks window is safe and also covers late joiners.
+
+### One-time setup
+
+1. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**
+   - Name: `MONGODB_URI` — Value: your production Mongo connection string (same one in `.env.local`).
+   - *(Optional)* `POST_RACE_WINDOW_HOURS` as a **variable** to change the 12-hour post-race retry window.
+2. Merge this workflow to the **`main`** branch (scheduled workflows only run from the default branch).
+3. That's it. Verify from the **Actions** tab → *Race weekend automation* → **Run workflow** (manual trigger) — outside a race window it should log "no race window active".
+
+### Running manually (fallback / one-off)
+
+The individual scripts still work and now take the meeting key from the environment (no file edits needed):
 
 | When | What to run | Command |
 |------|-------------|--------|
-| **Check Meeting Key** 
-| **After qualifying** (once quali results are in) | 1. Store qualifying data for the current race | `npm run storeracedata` |
-| Same run | 2. Auto-assign picks for users who didn’t make selections | `npm run runautopicks` or `MEETING_KEY=1281 npm run runautopicks` |
-| **After the race** (once official race results are in) | 3. Store updated race results + DNFs from OpenF1 | `npm run storeracedata` |
-| Same run | 4. Calculate and save scores for all users | `npm run runcalculatescores` |
+| **After qualifying** | Store qualifying data | `MEETING_KEY=1290 npm run storeracedata` |
+| Same run | Auto-assign picks for users who didn’t select | `MEETING_KEY=1290 npm run runautopicks` |
+| **After the race** | Store race results + DNFs | `MEETING_KEY=1290 npm run storeracedata` |
+| Same run | Calculate and save scores | `MEETING_KEY=1290 npm run runcalculatescores` |
 
-- **Order:** Within each phase, run the commands in the order shown. The auto-picks script depends on qualifying data; score calculation depends on stored quali + race data.
-- **Single race:** To process one weekend only, set the `meeting_key` in `scripts/storeRaceData.mjs`, `currentMeetingKey` in `scripts/runAutopicks.mjs`, and `MEETING_KEY` in `scripts/runCalculateScores.mjs` to that race’s key (e.g. `"1279"`). Leave them unset/empty to run for the full season.
+- Or run the whole schedule-aware flow at once: `npm run dispatch` (auto-detects the current race/phase).
+- Leave `MEETING_KEY` unset on any script to auto-detect the current race from the schedule.
+
+> **Note:** Like the original scripts, automation handles the **main qualifying + race** only. Sprint sessions are not auto-processed.

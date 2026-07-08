@@ -1,7 +1,9 @@
 import axios from "axios";
+import { pathToFileURL } from "url";
 import dbConnect from "../lib/mongodb.js";
 import Races from "../models/Race.js";
 import Driver from "../models/Driver.js";
+import { getCurrentRacePhase } from "../lib/utils/racePhase.js";
 
 // OpenF1 rate limit: max 3 requests/second
 const OPENF1_DELAY_MS = 400;
@@ -25,7 +27,7 @@ async function storeRaceData(year, meetingKey = null) {
         raceResponse = response.data;
     } catch (error) {
         console.error("❌ Failed to fetch race data:", error);
-        process.exit(1);
+        throw error; // let the caller (dispatcher/CLI) decide how to handle
     }
 
     console.log(`🏎️ Found ${raceResponse.length} races for ${year}.`);
@@ -211,11 +213,25 @@ async function storeRaceData(year, meetingKey = null) {
     }
 
     console.log("✅ All race data stored successfully!");
-    process.exit();
 }
 
-// storeRaceData("2023"); // Call for a specific year & meeting if needed
-storeRaceData("2026", "1287"); // Call for a specific year & meeting if needed
+export { storeRaceData };
+
+// Run directly from the CLI: `MEETING_KEY=1290 npm run storeracedata`
+// If MEETING_KEY is unset, fall back to the current race derived from the schedule.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+    const season = process.env.SEASON || "2026";
+    let meetingKey = process.env.MEETING_KEY || null;
+    if (!meetingKey) {
+        meetingKey = getCurrentRacePhase(new Date(), season)?.meetingKey || null;
+    }
+    storeRaceData(season, meetingKey)
+        .then(() => process.exit(0))
+        .catch((err) => {
+            console.error("❌ storeRaceData failed:", err);
+            process.exit(1);
+        });
+}
 
 // 🔥 Fetch all unique driver numbers for a given session (uses /v1/position; 404 = no data yet e.g. race not run)
 async function fetchDriverNumbers(sessionKey) {

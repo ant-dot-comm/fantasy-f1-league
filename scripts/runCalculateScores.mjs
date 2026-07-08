@@ -6,14 +6,13 @@
  * Set SEASON and optionally MEETING_KEY below.
  */
 
+import { pathToFileURL } from "url";
 import dbConnect from "../lib/mongodb.js";
 import User from "../models/User.js";
 import Race from "../models/Race.js";
 import { computeRaceScoreForUser } from "../lib/utils/raceScoring.js";
 import { activeScoringModel } from "../lib/utils/scoringModel.js";
-
-const SEASON = 2026;
-// const MEETING_KEY = "1287"; // set to a string (e.g. "1279") to run for one race only
+import { getCurrentRacePhase } from "../lib/utils/racePhase.js";
 
 async function runCalculateScores(season, meetingKeyFilter = null) {
   await dbConnect();
@@ -33,7 +32,7 @@ async function runCalculateScores(season, meetingKeyFilter = null) {
 
   if (!racesWithResults.length) {
     console.log(`⚠️ No races with results for season ${season}.`);
-    process.exit(0);
+    return;
   }
 
   const orderedMeetingKeys = racesWithResults.map((r) => r.meeting_key);
@@ -42,7 +41,7 @@ async function runCalculateScores(season, meetingKeyFilter = null) {
   const users = await User.find({ seasons: season });
   if (!users.length) {
     console.log(`⚠️ No users for season ${season}.`);
-    process.exit(0);
+    return;
   }
 
   console.log(`📊 Calculating scores for ${users.length} users, ${racesWithResults.length} races.`);
@@ -112,9 +111,20 @@ async function runCalculateScores(season, meetingKeyFilter = null) {
   console.log("🎉 runCalculateScores done.");
 }
 
-runCalculateScores(SEASON, MEETING_KEY).catch((err) => {
-  console.error("❌", err);
-  process.exit(1);
-}).finally(() => {
-  process.exit(0);
-});
+export { runCalculateScores };
+
+// Run directly from the CLI: `MEETING_KEY=1290 npm run runcalculatescores`
+// If MEETING_KEY is unset, fall back to the current race derived from the schedule.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const season = Number(process.env.SEASON || 2026);
+  let meetingKey = process.env.MEETING_KEY || null;
+  if (!meetingKey) {
+    meetingKey = getCurrentRacePhase(new Date(), String(season))?.meetingKey || null;
+  }
+  runCalculateScores(season, meetingKey)
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error("❌", err);
+      process.exit(1);
+    });
+}

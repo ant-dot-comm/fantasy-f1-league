@@ -4,6 +4,7 @@
  * haven't made picks for the target race. Uses race schedule to determine which
  * race to run for; never overwrites existing autopicks or manual picks.
  */
+import { pathToFileURL } from "url";
 import dbConnect from "../lib/mongodb.js";
 import User from "../models/User.js";
 import Race from "../models/Race.js";
@@ -16,11 +17,13 @@ const MEETING_KEY_ENV = process.env.MEETING_KEY;
 
 /**
  * Resolve which meeting (race) to run autopicks for.
- * - If MEETING_KEY is set in env, use that.
+ * - If an explicit key is passed (from the dispatcher), use that.
+ * - Else if MEETING_KEY is set in env, use that.
  * - Otherwise find the race that currently has picks open: picks_open is in the past
  *   and picks_close is in the future (so we don't override an earlier race).
  */
-function getMeetingKeyFromSchedule(season) {
+function getMeetingKeyFromSchedule(season, explicitKey = null) {
+    if (explicitKey) return String(explicitKey);
     if (MEETING_KEY_ENV) return String(MEETING_KEY_ENV);
     const now = new Date();
     const year = Number(season);
@@ -36,17 +39,15 @@ function getMeetingKeyFromSchedule(season) {
     return withPicksOpen[0][0];
 }
 
-async function runAutoPicks() {
+async function runAutoPicks({ season = SEASON, meetingKey = null } = {}) {
     // --- Step 1: Connect to DB ---
     await dbConnect();
 
-    const season = SEASON;
-
-    // --- Step 2: Resolve which race to run for (from schedule or MEETING_KEY env) ---
-    const currentMeetingKey = getMeetingKeyFromSchedule(season);
+    // --- Step 2: Resolve which race to run for (explicit key, MEETING_KEY env, or schedule) ---
+    const currentMeetingKey = getMeetingKeyFromSchedule(season, meetingKey);
     if (!currentMeetingKey) {
         console.log(`⚠️ No race with picks currently open for season ${season} (picks_open < now < picks_close). Set MEETING_KEY to override.`);
-        process.exit(1);
+        return;
     }
     console.log(`🚀 Running auto-picks for season ${season} on race ${currentMeetingKey}`);
 
@@ -65,21 +66,28 @@ async function runAutoPicks() {
     }
     console.log(`Processing race: ${race.meeting_name}`);
 
-    for (const user of users) {
-        // Ensure user.picks[season] exists so we can read from it safely
-        if (!user.picks[season]) {
-            user.picks[season] = {};
-        }
+    const seasonKey = String(season);
+    const meetingKeyStr = String(currentMeetingKey);
 
-        // Never override if user already has any picks for this race (manual or autopick)
-        const existing = user.picks[season][currentMeetingKey]?.picks;
-        if (existing && existing.length > 0) {
-            console.log(`⏭️ Skipping ${user.username}: already has picks for this race.`);
-            continue;
-        }
-        // Never overwrite existing autopicks for this race (safety check)
-        if (user.picks[season][currentMeetingKey]?.autopick === true) {
-            console.log(`⏭️ Skipping ${user.username}: already has autopicks for this race.`);
+    for (const user of users) {
+        // 🔒 Read any existing pick for this race robustly. `user.picks` is a
+        // Mongoose Map of Maps, so we MUST use .get() — bracket access on a Map
+        // returns undefined, which is exactly what let a previous run overwrite
+        // real picks. The `?? [bracket]` fallback also handles plain/lean objects.
+        const seasonMap =
+            user.picks?.get?.(seasonKey) ?? user.picks?.[seasonKey];
+        const existingRaw =
+            seasonMap?.get?.(meetingKeyStr) ?? seasonMap?.[meetingKeyStr];
+        const existing = existingRaw?.toObject?.() ?? existingRaw ?? null;
+
+        // 🔒 HARD GUARD: auto-picks only ever FILL IN users with nothing. Never
+        // touch a user who already has manual picks OR an autopick for this race.
+        const hasPicks = Array.isArray(existing?.picks) && existing.picks.length > 0;
+        const hasAutopick = existing?.autopick === true;
+        if (hasPicks || hasAutopick) {
+            console.log(
+                `⏭️ Skipping ${user.username}: already has ${hasPicks ? "picks" : "an autopick"} for this race (never overwritten).`
+            );
             continue;
         }
 
@@ -124,7 +132,16 @@ async function runAutoPicks() {
     }
 
     console.log("✅ Auto-picks completed!");
-    process.exit();
 }
 
-runAutoPicks();
+export { runAutoPicks };
+
+// Run directly from the CLI: `MEETING_KEY=1290 npm run runautopicks`
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+    runAutoPicks()
+        .then(() => process.exit(0))
+        .catch((err) => {
+            console.error("❌ runAutoPicks failed:", err);
+            process.exit(1);
+        });
+}
