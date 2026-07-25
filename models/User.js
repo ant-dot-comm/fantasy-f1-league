@@ -26,6 +26,7 @@ const AchievementEntrySchema = new mongoose.Schema({
 // ✅ Define the schema for race picks
 const RacePickSchema = new mongoose.Schema({
   autopick: { type: Boolean, default: false }, // ✅ Indicates if the pick was auto-generated
+  penaltyAdjusted: { type: Boolean, default: false }, // ✅ True if a pick was swapped after a grid penalty
   picks: {
     type: [Number], // ✅ Array of driver numbers (can be empty or null)
     default: undefined, // ✅ Allows unselected picks to remain undefined

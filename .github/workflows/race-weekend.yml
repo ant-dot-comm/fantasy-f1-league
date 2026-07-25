@@ -5,9 +5,10 @@ name: Race weekend automation
 # so this can run harmlessly year-round — it no-ops outside race windows.
 on:
   schedule:
-    # Hourly, on the hour (UTC). GitHub may delay scheduled runs a few minutes
-    # under load; that's fine for our multi-hour windows.
-    - cron: "0 * * * *"
+    # Every 20 minutes (UTC). Frequent enough to catch late qualifying penalties
+    # while picks are open and re-fix affected picks. GitHub may delay scheduled
+    # runs a few minutes under load, so 20 min is a target, not a guarantee.
+    - cron: "*/20 * * * *"
   # Lets you trigger a run by hand from the Actions tab (useful for testing).
   workflow_dispatch:
     inputs:

@@ -14,6 +14,7 @@
  */
 import mongoose from "mongoose";
 import { getCurrentRacePhase } from "../lib/utils/racePhase.js";
+import { reconcilePicks } from "../lib/utils/reconcilePicks.js";
 import { storeRaceData } from "./storeRaceData.mjs";
 import { runAutoPicks } from "./runAutopicks.mjs";
 import { runCalculateScores } from "./runCalculateScores.mjs";
@@ -32,9 +33,11 @@ async function main() {
   console.log(`🏁 ${now.toISOString()} — phase="${phase.phase}", meeting_key=${meetingKey}, season=${season}`);
 
   if (phase.phase === "qualifying") {
-    console.log("➡️  [1/2] Storing qualifying data...");
+    console.log("➡️  [1/3] Storing qualifying data...");
     await storeRaceData(season, meetingKey);
-    console.log("➡️  [2/2] Assigning auto-picks...");
+    console.log("➡️  [2/3] Reconciling picks against the current grid (penalty check)...");
+    await reconcilePicks({ season, meetingKey });
+    console.log("➡️  [3/3] Assigning auto-picks...");
     await runAutoPicks({ season, meetingKey });
   } else if (phase.phase === "race") {
     console.log("➡️  [1/2] Storing race results...");

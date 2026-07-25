@@ -11,6 +11,16 @@ const DriverResultSchema = new mongoose.Schema({
   dsq: { type: Boolean, default: false },
 });
 
+// Log of picks auto-swapped after a qualifying penalty changed the grid
+// (feeds /api/automation/status → the Cowork email agent).
+const PenaltyAdjustmentSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  driverOut: { type: Number, required: true },
+  driverIn: { type: Number, required: true },
+  positionOut: { type: Number },
+  at: { type: Date, default: Date.now },
+}, { _id: false });
+
 const RaceSchema = new mongoose.Schema(
   {
     meeting_key: { type: String, unique: true, required: true },
@@ -22,6 +32,7 @@ const RaceSchema = new mongoose.Schema(
     qualifying_results: { type: [DriverResultSchema], default: [] },
     race_results: { type: [DriverResultSchema], default: [] },
     dnfs: { type: Number, default: 0 }, // ✅ Number of DNFs in the race
+    penaltyAdjustments: { type: [PenaltyAdjustmentSchema], default: [] }, // ✅ picks swapped after grid penalties
   },
   { timestamps: true }
 );

@@ -43,14 +43,22 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/b
 
 Race-weekend processing runs **automatically via GitHub Actions** — no more copying meeting keys.
 
-The workflow [`.github/workflows/race-weekend.yml`](.github/workflows/race-weekend.yml) runs **hourly** and calls `scripts/dispatchRaceWeekend.mjs`. That dispatcher reads [`data/raceSchedule.js`](data/raceSchedule.js) and the current time to decide what (if anything) is due, then runs the right scripts. It no-ops outside race windows and every step is idempotent, so running it repeatedly is safe.
+The workflow [`.github/workflows/race-weekend.yml`](.github/workflows/race-weekend.yml) runs **every 20 minutes** and calls `scripts/dispatchRaceWeekend.mjs`. That dispatcher reads [`data/raceSchedule.js`](data/raceSchedule.js) and the current time to decide what (if anything) is due, then runs the right scripts. It no-ops outside race windows and every step is idempotent, so running it repeatedly is safe.
 
 | Phase (auto-detected from the schedule) | Window | Runs |
 |---|---|---|
-| **After qualifying** | `picks_open ≤ now < picks_close` | `storeRaceData` → `runAutopicks` |
+| **After qualifying** | `picks_open ≤ now < picks_close` | `storeRaceData` → `reconcilePicks` → `runAutopicks` |
 | **After the race** | `race_end ≤ now < race_end + 12h` | `storeRaceData` → `runCalculateScores` |
 
 Because manual picks override auto-picks right up until race start ([`submitPicks.js`](pages/api/submitPicks.js)), running auto-picks throughout the picks window is safe and also covers late joiners.
+
+### Qualifying-penalty reconciliation
+
+Qualifying penalties are sometimes applied *after* results first post, reshuffling the P11–P22 "bottom" pool. While picks are open, the dispatcher re-fetches the grid every 20 min and runs [`lib/utils/reconcilePicks.js`](lib/utils/reconcilePicks.js): any pick whose driver got bumped into the top 10 is swapped for a random eligible driver; **valid picks are never touched**. Because this only runs while picks are open, affected players can still re-pick. Reconciliation **skips entirely on an incomplete grid** (won't reset picks on partial OpenF1 data), and never runs after picks close — a late penalty leaves the pick scored as-is. Each swap is logged to `race.penaltyAdjustments` and flags the pick with `penaltyAdjusted: true`.
+
+### Email drafts (picks open / grid changed)
+
+A read-only, token-protected endpoint [`pages/api/automation/status.js`](pages/api/automation/status.js) exposes the current pool, deadline, and any penalty adjustments (usernames only — no emails). A scheduled **Claude Cowork** agent reads it and creates **Gmail drafts** for you to review and send. Setup + agent prompt: [`docs/cowork-email-agent.md`](docs/cowork-email-agent.md).
 
 ### One-time setup
 
