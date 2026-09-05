@@ -1,15 +1,14 @@
 name: Race weekend automation
 
-# Runs the race-weekend scripts automatically. The dispatcher reads
-# data/raceSchedule.js + the current time to decide what (if anything) is due,
-# so this can run harmlessly year-round — it no-ops outside race windows.
+# MANUAL-ONLY. The scheduled trigger is intentionally disabled: GitHub throttles
+# free scheduled workflows to every few hours, so the reliable hourly trigger is
+# now the Claude cloud routine "Fantasy F1 — race-weekend dispatch (reliable)",
+# which calls /api/automation/dispatch. This workflow is kept for manual/emergency
+# runs of the full pipeline in-repo: Actions tab → Run workflow, or
+# `gh workflow run race-weekend.yml` (runs immediately, not throttled).
 on:
-  schedule:
-    # Every 20 minutes (UTC). Frequent enough to catch late qualifying penalties
-    # while picks are open and re-fix affected picks. GitHub may delay scheduled
-    # runs a few minutes under load, so 20 min is a target, not a guarantee.
-    - cron: "*/20 * * * *"
-  # Lets you trigger a run by hand from the Actions tab (useful for testing).
+  # schedule:                # disabled — see note above (GitHub throttles it)
+  #   - cron: "*/20 * * * *"
   workflow_dispatch:
     inputs:
       season:
