@@ -33,6 +33,7 @@ const RaceSchema = new mongoose.Schema(
     race_results: { type: [DriverResultSchema], default: [] },
     dnfs: { type: Number, default: 0 }, // ✅ Number of DNFs in the race
     penaltyAdjustments: { type: [PenaltyAdjustmentSchema], default: [] }, // ✅ picks swapped after grid penalties
+    lastDispatchAt: { type: Date }, // ⏱️ last time /api/automation/dispatch ran (throttle guard)
   },
   { timestamps: true }
 );
