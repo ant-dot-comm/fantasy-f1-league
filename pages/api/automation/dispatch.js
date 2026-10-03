@@ -64,7 +64,7 @@ export default async function handler(req, res) {
       await storeRaceData(season, meetingKey);
       steps.push("storeRaceData");
       const rec = await reconcilePicks({ season, meetingKey });
-      steps.push(`reconcile(${rec?.changes?.length ?? 0} swaps)`);
+      steps.push(rec?.skipped ? `reconcile(skipped: ${rec.skipped})` : `reconcile(${rec?.changes?.length ?? 0} swaps)`);
       await runAutoPicks({ season, meetingKey });
       steps.push("autopicks");
     } else {

@@ -119,6 +119,7 @@ async function storeRaceData(year, meetingKey = null) {
                     }));
                     gridRes.data.forEach((d) => allDriverNumbers.add(d.driver_number));
                     qualifyingResultsFromStartingGrid = true;
+                    raceEntry.gridSource = "starting_grid";
                     console.log(`✅ Stored starting grid for ${meeting_name} (${raceEntry.qualifying_results.length} drivers, session_key=${sk})`);
                     if (raceEntry.qualifying_results.length < 22) {
                         console.warn(`⚠️ Starting grid has ${raceEntry.qualifying_results.length} drivers; expected 22. OpenF1 may not have full grid yet.`);
@@ -129,7 +130,12 @@ async function storeRaceData(year, meetingKey = null) {
             }
         }
 
-        if (!qualifyingResultsFromStartingGrid && sessionKeyQualifying) {
+        if (!qualifyingResultsFromStartingGrid && raceEntry.gridSource === "starting_grid") {
+            // 🔒 OpenF1's starting_grid is intermittently empty. Never downgrade the stored
+            // official (post-penalty) grid back to raw quali — that flip-flop made
+            // reconcilePicks swap valid picks (Italian GP 2026).
+            console.log(`🔒 starting_grid unavailable this run for ${meeting_name}; keeping the stored official grid.`);
+        } else if (!qualifyingResultsFromStartingGrid && sessionKeyQualifying) {
             try {
                 console.log(`🔎 No starting grid yet; fetching qualifying session_result for ${meeting_name}...`);
                 const qualiRes = await axios.get(
@@ -145,6 +151,7 @@ async function storeRaceData(year, meetingKey = null) {
                         dsq: d.dsq === true,
                     }));
                     qualiResults.forEach((d) => allDriverNumbers.add(d.driver_number));
+                    raceEntry.gridSource = "quali";
                     console.log(`✅ Stored qualifying results (fallback, ${qualiResults.length} drivers) for ${meeting_name}`);
                 } else {
                     console.log(`⚠️ No qualifying results for ${meeting_name}, keeping existing data`);

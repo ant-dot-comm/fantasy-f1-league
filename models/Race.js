@@ -30,6 +30,9 @@ const RaceSchema = new mongoose.Schema(
     picks_open: { type: Date }, // ✅ Updated field for Qualifying end
     picks_closed: { type: Date }, // ✅ Updated field for Race start
     qualifying_results: { type: [DriverResultSchema], default: [] },
+    // Where qualifying_results came from: OpenF1 "starting_grid" (official, post-penalty)
+    // or raw "quali" session_result (pre-penalty fallback). Once starting_grid, never downgraded.
+    gridSource: { type: String, enum: ["starting_grid", "quali"] },
     race_results: { type: [DriverResultSchema], default: [] },
     dnfs: { type: Number, default: 0 }, // ✅ Number of DNFs in the race
     penaltyAdjustments: { type: [PenaltyAdjustmentSchema], default: [] }, // ✅ picks swapped after grid penalties
