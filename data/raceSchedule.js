@@ -252,6 +252,12 @@ const raceSchedule = {
       picks_close: new Date("2026-09-26T11:00:00Z"),  // PST: 4:00 AM Sep 26
       race_end: new Date("2026-09-26T13:00:00Z"),     // PST: 6:00 AM Sep 26
     },
+    "1308": { // Bahrain GP relocated to Malaysia (Sepang/Kuala Lumpur) – API Q end 09:00 Oct 3, R start 07:00 Oct 4
+      race_name: "Bahrain Grand Prix (Malaysia)",
+      picks_open: new Date("2026-10-03T09:00:00Z"),   // PDT: 2:00 AM Oct 3
+      picks_close: new Date("2026-10-04T07:00:00Z"),  // PDT: 12:00 AM Oct 4 (midnight)
+      race_end: new Date("2026-10-04T09:00:00Z"),     // PDT: 2:00 AM Oct 4
+    },
     "1296": { // Singapore Sprint – API Q end 14:00 Oct 10, R start 12:00 Oct 11; SQ end 13:14 Oct 9, S start 09:00 Oct 10
       race_name: "Singapore Grand Prix",
       picks_open: new Date("2026-10-10T14:00:00Z"),   // PST: 7:00 AM Oct 10
