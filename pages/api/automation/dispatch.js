@@ -58,18 +58,24 @@ export default async function handler(req, res) {
   // Mark start so concurrent calls don't double-run (doc exists after first store).
   if (race) await Race.updateOne({ meeting_key: meetingKey }, { $set: { lastDispatchAt: now } });
 
+  // Report what was actually stored, so an empty grid is visible instead of a silent "success".
+  const describeStore = (summaries, withResults) => {
+    const s = summaries?.[0];
+    if (!s) return "storeRaceData(nothing stored)";
+    const grid = s.gridCount ? `grid: ${s.gridCount} via ${s.gridSource}` : "grid: NONE";
+    return `storeRaceData(${grid}${withResults ? `, results: ${s.raceResultsCount || "NONE"}` : ""})`;
+  };
+
   const steps = [];
   try {
     if (phase.phase === "qualifying") {
-      await storeRaceData(season, meetingKey);
-      steps.push("storeRaceData");
+      steps.push(describeStore(await storeRaceData(season, meetingKey), false));
       const rec = await reconcilePicks({ season, meetingKey });
       steps.push(rec?.skipped ? `reconcile(skipped: ${rec.skipped})` : `reconcile(${rec?.changes?.length ?? 0} swaps)`);
       await runAutoPicks({ season, meetingKey });
       steps.push("autopicks");
     } else {
-      await storeRaceData(season, meetingKey);
-      steps.push("storeRaceData");
+      steps.push(describeStore(await storeRaceData(season, meetingKey), true));
       await runCalculateScores(Number(season), String(meetingKey));
       steps.push("scores");
     }

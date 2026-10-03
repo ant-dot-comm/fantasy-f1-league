@@ -12,6 +12,29 @@ function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Every OpenF1 request goes through here: calls are spaced ≥ OPENF1_DELAY_MS apart and
+// 429s are retried with backoff (honouring Retry-After). A back-to-back burst used to get
+// the quali fetch 429'd and we silently stored an empty grid (Malaysia 2026).
+let lastOpenF1Call = 0;
+async function openf1Get(url, options = {}) {
+    const accept = options.validateStatus || ((s) => s >= 200 && s < 300);
+    for (let attempt = 0; ; attempt++) {
+        const wait = lastOpenF1Call + OPENF1_DELAY_MS - Date.now();
+        if (wait > 0) await delay(wait);
+        lastOpenF1Call = Date.now();
+        const res = await axios.get(url, { ...options, validateStatus: (s) => s === 429 || accept(s) });
+        if (res.status !== 429) return res;
+        if (attempt >= 4) {
+            const err = new Error(`OpenF1 rate limited (429) after ${attempt + 1} attempts: ${url}`);
+            err.response = res;
+            throw err;
+        }
+        const retryAfter = Number(res.headers?.["retry-after"]) || 2 ** attempt; // 1s, 2s, 4s, 8s
+        console.warn(`⚠️ OpenF1 429 on ${url} — retrying in ${retryAfter}s`);
+        await delay(retryAfter * 1000);
+    }
+}
+
 async function storeRaceData(year, meetingKey = null) {
     await dbConnect();
 
@@ -23,7 +46,7 @@ async function storeRaceData(year, meetingKey = null) {
             ? `https://api.openf1.org/v1/meetings?meeting_key=${meetingKey}`
             : `https://api.openf1.org/v1/meetings?year=${year}`;
 
-        const response = await axios.get(url);
+        const response = await openf1Get(url);
         raceResponse = response.data;
     } catch (error) {
         console.error("❌ Failed to fetch race data:", error);
@@ -31,6 +54,8 @@ async function storeRaceData(year, meetingKey = null) {
     }
 
     console.log(`🏎️ Found ${raceResponse.length} races for ${year}.`);
+
+    const summaries = []; // returned so callers (dispatch) can report what was actually stored
 
     for (let race of raceResponse) {
         const { meeting_key, country_name, meeting_name } = race;
@@ -58,7 +83,7 @@ async function storeRaceData(year, meetingKey = null) {
             raceStartTime = null;
 
         try {
-            const sessionResponse = await axios.get(
+            const sessionResponse = await openf1Get(
                 `https://api.openf1.org/v1/sessions?meeting_key=${meeting_key}`
             );
             const sessions = sessionResponse.data;
@@ -108,7 +133,7 @@ async function storeRaceData(year, meetingKey = null) {
         for (const sk of sessionKeysToTry) {
             if (qualifyingResultsFromStartingGrid) break;
             try {
-                const gridRes = await axios.get(
+                const gridRes = await openf1Get(
                     `https://api.openf1.org/v1/starting_grid?session_key=${sk}`,
                     { validateStatus: (s) => s === 200 || s === 404 }
                 );
@@ -138,7 +163,7 @@ async function storeRaceData(year, meetingKey = null) {
         } else if (!qualifyingResultsFromStartingGrid && sessionKeyQualifying) {
             try {
                 console.log(`🔎 No starting grid yet; fetching qualifying session_result for ${meeting_name}...`);
-                const qualiRes = await axios.get(
+                const qualiRes = await openf1Get(
                     `https://api.openf1.org/v1/session_result?session_key=${sessionKeyQualifying}`
                 );
                 const qualiResults = qualiRes.data;
@@ -169,7 +194,7 @@ async function storeRaceData(year, meetingKey = null) {
         if (sessionKeyRace) {
             try {
                 console.log(`🔎 Fetching race classification for session: ${sessionKeyRace}...`);
-                const raceRes = await axios.get(
+                const raceRes = await openf1Get(
                     `https://api.openf1.org/v1/session_result?session_key=${sessionKeyRace}`
                 );
                 const raceResults = raceRes.data;
@@ -217,9 +242,16 @@ async function storeRaceData(year, meetingKey = null) {
         // ✅ Save whatever data we have
         await raceEntry.save();
         console.log(`✅ Successfully saved data for ${meeting_name}`);
+        summaries.push({
+            meetingKey: String(meeting_key),
+            gridSource: raceEntry.gridSource ?? null,
+            gridCount: raceEntry.qualifying_results?.length ?? 0,
+            raceResultsCount: raceEntry.race_results?.length ?? 0,
+        });
     }
 
     console.log("✅ All race data stored successfully!");
+    return summaries;
 }
 
 export { storeRaceData };
@@ -244,7 +276,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
 async function fetchDriverNumbers(sessionKey) {
     try {
         console.log(`🔎 Fetching driver numbers for session: ${sessionKey}...`);
-        const response = await axios.get(
+        const response = await openf1Get(
             `https://api.openf1.org/v1/position?session_key=${sessionKey}`,
             { validateStatus: (s) => s === 200 || s === 404 }
         );
@@ -276,24 +308,13 @@ async function checkAndStoreNewDrivers(driverNumbers, sessionKey) {
         console.log(`🔍 Checking driver ${driverNumber}...`);
 
         try {
-            let response = await axios.get(
-                `https://api.openf1.org/v1/drivers?driver_number=${driverNumber}&session_key=${sessionKey}`,
-                { validateStatus: (s) => s === 200 || s === 429 }
+            // openf1Get spaces calls and retries 429s, so no manual delays/retries here.
+            const response = await openf1Get(
+                `https://api.openf1.org/v1/drivers?driver_number=${driverNumber}&session_key=${sessionKey}`
             );
-
-            // ✅ Respect OpenF1 rate limit (3 req/s): retry once after delay if 429
-            if (response.status === 429) {
-                const retryAfter = Number(response.headers["retry-after"]) || 1;
-                console.warn(`⚠️ Rate limited (429). Waiting ${retryAfter}s before retry...`);
-                await delay(retryAfter * 1000);
-                response = await axios.get(
-                    `https://api.openf1.org/v1/drivers?driver_number=${driverNumber}&session_key=${sessionKey}`
-                );
-            }
 
             if (!response.data.length) {
                 console.warn(`⚠️ No driver data found for number ${driverNumber}`);
-                await delay(OPENF1_DELAY_MS);
                 continue;
             }
 
@@ -302,14 +323,12 @@ async function checkAndStoreNewDrivers(driverNumbers, sessionKey) {
             // ✅ Check by full_name instead of year
             if (existingDriverNames.has(driverData.full_name)) {
                 console.log(`✅ Driver ${driverData.full_name} already exists. Skipping.`);
-                await delay(OPENF1_DELAY_MS);
                 continue;
             }
 
             // ✅ Ensure required fields exist before saving
             if (!driverData.first_name || !driverData.last_name) {
                 console.warn(`⚠️ Missing required fields for driver #${driverNumber}, skipping...`, driverData);
-                await delay(OPENF1_DELAY_MS);
                 continue;
             }
 
@@ -333,7 +352,5 @@ async function checkAndStoreNewDrivers(driverNumbers, sessionKey) {
         } catch (error) {
             console.error(`❌ Error fetching driver data for ${driverNumber}:`, error.message);
         }
-
-        await delay(OPENF1_DELAY_MS);
     }
 }
