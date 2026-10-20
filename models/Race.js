@@ -37,6 +37,12 @@ const RaceSchema = new mongoose.Schema(
     dnfs: { type: Number, default: 0 }, // ✅ Number of DNFs in the race
     penaltyAdjustments: { type: [PenaltyAdjustmentSchema], default: [] }, // ✅ picks swapped after grid penalties
     lastDispatchAt: { type: Date }, // ⏱️ last time /api/automation/dispatch ran (throttle guard)
+    // ✉️ Which race emails have been drafted (claimed via /api/automation/claim-email),
+    // so the hourly email routine drafts each one exactly once.
+    emailDrafts: {
+      picksOpenAt: { type: Date },         // when the "Picks Open" draft was claimed
+      gridChangedCount: { type: Number },  // penaltyAdjustments.length covered by the last "Grid Changed" draft
+    },
   },
   { timestamps: true }
 );
